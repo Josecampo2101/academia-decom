@@ -1,7 +1,7 @@
 import {
   parseAssessmentAttempts,
   type AssessmentAttempt,
-} from "./assessment-attempts.ts";
+} from "./assessment-attempts";
 
 export const ASSESSMENT_REVIEW_QUEUE_KEY = "academia-decom:assessment-review-queue:v1";
 
