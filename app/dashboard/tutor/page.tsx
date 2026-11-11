@@ -336,9 +336,7 @@ export default function TutorDashboardPage() {
       </div>
 
       {selected && (
-        <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-950/40 p-0 sm:items-center sm:p-5" role="presentation" onClick={(event) => {
-          if (event.target === event.currentTarget) setSelected(null);
-        }}>
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-950/40 p-0 sm:items-center sm:p-5" role="presentation">
           <section role="dialog" aria-modal="true" aria-labelledby="review-dialog-title" className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-3xl md:p-8">
             <div className="flex items-start justify-between gap-4">
               <div>
