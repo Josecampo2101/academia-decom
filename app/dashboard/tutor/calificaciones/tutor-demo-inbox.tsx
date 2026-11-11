@@ -56,8 +56,6 @@ export default function TutorDemoInbox() {
       review: {
         decision,
         feedback: feedback.trim(),
-        score: 0,
-        maxPoints: 0,
         reviewedAt: new Date().toISOString(),
       },
       updatedAt: new Date().toISOString(),
