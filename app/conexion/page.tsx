@@ -29,6 +29,7 @@ export default function Home() {
     const savedTheme = localStorage.getItem("academia-theme") as Theme | null;
 
     if (savedTheme === "light" || savedTheme === "dark" || savedTheme === "system") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme(savedTheme);
     }
   }, []);
