@@ -90,7 +90,7 @@ export default function AssessmentHistoryPanel({ attempts, selectedAttemptId, on
       </div>
 
       <ol className="mt-4 space-y-2">
-        {filteredAttempts.map((attempt, index) => {
+        {filteredAttempts.map((attempt) => {
           const hasErrors = attempt.result.questions.some((question) => question.status === "incorrecta");
           const selected = selectedAttemptId === attempt.id;
           return (
