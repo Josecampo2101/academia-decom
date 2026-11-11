@@ -29,8 +29,9 @@ function hashInvitationToken(token: string) {
 
 async function verifyCaptcha(token: string, request: NextRequest) {
   const secret = process.env.TURNSTILE_SECRET_KEY;
+  const expectedHost = process.env.TURNSTILE_EXPECTED_HOSTNAME;
 
-  if (!secret) {
+  if (!secret || !expectedHost) {
     return { ok: false, unavailable: true };
   }
 
@@ -38,11 +39,6 @@ async function verifyCaptcha(token: string, request: NextRequest) {
     secret,
     response: token,
   });
-  const forwardedFor = request.headers.get("x-forwarded-for");
-  const remoteIp = forwardedFor?.split(",")[0]?.trim();
-
-  if (remoteIp) form.set("remoteip", remoteIp);
-
   try {
     const response = await fetch(
       "https://challenges.cloudflare.com/turnstile/v0/siteverify",
@@ -63,12 +59,8 @@ async function verifyCaptcha(token: string, request: NextRequest) {
       action?: string;
     };
 
-    const expectedHost = process.env.TURNSTILE_EXPECTED_HOSTNAME;
-    const hostnameMatches =
-      !expectedHost || result.hostname === expectedHost;
-
     return {
-      ok: result.success === true && hostnameMatches,
+      ok: result.success === true && result.hostname === expectedHost,
       unavailable: false,
     };
   } catch {
@@ -90,7 +82,11 @@ export async function POST(request: NextRequest) {
     if (contentLength > 12_000) {
       return json({ error: "La solicitud es demasiado grande." }, 413);
     }
-    body = (await request.json()) as RequestBody;
+    const rawBody = await request.text();
+    if (Buffer.byteLength(rawBody, "utf8") > 12_000) {
+      return json({ error: "La solicitud es demasiado grande." }, 413);
+    }
+    body = JSON.parse(rawBody) as RequestBody;
   } catch {
     return json({ error: "No se pudo leer la solicitud." }, 400);
   }
