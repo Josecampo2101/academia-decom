@@ -60,18 +60,20 @@ test("upsertAssessmentReviewQueueItem rechaza escrituras atrasadas", () => {
 });
 
 test("upsertAssessmentReviewQueueItem trata repetición idéntica como idempotente", () => {
+  const current = readAssessmentReviewQueue()[0];
   const dispatchesBefore = dispatchCount;
-  assert.equal(upsertAssessmentReviewQueueItem(item), true);
-  assert.equal(upsertAssessmentReviewQueueItem(item), true);
-  assert.equal(dispatchCount, dispatchesBefore + 1);
+  assert.equal(upsertAssessmentReviewQueueItem(current), true);
+  assert.equal(upsertAssessmentReviewQueueItem(current), true);
+  assert.equal(dispatchCount, dispatchesBefore);
 });
 
 test("upsertAssessmentReviewQueueItem rechaza cambios de identidad o envío original", () => {
-  assert.equal(upsertAssessmentReviewQueueItem(item), true);
+  const current = readAssessmentReviewQueue()[0];
+  assert.equal(upsertAssessmentReviewQueueItem(current), true);
   const changedSubmission = {
-    ...item,
+    ...current,
     updatedAt: "2026-11-11T21:00:00.000Z",
-    attempt: { ...attempt, answers: { short: "Respuesta alterada" } },
+    attempt: { ...current.attempt, answers: { short: "Respuesta alterada" } },
   };
   assert.equal(upsertAssessmentReviewQueueItem(changedSubmission), false);
   assert.equal(readAssessmentReviewQueue()[0].attempt.answers.short, "Respuesta de prueba");
