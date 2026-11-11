@@ -92,11 +92,20 @@ function isAssessmentAttempt(value: unknown, assessmentId: string): value is Ass
     typeof value.submittedAt !== "string" || !Number.isFinite(Date.parse(value.submittedAt)) ||
     !isAssessmentAnswers(value.answers) || !isAssessmentResult(value.result)) return false;
 
-  if (value.manualReviews === undefined) return true;
-  if (!Array.isArray(value.manualReviews) || !value.manualReviews.every(isManualAssessmentReview)) return false;
-  const reviewIds = value.manualReviews.map((review) => review.questionId);
+  const reviews: ManualAssessmentReview[] = value.manualReviews === undefined ? [] : value.manualReviews as ManualAssessmentReview[];
+  if (!Array.isArray(reviews) || !reviews.every(isManualAssessmentReview)) return false;
+  const reviewIds = reviews.map((review) => review.questionId);
   if (new Set(reviewIds).size !== reviewIds.length) return false;
-  return value.manualReviews.every((review) => {
+  const reviewedQuestions = value.result.questions.filter((question) => question.status === "revisada");
+  if (reviewedQuestions.length !== reviews.length) return false;
+  const manualEarned = reviews.reduce((total, review) => total + review.earnedPoints, 0);
+  const manualPossible = reviews.reduce((total, review) => total + review.possiblePoints, 0);
+  if (reviews.length === 0) {
+    if (value.result.manualEarned !== undefined || value.result.manualPossible !== undefined) return false;
+  } else if (value.result.manualEarned !== manualEarned || value.result.manualPossible !== manualPossible) {
+    return false;
+  }
+  return reviews.every((review) => {
     const question = value.result.questions.find((item) => item.questionId === review.questionId);
     return question?.status === "revisada" &&
       question.earnedPoints === review.earnedPoints &&
