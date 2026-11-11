@@ -16,6 +16,7 @@ Acceso de interfaz para `national_admin` y `academic_editor`, con verificación 
 - Alta y edición de instrucciones, programa, curso, módulo, formato de respuesta y fecha límite opcional.
 - Selección curricular jerárquica mediante IDs estables de programa, curso y módulo; las opciones de curso y módulo dependen de la selección superior.
 - Actividades: respuesta escrita, archivo adjunto, enlace externo o evidencia audiovisual.
+- Rúbricas opcionales para actividades, con criterios, descripciones observables y puntajes enteros; el total no puede superar 100 puntos.
 - Evaluaciones: selección única, selección múltiple, verdadero/falso y respuesta corta.
 - Constructor local de preguntas y opciones, con selección explícita de claves correctas para preguntas objetivas.
 - Estados borrador, publicado y archivado.
@@ -81,11 +82,12 @@ Las entidades deben vincularse con IDs de programa/curso/módulo/lección del ca
 
 El editor ofrece una vista previa del contenido sin guardar. Presenta título, curso, módulo, instrucciones, fecha límite y formato de entrega. Para evaluaciones muestra enunciados y opciones de respuesta; para actividades representa el área de entrega correspondiente.
 
-La vista previa no incluye las claves correctas, puntajes, rúbricas privadas ni retroalimentación del tutor. Sus controles son ilustrativos y no envían respuestas, archivos ni intentos. Esta separación es obligatoria también en la futura API de lectura del estudiante: los datos sensibles de evaluación deben permanecer en el servidor y solo exponerse después de aplicar la política de revisión aprobada.
+La vista previa no incluye las claves correctas, puntajes, rúbricas privadas ni retroalimentación del tutor. Las rúbricas se editan en el área docente y no se presentan al estudiante en esta fase. Sus controles son ilustrativos y no envían respuestas, archivos ni intentos. Esta separación es obligatoria también en la futura API de lectura del estudiante: los datos sensibles de evaluación deben permanecer en el servidor y solo exponerse después de aplicar la política de revisión aprobada.
 
 ## Límites de esta entrega
 
 - No hay persistencia, envío de actividades ni calificación real.
+- Las rúbricas son estado local de demostración; no se asignan a tutores ni se aplican a entregas.
 - La selección curricular utiliza fixtures locales; todavía no consulta el catálogo persistido ni se conecta a la Biblioteca.
 - No se crea esquema, RPC, Storage, RLS ni migración.
 - No se envían notificaciones ni se programan fechas de vencimiento.
