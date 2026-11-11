@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isNotificationStateCompatible } from "@/lib/invitations/notifications.mjs";
 
 type ClaimedNotification = {
   notification_id: string;
@@ -177,13 +178,12 @@ async function processNotifications(request: NextRequest) {
       }
 
       const record = requestRecord as RequestRecord;
-      const expectedStatus = {
-        request_received: "pending",
-        request_approved: "approved",
-        request_rejected: "rejected",
-      }[notification.notification_type];
-
-      if (record.status !== expectedStatus) {
+      if (
+        !isNotificationStateCompatible(
+          notification.notification_type,
+          record.status
+        )
+      ) {
         throw new Error("El estado de la solicitud no coincide con la notificación.");
       }
 

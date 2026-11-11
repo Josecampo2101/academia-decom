@@ -82,3 +82,58 @@ La URL de confirmación de Supabase Auth debe permitir `/activar` como redirect 
 4. Ejecutar una solicitud de prueba y verificar que se envíe el correo de recepción.
 5. Aprobar y rechazar solicitudes de prueba para verificar ambos mensajes y el enlace de activación.
 6. Confirmar en `invitation_notifications` los estados, intentos, marcas de tiempo y `provider_message_id`.
+
+
+## Desarrollo local
+
+1. Desde la raíz del proyecto, copia `.env.example` a `.env.local`:
+   ```powershell
+   Copy-Item .env.example .env.local
+   ```
+2. Completa las variables de Supabase con la URL, publishable key y secret key del proyecto. La secret key solo se usa en servidor.
+3. Para probar el formulario local, configura las claves de prueba de Cloudflare Turnstile y deja `TURNSTILE_EXPECTED_HOSTNAME=localhost`. En producción, usa el hostname real exacto.
+4. Mantén `APP_URL=http://localhost:3000` mientras el servidor local se ejecute en ese puerto. Si Next.js informa otro puerto, ajusta el valor.
+5. Reinicia `npm run dev` después de modificar `.env.local`.
+
+Las páginas requieren parámetros de seguridad; abrirlas sin ellos debe mostrar una explicación, no iniciar una solicitud:
+- Solicitud: `/solicitud-invitacion?token=<token-de-invitacion>`
+- Activación: `/activar?request_id=<uuid-de-solicitud-aprobada>`
+
+Los mensajes de enlace faltante que aparecen al abrir las rutas sin parámetros son esperados. Para una prueba real, primero genera una invitación desde el panel administrativo y utiliza la URL completa que entrega el sistema. No inventes ni reutilices tokens.
+
+## Corrección de recursión RLS
+
+La política de lectura de `congregations` consultaba `memberships`, mientras que la política de lectura de `memberships` consultaba `congregations`. Se rompió el ciclo moviendo la comprobación de pertenencia activa a `private.is_active_congregation_member(uuid)`, una función `SECURITY DEFINER` acotada, con `search_path` vacío, validación de `auth.uid()` y ejecución concedida solo a `authenticated`. El esquema `private` no debe añadirse a los esquemas expuestos por la Data API.
+
+La migración `20261111100116_break_congregations_memberships_rls_cycle` reemplaza únicamente la política SELECT de congregaciones; conserva las políticas de escritura y el control por distrito. La consulta de verificación con la cuenta nacional autenticada debe poder leer las congregaciones sin producir el error PostgreSQL `42P17`.
+
+
+### Turnstile de prueba para desarrollo local
+
+Cloudflare publica credenciales de prueba que permiten validar el formulario sin crear un widget real. Para usarlas localmente, coloca en `.env.local`:
+
+```dotenv
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+TURNSTILE_TEST_MODE=true
+TURNSTILE_EXPECTED_HOSTNAME=localhost
+```
+
+El servidor solo acepta este modo si `NODE_ENV` no es `production`, `TURNSTILE_TEST_MODE=true` y la clave secreta coincide exactamente con la credencial oficial de prueba. En producción siempre exige la verificación de hostname y acción con las claves reales. No copies las credenciales de prueba al entorno productivo.
+
+Referencia oficial: [Cloudflare — Test your Turnstile implementation](https://developers.cloudflare.com/turnstile/troubleshooting/testing/).
+
+
+## Permisos de administración de invitaciones
+
+La interfaz administrativa utiliza la sesión autenticada y las políticas RLS de `public.invitations`. La migración `20261111100516_grant_authenticated_invitation_management` concede únicamente `SELECT`, `INSERT` y `UPDATE` a `authenticated`; no concede acceso a `anon` ni `DELETE`. El alcance de lectura, creación y revocación continúa limitado por las políticas RLS existentes.
+
+
+## Endurecimiento de RPC heredados
+
+La ruta de solicitud utiliza `submit_invitation_request_v2` desde el servidor con la clave de servicio. Se retiró el permiso de ejecución pública y autenticada de la función heredada `submit_invitation_request`, que no valida todos los campos del flujo actual. También se retiró la ejecución directa de `handle_new_auth_user` (sigue vinculada al trigger de `auth.users`) y se limitaron `can_manage_profile` y `can_view_profile` a usuarios autenticados. La migración correspondiente es `20261111100627_restrict_legacy_invitation_rpc_access`.
+
+
+## Revisión administrativa de solicitudes
+
+El panel `/dashboard/invitaciones` también muestra las solicitudes recibidas por distrito y permite filtrar pendientes, aprobadas y rechazadas. Las decisiones se registran exclusivamente mediante `review_invitation_request`, que comprueba el alcance del administrador y encola la notificación correspondiente. La lectura se hace mediante `get_invitation_requests`, una función `SECURITY DEFINER` que devuelve solo los datos necesarios y filtra por `national_admin` o por distritos que el usuario puede administrar. La tabla `invitation_requests` no recibe permisos directos de lectura para clientes.
