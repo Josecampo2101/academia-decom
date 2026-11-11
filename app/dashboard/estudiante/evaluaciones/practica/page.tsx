@@ -3,24 +3,31 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import {
+  createAssessmentAttempt,
+  gradeAssessment,
+  parseAssessmentAttempts,
+  PRACTICE_ASSESSMENT_ID,
+  PRACTICE_ATTEMPTS_STORAGE_PREFIX,
+  type AssessmentAnswers,
+  type AssessmentAttempt,
+} from "@/lib/academic/assessment-attempts";
+import { practiceAnswerKey, practiceQuestions } from "@/lib/academic/assessment-demo-fixtures";
 
 type AccessState = "checking" | "allowed" | "denied" | "error";
-type Answers = { single: string; multiple: string[]; boolean: string; short: string };
-
-const questions = [
-  { id: "single", type: "Selección única", prompt: "¿Qué debe orientar la elección del medio de comunicación?", options: ["La preferencia personal del diseñador", "El propósito y el público del mensaje", "La cantidad de colores disponibles", "La tendencia del momento"], correct: "El propósito y el público del mensaje" },
-  { id: "multiple", type: "Selección múltiple", prompt: "¿Qué acciones ayudan a mantener una comunicación institucional responsable? Selecciona todas las que correspondan.", options: ["Verificar los datos antes de publicar", "Adaptar el lenguaje al público", "Alterar el logotipo para cada publicación", "Revisar el contexto del mensaje"], correct: ["Verificar los datos antes de publicar", "Adaptar el lenguaje al público", "Revisar el contexto del mensaje"] },
-  { id: "boolean", type: "Verdadero o falso", prompt: "La identidad institucional se limita únicamente al uso del logotipo.", options: ["Verdadero", "Falso"], correct: "Falso" },
-  { id: "short", type: "Respuesta corta", prompt: "Menciona dos aspectos que verificarías antes de publicar una comunicación institucional.", correct: null },
-] as const;
+const emptyAnswers = (): AssessmentAnswers => ({ single: "", multiple: [], boolean: "", short: "" });
 
 export default function PracticeAssessmentPage() {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const [access, setAccess] = useState<AccessState>("checking");
-  const [answers, setAnswers] = useState<Answers>({ single: "", multiple: [], boolean: "", short: "" });
-  const [submitted, setSubmitted] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [answers, setAnswers] = useState<AssessmentAnswers>(emptyAnswers);
+  const [attempts, setAttempts] = useState<AssessmentAttempt[]>([]);
+  const [submittedAttempt, setSubmittedAttempt] = useState<AssessmentAttempt | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [storageReady, setStorageReady] = useState(false);
+  const [storageError, setStorageError] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -28,23 +35,20 @@ export default function PracticeAssessmentPage() {
       try {
         const { data: { user }, error: authError } = await supabase.auth.getUser();
         if (!active) return;
-        if (authError || !user) {
-          router.replace("/conexion");
-          return;
-        }
+        if (authError || !user) { router.replace("/conexion"); return; }
         const { data: assignments, error: assignmentError } = await supabase.from("user_role_assignments").select("role_id").eq("user_id", user.id);
         if (assignmentError) throw assignmentError;
         if (!active) return;
         const roleIds = [...new Set((assignments ?? []).map((item) => item.role_id))];
-        if (!roleIds.length) {
-          setAccess("denied");
-          return;
-        }
+        if (!roleIds.length) { setAccess("denied"); return; }
         const { data: roles, error: rolesError } = await supabase.from("roles").select("role_key").in("id", roleIds);
         if (rolesError) throw rolesError;
         if (!active) return;
         const keys = (roles ?? []).map((role) => role.role_key);
-        setAccess(keys.includes("member") || keys.includes("national_admin") ? "allowed" : "denied");
+        if (keys.includes("member") || keys.includes("national_admin")) {
+          setUserId(user.id);
+          setAccess("allowed");
+        } else setAccess("denied");
       } catch (error) {
         console.error("No fue posible validar el acceso a la práctica:", error);
         if (active) setAccess("error");
@@ -54,41 +58,102 @@ export default function PracticeAssessmentPage() {
     return () => { active = false; };
   }, [router, supabase]);
 
-  const answeredCount = Number(Boolean(answers.single)) + Number(answers.multiple.length > 0) + Number(Boolean(answers.boolean)) + Number(Boolean(answers.short.trim()));
-  const objectiveScore = (answers.single === questions[0].correct ? 1 : 0) + (answers.boolean === questions[2].correct ? 1 : 0) + (questions[1].correct.every((item) => answers.multiple.includes(item)) && answers.multiple.length === questions[1].correct.length ? 1 : 0);
+  const storageKey = userId ? `${PRACTICE_ATTEMPTS_STORAGE_PREFIX}:${userId}:${PRACTICE_ASSESSMENT_ID}` : null;
+
+  useEffect(() => {
+    if (!storageKey) return;
+    try {
+      const restored = parseAssessmentAttempts(window.localStorage.getItem(storageKey), PRACTICE_ASSESSMENT_ID);
+      // Restauración intencional del historial local al identificar la sesión.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setAttempts(restored);
+      setSubmittedAttempt(restored[0] ?? null);
+    } catch (error) {
+      console.error("No fue posible recuperar los intentos locales:", error);
+      setStorageError("No se pudo recuperar el historial de este navegador.");
+    } finally {
+      setStorageReady(true);
+    }
+  }, [storageKey]);
+
+  const answeredCount = practiceQuestions.filter((question) => {
+    const answer = answers[question.id];
+    return Array.isArray(answer) ? answer.length > 0 : typeof answer === "string" && answer.trim().length > 0;
+  }).length;
 
   function toggleMultiple(option: string) {
-    setAnswers((current) => ({ ...current, multiple: current.multiple.includes(option) ? current.multiple.filter((item) => item !== option) : [...current.multiple, option] }));
+    setAnswers((current) => {
+      const selected = Array.isArray(current.multiple) ? current.multiple : [];
+      return { ...current, multiple: selected.includes(option) ? selected.filter((item) => item !== option) : [...selected, option] };
+    });
   }
 
-  if (access === "checking") return <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]"><div className="h-10 w-10 animate-spin rounded-full border-4 border-[#087DB5]/20 border-t-[#087DB5]" /></main>;
+  function finalizeAttempt() {
+    if (!storageKey) return;
+    const result = gradeAssessment(practiceQuestions, practiceAnswerKey, answers);
+    const attempt = createAssessmentAttempt(PRACTICE_ASSESSMENT_ID, answers, result);
+    try {
+      const next = [attempt, ...attempts];
+      window.localStorage.setItem(storageKey, JSON.stringify(next));
+      setAttempts(next);
+      setSubmittedAttempt(attempt);
+      setShowConfirm(false);
+      setStorageError("");
+    } catch (error) {
+      console.error("No fue posible guardar el intento:", error);
+      setStorageError("No se pudo guardar el intento. Comprueba el espacio disponible en el navegador e inténtalo de nuevo.");
+    }
+  }
+
+  function startNewAttempt() {
+    setAnswers(emptyAnswers());
+    setSubmittedAttempt(null);
+  }
+
+  if (access === "checking" || (access === "allowed" && !storageReady)) return <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]"><div className="h-10 w-10 animate-spin rounded-full border-4 border-[#087DB5]/20 border-t-[#087DB5]" /></main>;
   if (access !== "allowed") return <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6"><section className="max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center"><h1 className="text-xl font-bold text-[#102D4D]">{access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}</h1><p className="mt-2 text-sm text-slate-500">{access === "error" ? "Intenta nuevamente." : "Esta práctica está habilitada para estudiantes con una asignación vigente."}</p><button type="button" onClick={() => router.push("/dashboard/estudiante")} className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white">Volver al panel</button></section></main>;
 
   return (
     <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
       <header className="border-b border-slate-200 bg-white"><div className="mx-auto flex max-w-4xl items-center justify-between px-5 py-4 md:px-8"><div><p className="text-xs font-extrabold tracking-[0.14em] text-[#087DB5]">ACADEMIA DECOM</p><p className="mt-1 text-xs text-slate-400">Práctica de evaluación</p></div><button type="button" onClick={() => router.push("/dashboard/estudiante/evaluaciones")} className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600">← Evaluaciones</button></div></header>
       <div className="mx-auto max-w-4xl space-y-6 px-5 py-7 pb-12 md:px-8 md:py-9">
-        <section className="rounded-3xl bg-[#102D4D] p-6 text-white md:p-8"><span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider">Práctica · No calificada</span><h1 className="mt-4 text-2xl font-extrabold">Comprobación de fundamentos</h1><p className="mt-2 text-sm leading-6 text-white/75">Responde los cuatro tipos de preguntas. Al finalizar podrás revisar una puntuación ilustrativa de las preguntas objetivas.</p><div className="mt-5 flex flex-wrap gap-4 text-xs text-white/70"><span>4 preguntas</span><span>10 minutos estimados</span><span>{answeredCount}/4 respondidas</span></div><div className="mt-4 h-2 overflow-hidden rounded-full bg-white/15"><div className="h-full rounded-full bg-[#19A7A0] transition-all" style={{width:`${answeredCount/4*100}%`}} /></div></section>
+        <section className="rounded-3xl bg-[#102D4D] p-6 text-white md:p-8"><span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider">Práctica · No oficial</span><h1 className="mt-4 text-2xl font-extrabold">Comprobación de fundamentos</h1><p className="mt-2 text-sm leading-6 text-white/75">Responde las cuatro preguntas. Al finalizar se guardará un intento local y podrás consultar su resultado posteriormente.</p><div className="mt-5 flex flex-wrap gap-4 text-xs text-white/70"><span>4 preguntas</span><span>10 minutos estimados</span><span>{answeredCount}/4 respondidas</span><span>{attempts.length} intentos guardados</span></div><div className="mt-4 h-2 overflow-hidden rounded-full bg-white/15"><div className="h-full rounded-full bg-[#19A7A0] transition-all" style={{ width: `${answeredCount / practiceQuestions.length * 100}%` }} /></div></section>
 
-        {!submitted ? (
+        {storageError && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-amber-900">{storageError}</p>}
+
+        {!submittedAttempt ? (
           <section className="space-y-4">
-            {questions.map((question,index)=>(
+            {practiceQuestions.map((question, index) => (
               <article key={question.id} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-7">
-                <div className="flex flex-wrap items-center justify-between gap-2"><span className="text-[10px] font-bold uppercase tracking-wider text-[#087DB5]">Pregunta {index+1} de {questions.length}</span><span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-semibold text-slate-500">{question.type}</span></div>
+                <div className="flex flex-wrap items-center justify-between gap-2"><span className="text-[10px] font-bold uppercase tracking-wider text-[#087DB5]">Pregunta {index + 1} de {practiceQuestions.length}</span><span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-semibold text-slate-500">{question.type}</span></div>
                 <h2 className="mt-4 text-base font-bold leading-6">{question.prompt}</h2>
-                {question.id==="single"&&<div className="mt-4 space-y-2">{question.options.map((option)=><label key={option} className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-100 p-3 text-sm text-slate-600 hover:bg-slate-50"><input type="radio" name="single" checked={answers.single===option} onChange={()=>setAnswers((current)=>({...current,single:option}))} className="mt-0.5 h-4 w-4 accent-[#087DB5]"/>{option}</label>)}</div>}
-                {question.id==="multiple"&&<div className="mt-4 space-y-2">{question.options.map((option)=><label key={option} className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-100 p-3 text-sm text-slate-600 hover:bg-slate-50"><input type="checkbox" checked={answers.multiple.includes(option)} onChange={()=>toggleMultiple(option)} className="mt-0.5 h-4 w-4 accent-[#087DB5]"/>{option}</label>)}</div>}
-                {question.id==="boolean"&&<div className="mt-4 grid gap-2 sm:grid-cols-2">{question.options.map((option)=><button key={option} type="button" aria-pressed={answers.boolean===option} onClick={()=>setAnswers((current)=>({...current,boolean:option}))} className={`rounded-xl border px-4 py-3 text-sm font-semibold ${answers.boolean===option?"border-[#087DB5] bg-sky-50 text-[#087DB5]":"border-slate-200 text-slate-500"}`}>{option}</button>)}</div>}
-                {question.id==="short"&&<textarea value={answers.short} onChange={(event)=>setAnswers((current)=>({...current,short:event.target.value}))} rows={4} maxLength={500} placeholder="Escribe tu respuesta..." className="mt-4 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm leading-6 outline-none focus:border-[#087DB5]"/>}
+                {question.type === "Selección única" && <div className="mt-4 space-y-2">{question.options.map((option) => <label key={option} className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-100 p-3 text-sm text-slate-600 hover:bg-slate-50"><input type="radio" name={question.id} checked={answers[question.id] === option} onChange={() => setAnswers((current) => ({ ...current, [question.id]: option }))} className="mt-0.5 h-4 w-4 accent-[#087DB5]" />{option}</label>)}</div>}
+                {question.type === "Selección múltiple" && <div className="mt-4 space-y-2">{question.options.map((option) => <label key={option} className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-100 p-3 text-sm text-slate-600 hover:bg-slate-50"><input type="checkbox" checked={Array.isArray(answers[question.id]) && (answers[question.id] as string[]).includes(option)} onChange={() => toggleMultiple(option)} className="mt-0.5 h-4 w-4 accent-[#087DB5]" />{option}</label>)}</div>}
+                {question.type === "Verdadero o falso" && <div className="mt-4 grid gap-2 sm:grid-cols-2">{question.options.map((option) => <button key={option} type="button" aria-pressed={answers[question.id] === option} onClick={() => setAnswers((current) => ({ ...current, [question.id]: option }))} className={`rounded-xl border px-4 py-3 text-sm font-semibold ${answers[question.id] === option ? "border-[#087DB5] bg-sky-50 text-[#087DB5]" : "border-slate-200 text-slate-500"}`}>{option}</button>)}</div>}
+                {question.type === "Respuesta corta" && <textarea value={typeof answers[question.id] === "string" ? answers[question.id] as string : ""} onChange={(event) => setAnswers((current) => ({ ...current, [question.id]: event.target.value }))} rows={4} maxLength={500} placeholder="Escribe tu respuesta..." className="mt-4 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm leading-6 outline-none focus:border-[#087DB5]" />}
               </article>
             ))}
-            <div className="flex flex-col justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center"><p className="text-xs leading-5 text-slate-500">Esta práctica funciona solo en el navegador. No crea intentos, no transmite respuestas y no afecta tu progreso.</p><button type="button" disabled={answeredCount!==4} onClick={()=>setShowConfirm(true)} className="shrink-0 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40">Revisar y finalizar</button></div>
+            <div className="flex flex-col justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center"><p className="text-xs leading-5 text-slate-500">Las preguntas objetivas se corrigen automáticamente en esta demostración. La respuesta corta queda pendiente de revisión humana.</p><button type="button" disabled={answeredCount !== practiceQuestions.length} onClick={() => setShowConfirm(true)} className="shrink-0 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40">Revisar y finalizar</button></div>
           </section>
-        ):(
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8"><p className="text-xs font-bold uppercase tracking-wider text-[#19A7A0]">Resultado ilustrativo</p><h2 className="mt-2 text-2xl font-extrabold">Práctica completada</h2><p className="mt-2 text-sm text-slate-500">Puntuación objetiva de ejemplo: {objectiveScore}/3. La respuesta corta requiere revisión humana y no se incluye en este resultado.</p><div className="mt-6 grid gap-3 sm:grid-cols-3">{[{label:"Selección única",correct:answers.single===questions[0].correct},{label:"Selección múltiple",correct:questions[1].correct.every((item)=>answers.multiple.includes(item))&&answers.multiple.length===questions[1].correct.length},{label:"Verdadero o falso",correct:answers.boolean===questions[2].correct}].map((item)=><div key={item.label} className="rounded-2xl bg-[#F4F7FA] p-4"><p className="text-xs font-semibold text-slate-500">{item.label}</p><p className={`mt-2 text-sm font-bold ${item.correct?"text-teal-700":"text-rose-700"}`}>{item.correct?"Correcta":"Por repasar"}</p></div>)}</div><div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-amber-900">Este resultado es local y no representa una calificación oficial ni se almacena en Academia DECOM.</div><button type="button" onClick={()=>router.push("/dashboard/estudiante/evaluaciones")} className="mt-6 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white">Volver a evaluaciones</button></section>
+        ) : (
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#19A7A0]">Resultado de demostración</p><h2 className="mt-2 text-2xl font-extrabold">Intento completado</h2>
+            <p className="mt-2 text-sm text-slate-500">Puntuación objetiva: {submittedAttempt.result.objectiveEarned}/{submittedAttempt.result.objectivePossible}. Preguntas pendientes de revisión manual: {submittedAttempt.result.pendingManual}.</p>
+            <p className="mt-1 text-[11px] text-slate-400">Enviado: {new Date(submittedAttempt.submittedAt).toLocaleString("es-CO")}</p>
+            <div className="mt-6 space-y-3">{submittedAttempt.result.questions.map((result, index) => {
+              const question = practiceQuestions.find((item) => item.id === result.questionId);
+              const answer = submittedAttempt.answers[result.questionId];
+              const answerText = Array.isArray(answer) ? answer.join(" · ") : answer || "Sin respuesta";
+              return <article key={result.questionId} className="rounded-2xl border border-slate-100 p-4"><div className="flex flex-wrap items-center justify-between gap-2"><p className="text-xs font-bold">{index + 1}. {question?.type}</p><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${result.status === "correcta" ? "bg-teal-50 text-teal-800" : result.status === "incorrecta" ? "bg-rose-50 text-rose-800" : "bg-amber-50 text-amber-800"}`}>{result.status === "correcta" ? "Correcta" : result.status === "incorrecta" ? "Incorrecta" : "Pendiente de revisión"}</span></div><p className="mt-2 text-sm font-semibold">{question?.prompt}</p><p className="mt-2 text-xs leading-5 text-slate-500">Tu respuesta: {answerText}</p></article>;
+            })}</div>
+            <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-amber-900">Este resultado se almacena únicamente en este navegador. La respuesta corta no recibe puntuación automática. Las claves de esta práctica son datos ficticios incluidos en código cliente y no son seguras para evaluaciones reales.</div>
+            <div className="mt-6 flex flex-wrap gap-2"><button type="button" onClick={startNewAttempt} className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white">Iniciar nuevo intento</button><button type="button" onClick={() => router.push("/dashboard/estudiante/evaluaciones")} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600">Volver a evaluaciones</button></div>
+          </section>
         )}
+
+        {attempts.length > 0 && <section className="rounded-3xl border border-slate-200 bg-white p-5 md:p-6"><h2 className="text-sm font-bold">Historial de intentos</h2><ol className="mt-3 space-y-2">{attempts.map((attempt, index) => <li key={attempt.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[#F4F7FA] p-3"><div><p className="text-xs font-semibold">Intento {attempts.length - index} · {attempt.result.objectiveEarned}/{attempt.result.objectivePossible} objetivas</p><p className="mt-1 text-[10px] text-slate-400">{new Date(attempt.submittedAt).toLocaleString("es-CO")}</p></div><button type="button" onClick={() => { setAnswers(attempt.answers); setSubmittedAttempt(attempt); }} className="text-xs font-semibold text-[#087DB5]">Ver resultado</button></li>)}</ol></section>}
       </div>
-      {showConfirm&&!submitted&&<div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-950/40 p-4 sm:items-center"><section role="dialog" aria-modal="true" aria-labelledby="confirm-assessment-title" className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"><h2 id="confirm-assessment-title" className="text-lg font-bold">¿Finalizar esta práctica?</h2><p className="mt-2 text-sm leading-6 text-slate-500">Has respondido las cuatro preguntas. Al continuar verás una revisión local de las respuestas objetivas.</p><div className="mt-6 flex justify-end gap-2"><button type="button" onClick={()=>setShowConfirm(false)} className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600">Seguir revisando</button><button type="button" onClick={()=>{setShowConfirm(false);setSubmitted(true);}} className="rounded-xl bg-[#087DB5] px-4 py-3 text-sm font-semibold text-white">Finalizar práctica</button></div></section></div>}
+      {showConfirm && !submittedAttempt && <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-950/40 p-4 sm:items-center"><section role="dialog" aria-modal="true" aria-labelledby="confirm-assessment-title" className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"><h2 id="confirm-assessment-title" className="text-lg font-bold">¿Finalizar esta práctica?</h2><p className="mt-2 text-sm leading-6 text-slate-500">Has respondido las cuatro preguntas. Se guardará un nuevo intento local y podrás consultar el resultado después.</p><div className="mt-6 flex justify-end gap-2"><button type="button" onClick={() => setShowConfirm(false)} className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600">Seguir revisando</button><button type="button" onClick={finalizeAttempt} className="rounded-xl bg-[#087DB5] px-4 py-3 text-sm font-semibold text-white">Finalizar práctica</button></div></section></div>}
     </main>
   );
 }
