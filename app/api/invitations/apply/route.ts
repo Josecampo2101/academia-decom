@@ -1,6 +1,11 @@
 import { createHash } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  isValidDateOfBirth,
+  isValidEmail,
+  isValidUuid,
+} from "@/lib/invitations/validation.mjs";
 
 type RequestBody = {
   action?: "validate" | "submit";
@@ -106,12 +111,6 @@ async function readBodyWithLimit(request: NextRequest, maxBytes: number) {
   }
 
   return new TextDecoder("utf-8", { fatal: true }).decode(body);
-}
-
-function isValidUuid(value: string) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-    value
-  );
 }
 
 export async function POST(request: NextRequest) {
@@ -258,27 +257,14 @@ export async function POST(request: NextRequest) {
   if (fullName.length < 3 || fullName.length > 140) {
     return json({ error: "Ingresa tu nombre completo." }, 400);
   }
-  if (
-    email.length > 254 ||
-    !/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/i.test(
-      email
-    )
-  ) {
+  if (!isValidEmail(email)) {
     return json({ error: "Ingresa un correo electrónico válido." }, 400);
   }
   const phoneDigits = phone.replace(/\D/g, "");
   if (phone.length > 40 || phoneDigits.length < 7 || phoneDigits.length > 20) {
     return json({ error: "Ingresa un número de WhatsApp válido." }, 400);
   }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth)) {
-    return json({ error: "Ingresa una fecha de nacimiento válida." }, 400);
-  }
-  const birthDate = new Date(`${dateOfBirth}T00:00:00.000Z`);
-  if (
-    Number.isNaN(birthDate.getTime()) ||
-    birthDate.toISOString().slice(0, 10) !== dateOfBirth ||
-    birthDate.getTime() > Date.now()
-  ) {
+  if (!isValidDateOfBirth(dateOfBirth)) {
     return json({ error: "La fecha de nacimiento no es válida." }, 400);
   }
   if (!isValidUuid(congregationId)) {
