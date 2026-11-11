@@ -82,3 +82,27 @@ La URL de confirmación de Supabase Auth debe permitir `/activar` como redirect 
 4. Ejecutar una solicitud de prueba y verificar que se envíe el correo de recepción.
 5. Aprobar y rechazar solicitudes de prueba para verificar ambos mensajes y el enlace de activación.
 6. Confirmar en `invitation_notifications` los estados, intentos, marcas de tiempo y `provider_message_id`.
+
+
+## Desarrollo local
+
+1. Desde la raíz del proyecto, copia `.env.example` a `.env.local`:
+   ```powershell
+   Copy-Item .env.example .env.local
+   ```
+2. Completa las variables de Supabase con la URL, publishable key y secret key del proyecto. La secret key solo se usa en servidor.
+3. Para probar el formulario local, configura las claves de prueba de Cloudflare Turnstile y deja `TURNSTILE_EXPECTED_HOSTNAME=localhost`. En producción, usa el hostname real exacto.
+4. Mantén `APP_URL=http://localhost:3000` mientras el servidor local se ejecute en ese puerto. Si Next.js informa otro puerto, ajusta el valor.
+5. Reinicia `npm run dev` después de modificar `.env.local`.
+
+Las páginas requieren parámetros de seguridad; abrirlas sin ellos debe mostrar una explicación, no iniciar una solicitud:
+- Solicitud: `/solicitud-invitacion?token=<token-de-invitacion>`
+- Activación: `/activar?request_id=<uuid-de-solicitud-aprobada>`
+
+Los mensajes de enlace faltante que aparecen al abrir las rutas sin parámetros son esperados. Para una prueba real, primero genera una invitación desde el panel administrativo y utiliza la URL completa que entrega el sistema. No inventes ni reutilices tokens.
+
+## Corrección de recursión RLS
+
+La política de lectura de `congregations` consultaba `memberships`, mientras que la política de lectura de `memberships` consultaba `congregations`. Se rompió el ciclo moviendo la comprobación de pertenencia activa a `private.is_active_congregation_member(uuid)`, una función `SECURITY DEFINER` acotada, con `search_path` vacío, validación de `auth.uid()` y ejecución concedida solo a `authenticated`. El esquema `private` no debe añadirse a los esquemas expuestos por la Data API.
+
+La migración `20261111100116_break_congregations_memberships_rls_cycle` reemplaza únicamente la política SELECT de congregaciones; conserva las políticas de escritura y el control por distrito. La consulta de verificación con la cuenta nacional autenticada debe poder leer las congregaciones sin producir el error PostgreSQL `42P17`.
