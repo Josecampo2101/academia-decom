@@ -84,6 +84,8 @@ export default function StudentActivitiesPage() {
         console.error("No fue posible leer el estado local de una actividad:", error);
       }
     }
+    // Hydrate the activity list from this authenticated user's browser-local records.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStatuses(next);
   }, [userId]);
 
