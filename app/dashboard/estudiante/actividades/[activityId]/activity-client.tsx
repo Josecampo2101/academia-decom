@@ -218,7 +218,7 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
   }
 
   function saveDraft() {
-    if (workStatus === "En revisión" || workStatus === "Calificada" || workStatus === "Rechazada") {
+    if (["En revisión", "Calificada", "Rechazada"].includes(workStatus)) {
       setValidationMessage("Esta entrega ya fue enviada. No puedes modificarla en este estado.");
       return;
     }
