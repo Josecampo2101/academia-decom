@@ -15,6 +15,22 @@ type Invitation = {
   created_at: string;
 };
 
+type InvitationRequest = {
+  request_id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  date_of_birth: string | null;
+  request_status: "pending" | "approved" | "rejected";
+  decision_note: string | null;
+  requested_at: string;
+  reviewed_at: string | null;
+  invitation_type: string;
+  district_name: string | null;
+  congregation_name: string | null;
+  requested_role_name: string | null;
+};
+
 function randomToken() {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
@@ -46,6 +62,12 @@ export default function InvitationsPage() {
   const [memberRoleId, setMemberRoleId] = useState("");
   const [districts, setDistricts] = useState<District[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [requests, setRequests] = useState<InvitationRequest[]>([]);
+  const [requestFilter, setRequestFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
+  const [decisionNotes, setDecisionNotes] = useState<Record<string, string>>({});
+  const [reviewingRequestId, setReviewingRequestId] = useState<string | null>(null);
+  const [requestMessage, setRequestMessage] = useState("");
+  const [requestError, setRequestError] = useState("");
   const [districtNames, setDistrictNames] = useState<Record<string, string>>({});
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [invitationType, setInvitationType] = useState<"guest" | "decom_member">("guest");
@@ -147,6 +169,13 @@ export default function InvitationsPage() {
 
       if (invitationError) throw invitationError;
       setInvitations((invitationRows ?? []) as Invitation[]);
+
+      const { data: requestRows, error: requestsError } = await supabase.rpc(
+        "get_invitation_requests",
+        { p_status: requestFilter === "all" ? null : requestFilter }
+      );
+      if (requestsError) throw requestsError;
+      setRequests((requestRows ?? []) as InvitationRequest[]);
     } catch (error) {
       console.error("Error cargando invitaciones:", error);
       setErrorMessage(
@@ -157,7 +186,7 @@ export default function InvitationsPage() {
     } finally {
       setLoading(false);
     }
-  }, [router, supabase]);
+  }, [router, supabase, requestFilter]);
 
   useEffect(() => {
     // loadData first awaits Supabase authentication before updating React state.
@@ -233,6 +262,52 @@ export default function InvitationsPage() {
 
     setMessage("La invitación fue revocada.");
     await loadData();
+  }
+
+  async function reviewRequest(
+    request: InvitationRequest,
+    decision: "approved" | "rejected"
+  ) {
+    if (reviewingRequestId) return;
+
+    const actionLabel = decision === "approved" ? "aprobar" : "rechazar";
+    if (!window.confirm(`¿Confirmas ${actionLabel} la solicitud de ${request.full_name}?`)) {
+      return;
+    }
+
+    setReviewingRequestId(request.request_id);
+    setRequestMessage("");
+    setRequestError("");
+
+    try {
+      const { error } = await supabase.rpc("review_invitation_request", {
+        p_request_id: request.request_id,
+        p_decision: decision,
+        p_decision_note: decisionNotes[request.request_id]?.trim() || null,
+      });
+      if (error) throw error;
+
+      setRequestMessage(
+        decision === "approved"
+          ? "Solicitud aprobada. Se registró el correo de activación en la cola de notificaciones."
+          : "Solicitud rechazada. Se registró el correo de notificación."
+      );
+      setDecisionNotes((current) => {
+        const next = { ...current };
+        delete next[request.request_id];
+        return next;
+      });
+      await loadData();
+    } catch (error) {
+      console.error("Error revisando solicitud:", error);
+      setRequestError(
+        error instanceof Error
+          ? error.message
+          : "No fue posible registrar la decisión."
+      );
+    } finally {
+      setReviewingRequestId(null);
+    }
   }
 
   async function copyLink() {
@@ -408,6 +483,148 @@ export default function InvitationsPage() {
                   })}
                 </tbody>
               </table>
+            </div>
+          )}
+        </section>
+
+        <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-bold">Solicitudes de ingreso</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Revisa los datos enviados y aprueba o rechaza las solicitudes de tu ámbito.
+              </p>
+            </div>
+            <select
+              value={requestFilter}
+              onChange={(event) =>
+                setRequestFilter(event.target.value as "pending" | "approved" | "rejected" | "all")
+              }
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm"
+              aria-label="Filtrar solicitudes"
+            >
+              <option value="pending">Pendientes</option>
+              <option value="approved">Aprobadas</option>
+              <option value="rejected">Rechazadas</option>
+              <option value="all">Todas</option>
+            </select>
+          </div>
+
+          {requestMessage ? (
+            <p role="status" className="mt-5 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800">
+              {requestMessage}
+            </p>
+          ) : null}
+          {requestError ? (
+            <p role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm text-red-700">
+              {requestError}
+            </p>
+          ) : null}
+
+          {requests.length === 0 ? (
+            <p className="mt-6 rounded-xl border border-dashed border-slate-200 px-5 py-10 text-center text-sm text-slate-500">
+              {requestFilter === "pending"
+                ? "No hay solicitudes pendientes de revisión."
+                : "No hay solicitudes para este filtro."}
+            </p>
+          ) : (
+            <div className="mt-6 space-y-4">
+              {requests.map((request) => (
+                <article key={request.request_id} className="rounded-xl border border-slate-200 p-5">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <h3 className="font-bold">{request.full_name}</h3>
+                      <p className="mt-1 text-sm text-slate-600">{request.email}</p>
+                      <p className="text-sm text-slate-600">WhatsApp: {request.phone || "No registrado"}</p>
+                    </div>
+                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                      request.request_status === "pending"
+                        ? "bg-amber-50 text-amber-800"
+                        : request.request_status === "approved"
+                          ? "bg-emerald-50 text-emerald-800"
+                          : "bg-red-50 text-red-700"
+                    }`}>
+                      {request.request_status === "pending"
+                        ? "Pendiente"
+                        : request.request_status === "approved"
+                          ? "Aprobada"
+                          : "Rechazada"}
+                    </span>
+                  </div>
+
+                  <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                    <div>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Distrito</dt>
+                      <dd className="mt-1">{request.district_name || "No especificado"}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Congregación</dt>
+                      <dd className="mt-1">{request.congregation_name || "No especificada"}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Tipo</dt>
+                      <dd className="mt-1">{request.invitation_type === "decom_member" ? "Miembro DECOM" : "Invitado"}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Rol solicitado</dt>
+                      <dd className="mt-1">{request.requested_role_name || "Integrante"}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Fecha de nacimiento</dt>
+                      <dd className="mt-1">{request.date_of_birth || "No registrada"}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Solicitud recibida</dt>
+                      <dd className="mt-1">{new Date(request.requested_at).toLocaleString("es-CO", { timeZone: "America/Bogota" })}</dd>
+                    </div>
+                  </dl>
+
+                  {request.decision_note ? (
+                    <p className="mt-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
+                      Observación registrada: {request.decision_note}
+                    </p>
+                  ) : null}
+
+                  {request.request_status === "pending" ? (
+                    <div className="mt-5 border-t border-slate-100 pt-4">
+                      <label className="block text-sm font-semibold">
+                        Observación (opcional; se incluirá en el correo de decisión)
+                        <textarea
+                          value={decisionNotes[request.request_id] ?? ""}
+                          onChange={(event) =>
+                            setDecisionNotes((current) => ({
+                              ...current,
+                              [request.request_id]: event.target.value,
+                            }))
+                          }
+                          maxLength={1000}
+                          rows={2}
+                          className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal outline-none focus:border-[#087DB5]"
+                          placeholder="Escribe una observación si es necesaria."
+                        />
+                      </label>
+                      <div className="mt-4 flex flex-wrap justify-end gap-3">
+                        <button
+                          type="button"
+                          onClick={() => void reviewRequest(request, "rejected")}
+                          disabled={reviewingRequestId !== null}
+                          className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                        >
+                          {reviewingRequestId === request.request_id ? "Procesando..." : "Rechazar"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void reviewRequest(request, "approved")}
+                          disabled={reviewingRequestId !== null}
+                          className="rounded-xl bg-[#087DB5] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#066a9b] disabled:opacity-50"
+                        >
+                          {reviewingRequestId === request.request_id ? "Procesando..." : "Aprobar"}
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+                </article>
+              ))}
             </div>
           )}
         </section>
