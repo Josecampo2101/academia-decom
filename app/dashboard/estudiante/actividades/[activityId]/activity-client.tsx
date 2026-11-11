@@ -214,8 +214,6 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
     }
   }
 
-  function validateDraft(event: FormEvent<HTMLFormElement>) { event.preventDefault(); validateResponse(); }
-
   if (access === "checking" || (access === "allowed" && !workLoaded)) {
     return <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]"><div className="h-10 w-10 animate-spin rounded-full border-4 border-[#087DB5]/20 border-t-[#087DB5]" /></main>;
   }
@@ -277,14 +275,14 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
             <div>
               <label htmlFor="activity-answer" className="text-sm font-bold">Tu respuesta</label>
               <p className="mt-1 text-xs text-slate-400">Desarrolla tu análisis con tus propias palabras.</p>
-              <textarea id="activity-answer" value={answer} onChange={(event) => { setAnswer(event.target.value); setValidationMessage(""); }} rows={9} maxLength={5000} placeholder="Escribe aquí tu propuesta y explica cómo aplicarías los principios de identidad institucional..." className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm leading-6 outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10" />
+              <textarea id="activity-answer" value={answer} disabled={workStatus === "En revisión" || workStatus === "Calificada"} onChange={(event) => { setAnswer(event.target.value); setValidationMessage(""); }} rows={9} maxLength={5000} placeholder="Escribe aquí tu propuesta y explica cómo aplicarías los principios de identidad institucional..." className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm leading-6 outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10" />
               <div className="mt-1 flex justify-between text-[10px] text-slate-400"><span>Mínimo de prueba: 40 caracteres</span><span>{answer.length}/5000</span></div>
             </div>
             <div>
               <label htmlFor="reference-url" className="text-sm font-bold">Enlace de referencia <span className="font-normal text-slate-400">(opcional)</span></label>
-              <input id="reference-url" type="url" value={referenceUrl} onChange={(event) => { setReferenceUrl(event.target.value); setValidationMessage(""); }} placeholder="https://..." className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-[#087DB5]" />
+              <input id="reference-url" type="url" value={referenceUrl} disabled={workStatus === "En revisión" || workStatus === "Calificada"} onChange={(event) => { setReferenceUrl(event.target.value); setValidationMessage(""); }} placeholder="https://..." className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-[#087DB5]" />
             </div>
-            <label className="flex items-start gap-3 text-xs leading-5 text-slate-500"><input type="checkbox" checked={confirmation} onChange={(event) => { setConfirmation(event.target.checked); setValidationMessage(""); }} className="mt-0.5 h-4 w-4 accent-[#087DB5]" /><span>Confirmo que esta respuesta es de mi autoría y que he revisado las instrucciones.</span></label>
+            <label className="flex items-start gap-3 text-xs leading-5 text-slate-500"><input type="checkbox" checked={confirmation} disabled={workStatus === "En revisión" || workStatus === "Calificada"} onChange={(event) => { setConfirmation(event.target.checked); setValidationMessage(""); }} className="mt-0.5 h-4 w-4 accent-[#087DB5]" /><span>Confirmo que esta respuesta es de mi autoría y que he revisado las instrucciones.</span></label>
             {validationMessage && <p role="status" className={`rounded-xl p-3 text-xs leading-5 ${validationMessage.startsWith("Validación") ? "bg-teal-50 text-teal-800" : "bg-amber-50 text-amber-800"}`}>{validationMessage}</p>}
             <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap"><button type="button" onClick={saveDraft} disabled={workStatus === "En revisión" || workStatus === "Calificada"} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40">Guardar borrador</button><button type="submit" disabled={workStatus === "En revisión" || workStatus === "Calificada"} className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white hover:bg-[#066a9b] disabled:cursor-not-allowed disabled:opacity-40">{workStatus === "Requiere ajustes" ? "Enviar nueva versión" : "Enviar actividad (demo)"}</button></div>
           </form>
