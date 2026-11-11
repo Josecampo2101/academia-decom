@@ -533,18 +533,29 @@ export default function DashboardPage() {
               <span>⌂</span> Inicio
             </a>
 
-            {modules.map((module) => (
-              <button
-                key={module.name}
-                type="button"
-                disabled
-                title="Módulo en construcción"
-                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm ${secondaryText} opacity-70`}
-              >
-                <span>{module.icon}</span>
-                {module.name}
-              </button>
-            ))}
+            {modules.map((module) =>
+              module.name === "Mi formación" ? (
+                <a
+                  key={module.name}
+                  href="/dashboard/formacion"
+                  className="flex w-full items-center gap-3 rounded-xl bg-[#087DB5]/10 px-4 py-3 text-left text-sm font-semibold text-[#087DB5] transition hover:bg-[#087DB5]/15"
+                >
+                  <span>{module.icon}</span>
+                  {module.name}
+                </a>
+              ) : (
+                <button
+                  key={module.name}
+                  type="button"
+                  disabled
+                  title="Módulo en construcción"
+                  className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm ${secondaryText} opacity-70`}
+                >
+                  <span>{module.icon}</span>
+                  {module.name}
+                </button>
+              )
+            )}
 
             <div className={`my-5 border-t ${borderColor}`} />
 
