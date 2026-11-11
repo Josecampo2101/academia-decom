@@ -99,6 +99,45 @@ export default function DashboardPage() {
     roleKeys.includes("district_coordinator") ||
     roleKeys.includes("area_coordinator");
 
+  function openAcademicModule(moduleName: string) {
+    const isStudent = roleKeys.includes("member");
+    const isTutor = roleKeys.includes("tutor");
+    const isAcademicAdmin =
+      isNationalAdmin || roleKeys.includes("academic_editor");
+
+    const studentDestinations: Record<string, string> = {
+      "Mi formación": "/dashboard/estudiante/formacion",
+      Biblioteca: "/dashboard/estudiante/biblioteca",
+      Evaluaciones: "/dashboard/estudiante/evaluaciones",
+      Seguimiento: "/dashboard/estudiante/seguimiento",
+      Reconocimientos: "/dashboard/estudiante/reconocimientos",
+    };
+    const adminDestinations: Record<string, string> = {
+      "Mi formación": "/dashboard/formacion",
+      Biblioteca: "/dashboard/biblioteca",
+      Evaluaciones: "/dashboard/administracion/actividades",
+    };
+
+    const destination = isStudent
+      ? studentDestinations[moduleName]
+      : isTutor && moduleName === "Seguimiento"
+        ? "/dashboard/tutor"
+        : isAcademicAdmin
+          ? adminDestinations[moduleName]
+          : undefined;
+
+    if (destination) router.push(destination);
+  }
+
+  function canOpenAcademicModule(moduleName: string) {
+    if (roleKeys.includes("member")) return true;
+    if (roleKeys.includes("tutor")) return moduleName === "Seguimiento";
+    if (isNationalAdmin || roleKeys.includes("academic_editor")) {
+      return ["Mi formación", "Biblioteca", "Evaluaciones"].includes(moduleName);
+    }
+    return false;
+  }
+
   // Cargar preferencia de tema.
   useEffect(() => {
     const savedTheme = localStorage.getItem("academia-theme") as Theme | null;
@@ -536,18 +575,22 @@ export default function DashboardPage() {
               <span>⌂</span> Inicio
             </a>
 
-            {modules.map((module) => (
-              <button
-                key={module.name}
-                type="button"
-                disabled
-                title="Módulo en construcción"
-                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm ${secondaryText} opacity-70`}
-              >
-                <span>{module.icon}</span>
-                {module.name}
-              </button>
-            ))}
+            {modules.map((module) => {
+              const canOpen = canOpenAcademicModule(module.name);
+              return (
+                <button
+                  key={module.name}
+                  type="button"
+                  onClick={() => openAcademicModule(module.name)}
+                  disabled={!canOpen}
+                  title={canOpen ? module.description : "No tienes un perfil académico habilitado para este módulo"}
+                  className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] disabled:cursor-not-allowed disabled:opacity-50 ${secondaryText}`}
+                >
+                  <span>{module.icon}</span>
+                  {module.name}
+                </button>
+              );
+            })}
 
             <div className={`my-5 border-t ${borderColor}`} />
 
