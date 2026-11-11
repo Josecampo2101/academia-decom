@@ -33,6 +33,8 @@ No usar el prefijo `NEXT_PUBLIC_` en la clave secreta de Turnstile ni en la clav
 - No se activa una cuenta al enviar la solicitud.
 - Los errores internos de Supabase no se devuelven al navegador.
 - La validación falla de forma cerrada si Turnstile no está configurado o no responde.
+- El servidor exige que Siteverify devuelva el hostname configurado y la acción `invitation_application`; el widget envía esa misma acción.
+- El cuerpo HTTP se lee con un límite de 12 KB durante la lectura del stream, no después de almacenar el cuerpo completo.
 - Turnstile es una barrera anti-bot; no sustituye un rate limiter persistente por IP/token. Antes de publicar el formulario ampliamente, añadir límites persistentes y alertas operativas.
 - El endpoint y la página no cambian permisos, funciones ni datos de producción.
 
@@ -41,8 +43,8 @@ No usar el prefijo `NEXT_PUBLIC_` en la clave secreta de Turnstile ni en la clav
 - Configurar las variables de Turnstile en todos los entornos.
 - Verificar el hostname real del despliegue.
 - Ejecutar pruebas con invitaciones nuevas reales: válida, vencida, revocada, usada, duplicada, distrito inactivo y ausencia de congregaciones.
-- Implementar el worker de correo para procesar `invitation_notifications`; el formulario solo deja la notificación en cola.
-- Completar la activación posterior a la aprobación usando la ruta segura y el flujo `activate_approved_invitation`.
+- El worker de correo y la pantalla de activación ya están implementados en la rama de desarrollo. Falta configurar Resend, el programador externo y ejecutar pruebas reales de extremo a extremo.
+- La activación usa la RPC `activate_approved_invitation`; su funcionamiento debe verificarse con una solicitud aprobada y un correo confirmado en un entorno de pruebas.
 
 ## Procesador de correos
 
