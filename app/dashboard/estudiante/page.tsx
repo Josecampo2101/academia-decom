@@ -164,7 +164,10 @@ export default function StudentDashboardPage() {
   const firstName = displayName.trim().split(/\s+/)[0] || "Estudiante";
 
   function navigateToSection(label: string) {
-    if (label === "Biblioteca") {\n      router.push("/dashboard/estudiante/biblioteca");\n      return;\n    }\n    if (label === "Actividades") {
+    if (label === "Biblioteca") {
+      router.push("/dashboard/estudiante/biblioteca");
+      return;
+    }\n    if (label === "Actividades") {
       router.push("/dashboard/estudiante/actividades");
       return;
     }
