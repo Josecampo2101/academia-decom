@@ -161,6 +161,9 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
         status: shared.status === "Requiere ajustes" ? "Requiere ajustes" : shared.status === "Calificada" || shared.status === "Rechazada" ? "Calificada" : "En revisión",
       })));
     };
+    // Initial synchronization reads only this browser's local demonstration record.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    refreshReview();
     window.addEventListener("academia-decom:demo-bridge-updated", refreshReview);
     window.addEventListener("storage", refreshReview);
     window.addEventListener("focus", refreshReview);
