@@ -110,7 +110,7 @@ export default function LibraryAdministrationPage() {
     const title = form.title.trim();
     if (!title) { setNotice("El título es obligatorio."); setNoticeError(true); return; }
     if (form.description.trim().length < 12) { setNotice("Añade una descripción de al menos 12 caracteres."); setNoticeError(true); return; }
-    if (form.type === "Enlace" && !/^https?:\\/\\//i.test(form.resourceUrl.trim())) { setNotice("Para un enlace, indica una URL válida que comience por https:// o http://."); setNoticeError(true); return; }
+    if (form.type === "Enlace" && !/^https?:\/\//i.test(form.resourceUrl.trim())) { setNotice("Para un enlace, indica una URL válida que comience por https:// o http://."); setNoticeError(true); return; }
     if (form.type !== "Enlace" && !form.fileName.trim()) { setNotice("Selecciona un archivo para este tipo de recurso."); setNoticeError(true); return; }
     const now = new Intl.DateTimeFormat("es-CO", { day: "2-digit", month: "short", year: "numeric" }).format(new Date());
     if (editingId) {
