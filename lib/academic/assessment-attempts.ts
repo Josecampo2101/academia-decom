@@ -42,19 +42,39 @@ function isAssessmentAnswers(value: unknown): value is AssessmentAnswers {
 
 function isQuestionResult(value: unknown): value is QuestionResult {
   if (!isRecord(value)) return false;
-  const validStatus = value.status === "correcta" || value.status === "incorrecta" || value.status === "revision_manual";
-  const validEarned = value.earnedPoints === null || (typeof value.earnedPoints === "number" && Number.isFinite(value.earnedPoints) && value.earnedPoints >= 0);
-  return typeof value.questionId === "string" && validStatus && validEarned &&
-    typeof value.possiblePoints === "number" && Number.isFinite(value.possiblePoints) && value.possiblePoints > 0 &&
-    (value.status === "revision_manual" ? value.earnedPoints === null : value.earnedPoints !== null && value.earnedPoints <= value.possiblePoints);
+
+  const questionId = value.questionId;
+  const status = value.status;
+  const earnedPoints = value.earnedPoints;
+  const possiblePoints = value.possiblePoints;
+
+  if (typeof questionId !== "string" || questionId.length === 0) return false;
+  if (status !== "correcta" && status !== "incorrecta" && status !== "revision_manual") return false;
+  if (typeof possiblePoints !== "number" || !Number.isFinite(possiblePoints) || possiblePoints <= 0) return false;
+
+  if (status === "revision_manual") return earnedPoints === null;
+  return typeof earnedPoints === "number" &&
+    Number.isFinite(earnedPoints) &&
+    earnedPoints >= 0 &&
+    earnedPoints <= possiblePoints;
 }
 
 function isAssessmentResult(value: unknown): value is AssessmentResult {
   if (!isRecord(value) || !Array.isArray(value.questions) || !value.questions.every(isQuestionResult)) return false;
-  const { objectiveEarned, objectivePossible, pendingManual } = value;
-  return typeof objectiveEarned === "number" && Number.isFinite(objectiveEarned) && objectiveEarned >= 0 &&
-    typeof objectivePossible === "number" && Number.isFinite(objectivePossible) && objectivePossible >= objectiveEarned &&
-    Number.isInteger(pendingManual) && pendingManual >= 0 &&
+
+  const objectiveEarned = value.objectiveEarned;
+  const objectivePossible = value.objectivePossible;
+  const pendingManual = value.pendingManual;
+
+  return typeof objectiveEarned === "number" &&
+    Number.isFinite(objectiveEarned) &&
+    objectiveEarned >= 0 &&
+    typeof objectivePossible === "number" &&
+    Number.isFinite(objectivePossible) &&
+    objectivePossible >= objectiveEarned &&
+    typeof pendingManual === "number" &&
+    Number.isInteger(pendingManual) &&
+    pendingManual >= 0 &&
     value.questions.filter((question) => question.status === "revision_manual").length === pendingManual;
 }
 
