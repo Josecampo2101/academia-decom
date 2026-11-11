@@ -59,6 +59,20 @@ test("readAssessmentReviewQueue descarta registros corruptos y claves inconsiste
   assert.deepEqual(readAssessmentReviewQueue(), [item]);
 });
 
+test("readAssessmentReviewQueue elimina IDs duplicados sin duplicar intentos", () => {
+  storage.set("academia-decom:assessment-review-queue:v1", JSON.stringify([item, item]));
+  assert.deepEqual(readAssessmentReviewQueue(), [item]);
+});
+
+test("writeAssessmentReviewQueue rechaza elementos inválidos y duplicados", () => {
+  const dispatchesBefore = dispatchCount;
+  const storedBefore = storage.get("academia-decom:assessment-review-queue:v1");
+  assert.equal(writeAssessmentReviewQueue([{ ...item, id: "incorrecto" }]), false);
+  assert.equal(writeAssessmentReviewQueue([item, item]), false);
+  assert.equal(dispatchCount, dispatchesBefore);
+  assert.equal(storage.get("academia-decom:assessment-review-queue:v1"), storedBefore);
+});
+
 test("writeAssessmentReviewQueue devuelve false si localStorage falla", () => {
   const originalSetItem = globalThis.window.localStorage.setItem;
   globalThis.window.localStorage.setItem = () => { throw new Error("quota"); };
