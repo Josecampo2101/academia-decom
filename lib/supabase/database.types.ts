@@ -1281,6 +1281,10 @@ export type Database = {
         Args: { target_district: string }
         Returns: boolean
       }
+      publish_academic_course: {
+        Args: { p_change_summary?: string; p_course_id: string }
+        Returns: string
+      }
       resolve_membership_transfer_area_review: {
         Args: {
           p_decision: string
