@@ -49,6 +49,34 @@ test("upsertAssessmentReviewQueueItem actualiza el intento sin duplicarlo", () =
   assert.equal(readAssessmentReviewQueue()[0].studentLabel, "Nombre actualizado");
 });
 
+test("upsertAssessmentReviewQueueItem rechaza escrituras atrasadas", () => {
+  const newer = { ...item, updatedAt: "2026-11-11T20:00:00.000Z" };
+  assert.equal(upsertAssessmentReviewQueueItem(newer), true);
+  const dispatchesAfterNewerWrite = dispatchCount;
+
+  assert.equal(upsertAssessmentReviewQueueItem(item), false);
+  assert.equal(readAssessmentReviewQueue()[0].updatedAt, newer.updatedAt);
+  assert.equal(dispatchCount, dispatchesAfterNewerWrite);
+});
+
+test("upsertAssessmentReviewQueueItem trata repetición idéntica como idempotente", () => {
+  const dispatchesBefore = dispatchCount;
+  assert.equal(upsertAssessmentReviewQueueItem(item), true);
+  assert.equal(upsertAssessmentReviewQueueItem(item), true);
+  assert.equal(dispatchCount, dispatchesBefore + 1);
+});
+
+test("upsertAssessmentReviewQueueItem rechaza cambios de identidad o envío original", () => {
+  assert.equal(upsertAssessmentReviewQueueItem(item), true);
+  const changedSubmission = {
+    ...item,
+    updatedAt: "2026-11-11T21:00:00.000Z",
+    attempt: { ...attempt, answers: { short: "Respuesta alterada" } },
+  };
+  assert.equal(upsertAssessmentReviewQueueItem(changedSubmission), false);
+  assert.equal(readAssessmentReviewQueue()[0].attempt.answers.short, "Respuesta de prueba");
+});
+
 test("readAssessmentReviewQueue descarta registros corruptos y claves inconsistentes", () => {
   storage.set("academia-decom:assessment-review-queue:v1", JSON.stringify([
     item,
