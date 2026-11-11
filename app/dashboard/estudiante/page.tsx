@@ -172,7 +172,7 @@ export default function StudentDashboardPage() {
       router.push("/dashboard/estudiante/actividades");
       return;
     }
-    if (label === "Evaluaciones") {
+    if (label === "Seguimiento") {\n      router.push("/dashboard/estudiante/seguimiento");\n      return;\n    }\n    if (label === "Evaluaciones") {
       router.push("/dashboard/estudiante/evaluaciones");
       return;
     }
