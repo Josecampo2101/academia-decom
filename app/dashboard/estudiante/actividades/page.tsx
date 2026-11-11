@@ -19,13 +19,13 @@ const demoActivities = [
   },
   {
     id: "cuestionario-fundamentos",
-    title: "Cuestionario de fundamentos",
+    title: "Reflexión: comunicar con propósito",
     course: "Identidad corporativa DECOM",
     module: "Módulo 1 · Conociendo DECOM",
     status: "Disponible",
     statusClass: "bg-sky-50 text-sky-800",
-    description: "Comprueba la comprensión de los conceptos introductorios del curso.",
-    type: "Evaluación práctica",
+    description: "Relaciona el propósito de un mensaje con el público y el medio seleccionado.",
+    type: "Respuesta breve",
   },
 ];
 
