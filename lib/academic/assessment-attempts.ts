@@ -106,7 +106,7 @@ function isAssessmentAttempt(value: unknown, assessmentId: string): value is Ass
     return false;
   }
   return reviews.every((review) => {
-    const question = value.result.questions.find((item) => item.questionId === review.questionId);
+    const question = (value.result as AssessmentResult).questions.find((item: QuestionResult) => item.questionId === review.questionId);
     return question?.status === "revisada" &&
       question.earnedPoints === review.earnedPoints &&
       question.possiblePoints === review.possiblePoints;
