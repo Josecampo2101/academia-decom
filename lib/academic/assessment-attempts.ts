@@ -31,6 +31,41 @@ export type AssessmentAttempt = {
 export const PRACTICE_ASSESSMENT_ID = "comprobacion-fundamentos-v1";
 export const PRACTICE_ATTEMPTS_STORAGE_PREFIX = "academia-decom:assessment-attempts:v1";
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+function isAssessmentAnswers(value: unknown): value is AssessmentAnswers {
+  return isRecord(value) && Object.values(value).every((answer) =>
+    typeof answer === "string" || (Array.isArray(answer) && answer.every((item) => typeof item === "string")),
+  );
+}
+
+function isQuestionResult(value: unknown): value is QuestionResult {
+  if (!isRecord(value)) return false;
+  const validStatus = value.status === "correcta" || value.status === "incorrecta" || value.status === "revision_manual";
+  const validEarned = value.earnedPoints === null || (typeof value.earnedPoints === "number" && Number.isFinite(value.earnedPoints) && value.earnedPoints >= 0);
+  return typeof value.questionId === "string" && validStatus && validEarned &&
+    typeof value.possiblePoints === "number" && Number.isFinite(value.possiblePoints) && value.possiblePoints > 0 &&
+    (value.status === "revision_manual" ? value.earnedPoints === null : value.earnedPoints !== null && value.earnedPoints <= value.possiblePoints);
+}
+
+function isAssessmentResult(value: unknown): value is AssessmentResult {
+  if (!isRecord(value) || !Array.isArray(value.questions) || !value.questions.every(isQuestionResult)) return false;
+  const { objectiveEarned, objectivePossible, pendingManual } = value;
+  return typeof objectiveEarned === "number" && Number.isFinite(objectiveEarned) && objectiveEarned >= 0 &&
+    typeof objectivePossible === "number" && Number.isFinite(objectivePossible) && objectivePossible >= objectiveEarned &&
+    Number.isInteger(pendingManual) && pendingManual >= 0 &&
+    value.questions.filter((question) => question.status === "revision_manual").length === pendingManual;
+}
+
+function isAssessmentAttempt(value: unknown, assessmentId: string): value is AssessmentAttempt {
+  if (!isRecord(value)) return false;
+  return value.assessmentId === assessmentId &&
+    typeof value.id === "string" && value.id.length > 0 &&
+    typeof value.submittedAt === "string" && Number.isFinite(Date.parse(value.submittedAt)) &&
+    isAssessmentAnswers(value.answers) && isAssessmentResult(value.result);
+}
+
 export function gradeAssessment(
   questions: AssessmentQuestion[],
   answerKey: AssessmentAnswerKey,
@@ -42,7 +77,8 @@ export function gradeAssessment(
   let pendingManual = 0;
 
   const results = questions.map((question): QuestionResult => {
-    const possiblePoints = pointsByQuestion[question.id] ?? 1;
+    const configuredPoints = pointsByQuestion[question.id] ?? 1;
+    const possiblePoints = Number.isFinite(configuredPoints) && configuredPoints > 0 ? configuredPoints : 1;
     if (question.type === "Respuesta corta") {
       pendingManual += 1;
       return { questionId: question.id, status: "revision_manual", earnedPoints: null, possiblePoints };
@@ -67,11 +103,11 @@ export function createAssessmentAttempt(
   now = new Date(),
 ): AssessmentAttempt {
   return {
-    id: `${assessmentId}:${now.getTime()}`,
+    id: `${assessmentId}:${now.getTime()}:${Math.random().toString(36).slice(2, 10)}`,
     assessmentId,
     submittedAt: now.toISOString(),
     answers: JSON.parse(JSON.stringify(answers)) as AssessmentAnswers,
-    result,
+    result: JSON.parse(JSON.stringify(result)) as AssessmentResult,
   };
 }
 
@@ -80,15 +116,7 @@ export function parseAssessmentAttempts(value: string | null, assessmentId: stri
   try {
     const parsed: unknown = JSON.parse(value);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((item): item is AssessmentAttempt =>
-      Boolean(item) && typeof item === "object" &&
-      (item as AssessmentAttempt).assessmentId === assessmentId &&
-      typeof (item as AssessmentAttempt).id === "string" &&
-      typeof (item as AssessmentAttempt).submittedAt === "string" &&
-      Boolean((item as AssessmentAttempt).answers) &&
-      Boolean((item as AssessmentAttempt).result) &&
-      Array.isArray((item as AssessmentAttempt).result.questions),
-    );
+    return parsed.filter((item): item is AssessmentAttempt => isAssessmentAttempt(item, assessmentId));
   } catch {
     return [];
   }
