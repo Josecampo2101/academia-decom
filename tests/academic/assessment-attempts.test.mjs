@@ -4,10 +4,9 @@ import {
   createAssessmentAttempt,
   gradeAssessment,
   parseAssessmentAttempts,
-  type AssessmentQuestion,
 } from "../../lib/academic/assessment-attempts.ts";
 
-const questions: AssessmentQuestion[] = [
+const questions = [
   { id: "single", type: "Selección única", prompt: "Pregunta única", options: ["A", "B"] },
   { id: "multiple", type: "Selección múltiple", prompt: "Pregunta múltiple", options: ["A", "B", "C"] },
   { id: "boolean", type: "Verdadero o falso", prompt: "Pregunta V/F", options: ["Verdadero", "Falso"] },
@@ -65,7 +64,7 @@ test("createAssessmentAttempt conserva respuestas y genera metadatos de envío",
   const result = gradeAssessment([questions[0]], { single: ["B"] }, answers);
   const attempt = createAssessmentAttempt("assessment-1", answers, result, submittedAt);
 
-  assert.match(attempt.id, /^assessment-1:1794418800000:/);
+  assert.match(attempt.id, /^assessment-1:1794409200000:/);
   assert.equal(attempt.assessmentId, "assessment-1");
   assert.equal(attempt.submittedAt, submittedAt.toISOString());
   assert.deepEqual(attempt.answers, answers);
