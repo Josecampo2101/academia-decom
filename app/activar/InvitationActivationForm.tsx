@@ -39,7 +39,14 @@ export default function InvitationActivationForm({
         { p_request_id: requestId }
       );
 
-      if (error || !data || data.success !== true) {
+      if (
+        error ||
+        !data ||
+        typeof data !== "object" ||
+        Array.isArray(data) ||
+        !("success" in data) ||
+        data.success !== true
+      ) {
         activationStarted.current = false;
         setMessage(
           error?.message ??
