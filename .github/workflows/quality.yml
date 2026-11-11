@@ -6,8 +6,6 @@ on:
       - "fix/**"
       - "feature/**"
   pull_request:
-    branches:
-      - main
 
 permissions:
   contents: read
