@@ -103,3 +103,42 @@ Los conteos son una fotografía del catálogo consultado; no sustituyen la extra
 - [ ] Guía de operación, restauración y rollback.
 
 **Conclusión:** la auditoría confirma que la línea base de migraciones es una prioridad real. El trabajo realizado aquí es únicamente el primer inventario; no se ha creado ni aplicado una migración baseline.
+
+
+## 7. Inventario estructural por tabla
+
+Consulta de solo lectura del catálogo, agrupada por tabla. Los conteos incluyen constraints declaradas y políticas visibles en `pg_policies`.
+
+| Tabla | Columnas | Constraints | Índices | Políticas | RLS |
+|---|---:|---:|---:|---:|---|
+| `area_memberships` | 7 | 12 | 4 | 4 | Sí |
+| `areas` | 5 | 7 | 2 | 4 | Sí |
+| `congregations` | 9 | 10 | 3 | 4 | Sí |
+| `districts` | 7 | 9 | 2 | 4 | Sí |
+| `invitation_notifications` | 14 | 15 | 4 | 0 | Sí |
+| `invitation_requests` | 14 | 15 | 5 | 0 | Sí |
+| `invitations` | 13 | 15 | 4 | 4 | Sí |
+| `membership_transfer_area_reviews` | 10 | 14 | 4 | 0 | Sí |
+| `membership_transfers` | 9 | 15 | 5 | 0 | Sí |
+| `memberships` | 6 | 11 | 4 | 4 | Sí |
+| `profiles` | 7 | 7 | 1 | 2 | Sí |
+| `roles` | 5 | 6 | 2 | 2 | Sí |
+| `user_role_assignments` | 7 | 11 | 4 | 4 | Sí |
+
+**Importante:** cero políticas directas no equivale a acceso público. En las tablas de solicitudes, notificaciones y traslados se observó RLS habilitado y ninguna política directa; hay que preservar y verificar sus rutas de acceso por RPC/servidor durante la extracción completa.
+
+## 8. Extensiones observadas
+
+| Extensión | Versión | Esquema |
+|---|---|---|
+| `pg_stat_statements` | 1.11 | `extensions` |
+| `pgcrypto` | 1.3 | `extensions` |
+| `plpgsql` | 1.0 | `pg_catalog` |
+| `supabase_vault` | 0.3.1 | `vault` |
+| `uuid-ossp` | 1.1 | `extensions` |
+
+Las extensiones gestionadas por Supabase deben distinguirse de las dependencias instaladas explícitamente por la aplicación. No se deben recrear ciegamente en una baseline ni copiar contenidos de Vault.
+
+## 9. Riesgo de interpretación del catálogo
+
+La inspección confirmó 32 políticas en `public` y `storage`, pero la consulta por tabla pública suma 32 políticas públicas. Las tablas de solicitudes, notificaciones y transferencias tienen RLS activo y cero políticas listadas, una decisión de aislamiento que no debe alterarse por simplificar la baseline. La extracción final debe incluir también ACL, funciones SECURITY DEFINER, propietarios y dependencias de RPC, y comprobar que no se introduzcan grants accidentales a `anon` o `authenticated`.
