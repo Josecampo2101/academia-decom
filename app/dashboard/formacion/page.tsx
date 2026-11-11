@@ -196,14 +196,23 @@ export default function FormationPage() {
                       <p className="mt-3 text-xs text-slate-400">{course.lessons}</p>
                     </div>
                     <div className="sm:pl-4">
-                      <button
-                        type="button"
-                        disabled
-                        title="Se habilitará cuando se publique el contenido académico"
-                        className={`w-full cursor-not-allowed rounded-xl px-5 py-3 text-sm font-semibold sm:w-auto ${isAvailable ? "bg-[#087DB5]/10 text-[#087DB5]" : "bg-slate-100 text-slate-400"}`}
-                      >
-                        {isAvailable ? "Contenido en preparación" : "Curso bloqueado"}
-                      </button>
+                      {isAvailable ? (
+                        <a
+                          href="/dashboard/formacion/identidad-corporativa"
+                          className="inline-flex w-full items-center justify-center rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#066895] sm:w-auto"
+                        >
+                          Ver estructura del curso
+                        </a>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled
+                          title="Se habilitará al aprobar el curso anterior"
+                          className="w-full cursor-not-allowed rounded-xl bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-400 sm:w-auto"
+                        >
+                          Curso bloqueado
+                        </button>
+                      )}
                     </div>
                   </div>
                   {index < curriculum.length - 1 && (
