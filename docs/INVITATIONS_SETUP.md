@@ -122,3 +122,8 @@ TURNSTILE_EXPECTED_HOSTNAME=localhost
 El servidor solo acepta este modo si `NODE_ENV` no es `production`, `TURNSTILE_TEST_MODE=true` y la clave secreta coincide exactamente con la credencial oficial de prueba. En producción siempre exige la verificación de hostname y acción con las claves reales. No copies las credenciales de prueba al entorno productivo.
 
 Referencia oficial: [Cloudflare — Test your Turnstile implementation](https://developers.cloudflare.com/turnstile/troubleshooting/testing/).
+
+
+## Permisos de administración de invitaciones
+
+La interfaz administrativa utiliza la sesión autenticada y las políticas RLS de `public.invitations`. La migración `20261111100516_grant_authenticated_invitation_management` concede únicamente `SELECT`, `INSERT` y `UPDATE` a `authenticated`; no concede acceso a `anon` ni `DELETE`. El alcance de lectura, creación y revocación continúa limitado por las políticas RLS existentes.
