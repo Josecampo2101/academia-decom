@@ -20,12 +20,15 @@ const json = (body: unknown, status = 200) =>
     headers: {
       "Cache-Control": "no-store, max-age=0",
       "X-Content-Type-Options": "nosniff",
+      "Referrer-Policy": "no-referrer",
     },
   });
 
 function hashInvitationToken(token: string) {
   return createHash("sha256").update(token, "utf8").digest("hex");
 }
+
+const TURNSTILE_ACTION = "invitation_application";
 
 async function verifyCaptcha(token: string) {
   const secret = process.env.TURNSTILE_SECRET_KEY;
@@ -60,12 +63,49 @@ async function verifyCaptcha(token: string) {
     };
 
     return {
-      ok: result.success === true && result.hostname === expectedHost,
+      ok:
+        result.success === true &&
+        result.hostname === expectedHost &&
+        result.action === TURNSTILE_ACTION,
       unavailable: false,
     };
   } catch {
     return { ok: false, unavailable: true };
   }
+}
+
+
+async function readBodyWithLimit(request: NextRequest, maxBytes: number) {
+  const reader = request.body?.getReader();
+  if (!reader) return "";
+
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      totalBytes += value.byteLength;
+      if (totalBytes > maxBytes) {
+        await reader.cancel();
+        throw new Error("BODY_TOO_LARGE");
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const body = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  return new TextDecoder("utf-8", { fatal: true }).decode(body);
 }
 
 function isValidUuid(value: string) {
@@ -77,17 +117,30 @@ function isValidUuid(value: string) {
 export async function POST(request: NextRequest) {
   let body: RequestBody;
 
+  if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) {
+    return json({ error: "El formato de la solicitud no es válido." }, 415);
+  }
+
+  const contentLengthHeader = request.headers.get("content-length");
+  if (contentLengthHeader) {
+    if (!/^\d+$/.test(contentLengthHeader)) {
+      return json({ error: "La longitud de la solicitud no es válida." }, 400);
+    }
+    if (Number(contentLengthHeader) > 12_000) {
+      return json({ error: "La solicitud es demasiado grande." }, 413);
+    }
+  }
+
   try {
-    const contentLength = Number(request.headers.get("content-length") ?? 0);
-    if (contentLength > 12_000) {
-      return json({ error: "La solicitud es demasiado grande." }, 413);
-    }
-    const rawBody = await request.text();
-    if (Buffer.byteLength(rawBody, "utf8") > 12_000) {
-      return json({ error: "La solicitud es demasiado grande." }, 413);
-    }
+    const rawBody = await readBodyWithLimit(request, 12_000);
     body = JSON.parse(rawBody) as RequestBody;
-  } catch {
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return json({ error: "El cuerpo de la solicitud no es válido." }, 400);
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message === "BODY_TOO_LARGE") {
+      return json({ error: "La solicitud es demasiado grande." }, 413);
+    }
     return json({ error: "No se pudo leer la solicitud." }, 400);
   }
 
