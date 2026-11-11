@@ -123,6 +123,22 @@ export default function IdentityCoursePage() {
           </div>
         </section>
 
+        <section className="mt-7 rounded-2xl border border-[#087DB5]/20 bg-white p-5 sm:flex sm:items-center sm:justify-between sm:gap-5">
+          <div>
+            <h2 className="font-bold">Explorar el aula virtual</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              Revisa la estructura prevista para lecciones, actividades, recursos y evaluación.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => router.push("/dashboard/formacion/identidad-corporativa/aula")}
+            className="mt-4 w-full rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#066895] sm:mt-0 sm:w-auto"
+          >
+            Abrir aula de prueba
+          </button>
+        </section>
+
         <section className="mt-9">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#087DB5]">
