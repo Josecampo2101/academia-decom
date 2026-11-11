@@ -132,3 +132,8 @@ La interfaz administrativa utiliza la sesión autenticada y las políticas RLS d
 ## Endurecimiento de RPC heredados
 
 La ruta de solicitud utiliza `submit_invitation_request_v2` desde el servidor con la clave de servicio. Se retiró el permiso de ejecución pública y autenticada de la función heredada `submit_invitation_request`, que no valida todos los campos del flujo actual. También se retiró la ejecución directa de `handle_new_auth_user` (sigue vinculada al trigger de `auth.users`) y se limitaron `can_manage_profile` y `can_view_profile` a usuarios autenticados. La migración correspondiente es `20261111100627_restrict_legacy_invitation_rpc_access`.
+
+
+## Revisión administrativa de solicitudes
+
+El panel `/dashboard/invitaciones` también muestra las solicitudes recibidas por distrito y permite filtrar pendientes, aprobadas y rechazadas. Las decisiones se registran exclusivamente mediante `review_invitation_request`, que comprueba el alcance del administrador y encola la notificación correspondiente. La lectura se hace mediante `get_invitation_requests`, una función `SECURITY DEFINER` que devuelve solo los datos necesarios y filtra por `national_admin` o por distritos que el usuario puede administrar. La tabla `invitation_requests` no recibe permisos directos de lectura para clientes.
