@@ -14,6 +14,7 @@ import {
 } from "@/lib/academic/assessment-attempts";
 import { practiceAnswerKey, practiceQuestions } from "@/lib/academic/assessment-demo-fixtures";
 import AssessmentHistoryPanel from "./assessment-history-panel";
+import { getStudentAssessmentReviews, upsertAssessmentReviewQueueItem } from "@/lib/academic/assessment-review-bridge";
 
 type AccessState = "checking" | "allowed" | "denied" | "error";
 const emptyAnswers = (): AssessmentAnswers => ({ single: "", multiple: [], boolean: "", short: "" });
@@ -23,6 +24,7 @@ export default function PracticeAssessmentPage() {
   const supabase = useMemo(() => createClient(), []);
   const [access, setAccess] = useState<AccessState>("checking");
   const [userId, setUserId] = useState<string | null>(null);
+  const [studentLabel, setStudentLabel] = useState("Estudiante");
   const [answers, setAnswers] = useState<AssessmentAnswers>(emptyAnswers);
   const [attempts, setAttempts] = useState<AssessmentAttempt[]>([]);
   const [submittedAttempt, setSubmittedAttempt] = useState<AssessmentAttempt | null>(null);
@@ -48,6 +50,7 @@ export default function PracticeAssessmentPage() {
         const keys = (roles ?? []).map((role) => role.role_key);
         if (keys.includes("member") || keys.includes("national_admin")) {
           setUserId(user.id);
+          setStudentLabel(String(user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email?.split("@")[0] ?? "Estudiante"));
           setAccess("allowed");
         } else setAccess("denied");
       } catch (error) {
@@ -64,18 +67,42 @@ export default function PracticeAssessmentPage() {
   useEffect(() => {
     if (!storageKey) return;
     try {
-      const restored = parseAssessmentAttempts(window.localStorage.getItem(storageKey), PRACTICE_ASSESSMENT_ID);
-      // Restauración intencional del historial local al identificar la sesión.
+      const localAttempts = parseAssessmentAttempts(window.localStorage.getItem(storageKey), PRACTICE_ASSESSMENT_ID);
+      const tutorReviews = getStudentAssessmentReviews(userId ?? "");
+      const merged = new Map(localAttempts.map((attempt) => [attempt.id, attempt]));
+      tutorReviews.forEach((item) => merged.set(item.attempt.id, item.attempt));
+      const restored = [...merged.values()].sort((a, b) => Date.parse(b.submittedAt) - Date.parse(a.submittedAt));
+      // Restauración intencional del historial local y de revisiones demo al identificar la sesión.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setAttempts(restored);
       setSubmittedAttempt(restored[0] ?? null);
+      window.localStorage.setItem(storageKey, JSON.stringify(restored));
     } catch (error) {
       console.error("No fue posible recuperar los intentos locales:", error);
       setStorageError("No se pudo recuperar el historial de este navegador.");
     } finally {
       setStorageReady(true);
     }
-  }, [storageKey]);
+    const refreshTutorReviews = () => {
+      if (!userId) return;
+      const current = parseAssessmentAttempts(window.localStorage.getItem(storageKey), PRACTICE_ASSESSMENT_ID);
+      const reviews = getStudentAssessmentReviews(userId);
+      const merged = new Map(current.map((attempt) => [attempt.id, attempt]));
+      reviews.forEach((item) => merged.set(item.attempt.id, item.attempt));
+      const next = [...merged.values()].sort((a, b) => Date.parse(b.submittedAt) - Date.parse(a.submittedAt));
+      window.localStorage.setItem(storageKey, JSON.stringify(next));
+      setAttempts(next);
+      setSubmittedAttempt((selected) => selected ? next.find((attempt) => attempt.id === selected.id) ?? selected : null);
+    };
+    window.addEventListener("focus", refreshTutorReviews);
+    window.addEventListener("storage", refreshTutorReviews);
+    window.addEventListener("academia-decom:assessment-review-queue-updated", refreshTutorReviews);
+    return () => {
+      window.removeEventListener("focus", refreshTutorReviews);
+      window.removeEventListener("storage", refreshTutorReviews);
+      window.removeEventListener("academia-decom:assessment-review-queue-updated", refreshTutorReviews);
+    };
+  }, [storageKey, userId]);
 
   const answeredCount = practiceQuestions.filter((question) => {
     const answer = answers[question.id];
@@ -96,10 +123,18 @@ export default function PracticeAssessmentPage() {
     try {
       const next = [attempt, ...attempts];
       window.localStorage.setItem(storageKey, JSON.stringify(next));
+      const queueSaved = upsertAssessmentReviewQueueItem({
+        id: PRACTICE_ASSESSMENT_ID + ":" + userId + ":" + attempt.id,
+        studentId: userId ?? "",
+        studentLabel,
+        attempt,
+        createdAt: attempt.submittedAt,
+        updatedAt: attempt.submittedAt,
+      });
       setAttempts(next);
       setSubmittedAttempt(attempt);
       setShowConfirm(false);
-      setStorageError("");
+      setStorageError(queueSaved ? "" : "El intento quedó guardado en tu historial local, pero no se pudo compartir con la bandeja demo del tutor.");
     } catch (error) {
       console.error("No fue posible guardar el intento:", error);
       setStorageError("No se pudo guardar el intento. Comprueba el espacio disponible en el navegador e inténtalo de nuevo.");
@@ -139,13 +174,16 @@ export default function PracticeAssessmentPage() {
         ) : (
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
             <p className="text-xs font-bold uppercase tracking-wider text-[#19A7A0]">Resultado de demostración</p><h2 className="mt-2 text-2xl font-extrabold">Intento completado</h2>
-            <p className="mt-2 text-sm text-slate-500">Puntuación objetiva: {submittedAttempt.result.objectiveEarned}/{submittedAttempt.result.objectivePossible}. Preguntas pendientes de revisión manual: {submittedAttempt.result.pendingManual}.</p>
+            <p className="mt-2 text-sm text-slate-500">Puntuación objetiva: {submittedAttempt.result.objectiveEarned}/{submittedAttempt.result.objectivePossible}. Puntuación manual: {submittedAttempt.result.manualEarned ?? 0}/{submittedAttempt.result.manualPossible ?? 0}. Preguntas pendientes: {submittedAttempt.result.pendingManual}.</p>
             <p className="mt-1 text-[11px] text-slate-400">Enviado: {new Date(submittedAttempt.submittedAt).toLocaleString("es-CO")}</p>
             <div className="mt-6 space-y-3">{submittedAttempt.result.questions.map((result, index) => {
               const question = practiceQuestions.find((item) => item.id === result.questionId);
               const answer = submittedAttempt.answers[result.questionId];
               const answerText = Array.isArray(answer) ? answer.join(" · ") : answer || "Sin respuesta";
-              return <article key={result.questionId} className="rounded-2xl border border-slate-100 p-4"><div className="flex flex-wrap items-center justify-between gap-2"><p className="text-xs font-bold">{index + 1}. {question?.type}</p><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${result.status === "correcta" ? "bg-teal-50 text-teal-800" : result.status === "incorrecta" ? "bg-rose-50 text-rose-800" : "bg-amber-50 text-amber-800"}`}>{result.status === "correcta" ? "Correcta" : result.status === "incorrecta" ? "Incorrecta" : "Pendiente de revisión"}</span></div><p className="mt-2 text-sm font-semibold">{question?.prompt}</p><p className="mt-2 text-xs leading-5 text-slate-500">Tu respuesta: {answerText}</p></article>;
+              const manualReview = submittedAttempt.manualReviews?.find((review) => review.questionId === result.questionId);
+              const statusLabel = result.status === "correcta" ? "Correcta" : result.status === "incorrecta" ? "Incorrecta" : result.status === "revisada" ? "Revisada por tutor" : "Pendiente de revisión";
+              const statusTone = result.status === "correcta" || result.status === "revisada" ? "bg-teal-50 text-teal-800" : result.status === "incorrecta" ? "bg-rose-50 text-rose-800" : "bg-amber-50 text-amber-800";
+              return <article key={result.questionId} className="rounded-2xl border border-slate-100 p-4"><div className="flex flex-wrap items-center justify-between gap-2"><p className="text-xs font-bold">{index + 1}. {question?.type}</p><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${statusTone}`}>{statusLabel}</span></div><p className="mt-2 text-sm font-semibold">{question?.prompt}</p><p className="mt-2 text-xs leading-5 text-slate-500">Tu respuesta: {answerText}</p>{result.status === "revisada" && <div className="mt-3 rounded-xl bg-teal-50 p-3 text-xs leading-5 text-teal-900"><p className="font-bold">Puntaje: {result.earnedPoints}/{result.possiblePoints}</p><p className="mt-1">{manualReview?.feedback}</p></div>}</article>;
             })}</div>
             <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-amber-900">Este resultado se almacena únicamente en este navegador. La respuesta corta no recibe puntuación automática. Las claves de esta práctica son datos ficticios incluidos en código cliente y no son seguras para evaluaciones reales.</div>
             <div className="mt-6 flex flex-wrap gap-2"><button type="button" onClick={startNewAttempt} className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white">Iniciar nuevo intento</button><button type="button" onClick={() => router.push("/dashboard/estudiante/evaluaciones")} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600">Volver a evaluaciones</button></div>
