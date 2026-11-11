@@ -127,3 +127,8 @@ Referencia oficial: [Cloudflare — Test your Turnstile implementation](https://
 ## Permisos de administración de invitaciones
 
 La interfaz administrativa utiliza la sesión autenticada y las políticas RLS de `public.invitations`. La migración `20261111100516_grant_authenticated_invitation_management` concede únicamente `SELECT`, `INSERT` y `UPDATE` a `authenticated`; no concede acceso a `anon` ni `DELETE`. El alcance de lectura, creación y revocación continúa limitado por las políticas RLS existentes.
+
+
+## Endurecimiento de RPC heredados
+
+La ruta de solicitud utiliza `submit_invitation_request_v2` desde el servidor con la clave de servicio. Se retiró el permiso de ejecución pública y autenticada de la función heredada `submit_invitation_request`, que no valida todos los campos del flujo actual. También se retiró la ejecución directa de `handle_new_auth_user` (sigue vinculada al trigger de `auth.users`) y se limitaron `can_manage_profile` y `can_view_profile` a usuarios autenticados. La migración correspondiente es `20261111100627_restrict_legacy_invitation_rpc_access`.
