@@ -238,6 +238,13 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
           </div>
 
           <div className="space-y-6 p-6 sm:p-9">
+            {token && siteKey && !success ? (
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-sm font-bold">Verificación de seguridad</p>
+                <div ref={captchaContainer} className="mt-3 min-h-[66px]" />
+              </div>
+            ) : null}
+
             {!token ? (
               <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">
                 Falta el enlace de invitación. Abre la dirección completa que
@@ -261,7 +268,6 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
                     Confirma que eres una persona y valida que el enlace siga vigente.
                   </p>
                 </div>
-                <div ref={captchaContainer} className="min-h-[66px]" />
                 <button
                   type="button"
                   disabled={!canValidate}
@@ -378,11 +384,6 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
                       </span>
                     </label>
                   ) : null}
-                </div>
-
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-sm font-bold">Verificación de seguridad</p>
-                  <div ref={captchaContainer} className="mt-3 min-h-[66px]" />
                 </div>
 
                 <button
