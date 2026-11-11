@@ -89,6 +89,9 @@ export default function DashboardPage() {
   >("");
 
   const isNationalAdmin = roleKeys.includes("national_admin");
+  const canManageInvitations = roleKeys.some((role) =>
+    ["national_admin", "district_coordinator", "area_coordinator"].includes(role)
+  );
 
   // Permisos del módulo de reubicaciones.
   const canManageTransfers =
@@ -563,6 +566,16 @@ export default function DashboardPage() {
             >
               <span>⚙</span> Administración
             </div>
+
+            {canManageInvitations && (
+              <a
+                href="/dashboard/invitaciones"
+                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
+              >
+                <span className="text-lg">✉</span>
+                <span>Invitaciones</span>
+              </a>
+            )}
 
             {/* REUBICACIÓN DE CREYENTES */}
             {canManageTransfers && (

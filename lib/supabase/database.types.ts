@@ -14,6 +14,127 @@ export type Database = {
   }
   public: {
     Tables: {
+      academic_catalog_events: {
+        Row: {
+          action: string
+          actor_id: string | null
+          after_data: Json | null
+          before_data: Json | null
+          created_at: string
+          district_id: string
+          entity_id: string
+          entity_type: string
+          id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          district_id: string
+          entity_id: string
+          entity_type: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          district_id?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academic_catalog_events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academic_catalog_events_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academic_programs: {
+        Row: {
+          archived_at: string | null
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          district_id: string
+          id: string
+          published_at: string | null
+          sort_order: number
+          status: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          district_id: string
+          id?: string
+          published_at?: string | null
+          sort_order?: number
+          status?: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          district_id?: string
+          id?: string
+          published_at?: string | null
+          sort_order?: number
+          status?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academic_programs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academic_programs_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academic_programs_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       area_memberships: {
         Row: {
           area_id: string
@@ -127,6 +248,230 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "congregations_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_modules: {
+        Row: {
+          archived_at: string | null
+          course_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          district_id: string
+          id: string
+          published_at: string | null
+          sort_order: number
+          status: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          course_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          district_id: string
+          id?: string
+          published_at?: string | null
+          sort_order?: number
+          status?: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          course_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          district_id?: string
+          id?: string
+          published_at?: string | null
+          sort_order?: number
+          status?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_modules_course_same_district_fkey"
+            columns: ["course_id", "district_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id", "district_id"]
+          },
+          {
+            foreignKeyName: "course_modules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_modules_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_modules_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          archived_at: string | null
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          district_id: string
+          estimated_minutes: number | null
+          id: string
+          level: string | null
+          program_id: string
+          published_at: string | null
+          sort_order: number
+          status: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          district_id: string
+          estimated_minutes?: number | null
+          id?: string
+          level?: string | null
+          program_id: string
+          published_at?: string | null
+          sort_order?: number
+          status?: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          district_id?: string
+          estimated_minutes?: number | null
+          id?: string
+          level?: string | null
+          program_id?: string
+          published_at?: string | null
+          sort_order?: number
+          status?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courses_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courses_program_same_district_fkey"
+            columns: ["program_id", "district_id"]
+            isOneToOne: false
+            referencedRelation: "academic_programs"
+            referencedColumns: ["id", "district_id"]
+          },
+          {
+            foreignKeyName: "courses_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curriculum_versions: {
+        Row: {
+          change_summary: string | null
+          course_id: string
+          created_at: string
+          created_by: string | null
+          district_id: string
+          id: string
+          published_at: string | null
+          snapshot: Json
+          status: string
+          version_number: number
+        }
+        Insert: {
+          change_summary?: string | null
+          course_id: string
+          created_at?: string
+          created_by?: string | null
+          district_id: string
+          id?: string
+          published_at?: string | null
+          snapshot: Json
+          status?: string
+          version_number: number
+        }
+        Update: {
+          change_summary?: string | null
+          course_id?: string
+          created_at?: string
+          created_by?: string | null
+          district_id?: string
+          id?: string
+          published_at?: string | null
+          snapshot?: Json
+          status?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curriculum_versions_course_same_district_fkey"
+            columns: ["course_id", "district_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id", "district_id"]
+          },
+          {
+            foreignKeyName: "curriculum_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curriculum_versions_district_id_fkey"
             columns: ["district_id"]
             isOneToOne: false
             referencedRelation: "districts"
@@ -383,6 +728,92 @@ export type Database = {
             columns: ["role_id"]
             isOneToOne: false
             referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lessons: {
+        Row: {
+          archived_at: string | null
+          content: Json
+          created_at: string
+          created_by: string | null
+          district_id: string
+          estimated_minutes: number | null
+          id: string
+          module_id: string
+          objectives: string[]
+          published_at: string | null
+          sort_order: number
+          status: string
+          summary: string | null
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          district_id: string
+          estimated_minutes?: number | null
+          id?: string
+          module_id: string
+          objectives?: string[]
+          published_at?: string | null
+          sort_order?: number
+          status?: string
+          summary?: string | null
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          district_id?: string
+          estimated_minutes?: number | null
+          id?: string
+          module_id?: string
+          objectives?: string[]
+          published_at?: string | null
+          sort_order?: number
+          status?: string
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_module_same_district_fkey"
+            columns: ["module_id", "district_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id", "district_id"]
+          },
+          {
+            foreignKeyName: "lessons_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -765,6 +1196,27 @@ export type Database = {
               isSetofReturn: false
             }
           }
+      get_invitation_requests: {
+        Args: { p_status?: string }
+        Returns: {
+          congregation_name: string
+          date_of_birth: string
+          decision_note: string
+          district_id: string
+          district_name: string
+          email: string
+          full_name: string
+          invitation_type: string
+          phone: string
+          request_id: string
+          request_status: string
+          requested_at: string
+          requested_congregation_id: string
+          requested_role_id: string
+          requested_role_name: string
+          reviewed_at: string
+        }[]
+      }
       get_membership_transfer_area_reviews: {
         Args: { p_status?: string }
         Returns: {
@@ -828,6 +1280,10 @@ export type Database = {
       is_district_coordinator: {
         Args: { target_district: string }
         Returns: boolean
+      }
+      publish_academic_course: {
+        Args: { p_change_summary?: string; p_course_id: string }
+        Returns: string
       }
       resolve_membership_transfer_area_review: {
         Args: {
