@@ -12,7 +12,7 @@ El estudiante debe completar las lecciones, entregar todas las actividades prác
 
 - **Administrador nacional (national_admin)**: administra la configuración global, ve reportes globales y puede gestionar todos los distritos.
 - **Director distrital (district_coordinator)**: administra la oferta académica y el seguimiento dentro de su distrito.
-- **Comité distrital (area_coordinator)**: comparte las capacidades distritales que el negocio haya autorizado; no queda limitado a los estudiantes de su área.
+- **Comité distrital (area_coordinator)**: cuando está reconocido como miembro del comité, comparte las capacidades de administración, consulta y seguimiento del director distrital dentro de su distrito; no queda limitado a los estudiantes de su área.
 - **Editor académico (academic_editor)**: crea y mantiene cursos, módulos, lecciones, recursos, actividades y bancos de preguntas dentro del ámbito asignado. Puede publicar sus propios cursos cuando cumpla las reglas de publicación.
 - **Tutor (tutor)**: consulta únicamente cursos y estudiantes que tenga asignados; revisa entregas y preguntas abiertas.
 - **Estudiante (member)**: consulta su propia matrícula, progreso, entregas, intentos, resultados y certificados.
@@ -36,7 +36,7 @@ Las entidades se agrupan por responsabilidad. Los nombres son orientativos y deb
 
 - course_enrollments: estudiante, curso y distrito, estado, fecha de inicio/finalización y versión del curso matriculada.
 - lesson_progress: estado, porcentaje, último punto de reproducción, fecha de inicio y finalización por estudiante/lección.
-- activity_assignments: actividad práctica, instrucciones, rúbrica, obligatoriedad y fecha límite opcional.
+- activity_assignments: actividad práctica, instrucciones, rúbrica y fecha límite opcional. Todas las actividades prácticas publicadas son obligatorias; no existe una categoría de actividad que el estudiante pueda omitir.
 - activity_submissions: versión de entrega, archivos, texto, estado, fecha y estudiante.
 - activity_reviews: tutor revisor, decisión, calificación, observaciones y fecha; conservar historial de revisiones en lugar de sobrescribirlo.
 
@@ -66,7 +66,7 @@ Los nombres y columnas definitivos se ajustarán al esquema real y a las convenc
 1. **Secuencia**: un curso no se desbloquea porque el usuario visite una URL. El servidor evalúa prerequisitos y finalización aprobada.
 2. **Lecciones**: cada lección declara una regla de finalización. Vídeo requiere completar la reproducción; texto/documentos requieren la verificación o actividad definida para esa lección.
 3. **Vídeo**: registrar eventos/checkpoints de reproducción en servidor y validar continuidad, duración y finalización. Un simple evento onEnded del navegador no es evidencia suficiente.
-4. **Actividades**: todas las actividades marcadas como obligatorias deben tener una revisión aprobatoria vigente. Una nueva entrega puede invalidar una aprobación anterior según la política configurada.
+4. **Actividades**: todas las actividades prácticas publicadas son obligatorias y deben tener una revisión aprobatoria vigente. No se permite omitirlas. Una nueva entrega puede invalidar una aprobación anterior según la política configurada.
 5. **Examen**: no se inicia si faltan lecciones o actividades obligatorias aprobadas.
 6. **Banco aleatorio**: seleccionar preguntas según configuración, mezclar opciones y guardar una instantánea por intento. Evitar repetir preguntas de intentos anteriores cuando el tamaño y la distribución del banco lo permitan.
 7. **Respuestas**: no enviar claves ni explicaciones al cliente antes del cierre y calificación del intento. Las preguntas abiertas quedan pendientes de tutor.
@@ -151,6 +151,45 @@ Los reportes administrativos incluyen estudiantes activos/inactivos, avance, pen
 - La emisión repetida no duplica certificados ni eventos de XP.
 - Los datos de reportes y certificados respetan el ámbito del distrito y minimizan información personal.
 
-## 11. Fuera de esta entrega
+
+## 12. Consistencia transaccional e idempotencia
+
+- La ruta formativa define el orden de cursos y sus prerequisitos. Para la primera versión, Identidad corporativa DECOM es el primer curso; después se habilitan las áreas de formación en el orden publicado por administración.
+- El desbloqueo del siguiente curso se calcula en servidor a partir de la matrícula y de los requisitos aprobados del curso anterior. No se confía en un estado enviado por el navegador.
+- La matrícula queda vinculada a una versión publicada del curso. Los cambios posteriores crean una versión nueva y no alteran silenciosamente la matrícula existente.
+- La creación de un intento de examen, la selección de preguntas y la persistencia de su instantánea deben ejecutarse en una única transacción. La operación debe bloquear o serializar la matrícula para impedir dos intentos simultáneos que excedan el límite configurado.
+- Definir restricciones únicas para evitar duplicados: matrícula por estudiante/ruta/curso/versión según la política; número de intento por matrícula; posición de pregunta dentro del intento; código de certificado; y clave de idempotencia de operaciones repetibles.
+- Las solicitudes de entrega, revisión, calificación y emisión de certificados deben tolerar reintentos de red sin duplicar registros ni efectos secundarios.
+- Una revisión de tutor y una calificación publicada se conservan en auditoría. Las correcciones posteriores se registran como nuevas decisiones, nunca como borrado silencioso del historial.
+- Los eventos de XP se registran en un libro inmutable o append-only y se relacionan con el evento que los originó para impedir que una repetición otorgue puntos dos veces.
+- La notificación se registra en una outbox dentro de la misma transacción del evento de negocio; el proveedor externo se procesa después, con reintentos e idempotencia. El fallo de correo o WhatsApp no revierte una aprobación académica.
+
+## 13. Matriz mínima de pruebas
+
+| Área | Prueba negativa obligatoria | Resultado esperado |
+|---|---|---|
+| Ámbito | Estudiante consulta matrícula de otra persona o distrito | Denegado por servidor/RLS |
+| Secuencia | Abrir el siguiente curso antes de aprobar el anterior | Bloqueado |
+| Lecciones | Marcar vídeo completado solo con un evento del navegador | No se acepta como evidencia suficiente |
+| Actividades | Intentar iniciar examen con una actividad sin aprobar | Bloqueado |
+| Tutoría | Tutor consulta curso o entrega no asignados | Denegado |
+| Examen | Dos solicitudes concurrentes intentan consumir el mismo último intento | Solo se crea el número de intentos permitido |
+| Examen | Cambiar respuestas o preguntas después del envío | Instantánea cerrada e inmutable |
+| Banco | Consultar claves de respuesta antes de calificar | No se exponen |
+| Versiones | Publicar una nueva versión mientras hay matrículas activas | Las matrículas existentes conservan su versión |
+| Certificados | Repetir la solicitud de emisión | Un certificado por aprobación/versión |
+| Gamificación | Reprocesar un evento ya contabilizado | No duplica XP ni insignias |
+| Archivos | Solicitar URL firmada sin autorización o después de vencer | Denegado |
+| Reportes | Miembro del comité consulta otro distrito | Denegado |
+| Privacidad | Consultar validación pública de certificado | Solo devuelve datos mínimos definidos |
+
+## 14. Límites funcionales y privacidad
+
+- La primera versión no incorpora foros, comentarios públicos ni mensajería entre estudiantes.
+- La comunicación por WhatsApp requiere proveedor configurado y consentimiento/uso autorizado del dato de contacto; no debe bloquear el acceso académico si el canal no está disponible.
+- Los certificados públicos no deben revelar correo, teléfono, fecha de nacimiento, dirección ni historial académico.
+- Los registros de actividad y auditoría deben tener una política de retención definida antes de producción.
+
+## 15. Fuera de esta entrega
 
 Este documento no crea tablas, políticas RLS, buckets, funciones RPC, cron jobs ni proveedores de correo/WhatsApp. Tampoco declara que el módulo académico esté conectado a datos reales. Cada cambio de base de datos se presentará como migración revisable y requerirá autorización antes de aplicarse a producción.
