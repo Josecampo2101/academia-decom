@@ -2,9 +2,6 @@ import { createHash } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 type RequestBody = {
   action?: "validate" | "submit";
   token?: string;
