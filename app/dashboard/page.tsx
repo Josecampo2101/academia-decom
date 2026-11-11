@@ -104,6 +104,8 @@ export default function DashboardPage() {
       savedTheme === "dark" ||
       savedTheme === "system"
     ) {
+      // Leer localStorage tras montar evita discrepancias entre SSR e hidratación.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme(savedTheme);
     }
   }, []);
