@@ -148,8 +148,28 @@ export function upsertAssessmentReviewQueueItem(item: AssessmentReviewQueueItem)
   if (!validated) return false;
   const current = readAssessmentReviewQueue();
   const index = current.findIndex((entry) => entry.id === validated.id);
-  if (index >= 0) current[index] = validated;
-  else current.unshift(validated);
+  if (index >= 0) {
+    const existing = current[index];
+    const existingUpdatedAt = Date.parse(existing.updatedAt);
+    const incomingUpdatedAt = Date.parse(validated.updatedAt);
+
+    // A delayed tab/event must never replace a newer tutor review with stale data.
+    if (incomingUpdatedAt < existingUpdatedAt) return false;
+    if (incomingUpdatedAt === existingUpdatedAt) {
+      return JSON.stringify(validated) === JSON.stringify(existing);
+    }
+
+    // Queue identity and original submission metadata are immutable across updates.
+    if (validated.createdAt !== existing.createdAt ||
+      validated.attempt.submittedAt !== existing.attempt.submittedAt ||
+      validated.attempt.assessmentId !== existing.attempt.assessmentId ||
+      JSON.stringify(validated.attempt.answers) !== JSON.stringify(existing.attempt.answers)) {
+      return false;
+    }
+    current[index] = validated;
+  } else {
+    current.unshift(validated);
+  }
   return writeAssessmentReviewQueue(current);
 }
 
