@@ -147,14 +147,17 @@ export async function POST(request: NextRequest) {
     return json({ error: "Acción no válida." }, 400);
   }
 
-  const token = body.token?.trim() ?? "";
-  const captchaToken = body.captchaToken?.trim() ?? "";
+  // JSON is untrusted at runtime: TypeScript types do not validate incoming values.
+  const token = typeof body.token === "string" ? body.token.trim() : "";
+  const captchaToken =
+    typeof body.captchaToken === "string" ? body.captchaToken.trim() : "";
 
   if (token.length < 32 || token.length > 512) {
     return json({ error: "El enlace de invitación no es válido." }, 400);
   }
 
-  if (!captchaToken || captchaToken.length > 4096) {
+  // Cloudflare Turnstile tokens have a maximum length of 2,048 characters.
+  if (!captchaToken || captchaToken.length > 2048) {
     return json({ error: "Completa la verificación de seguridad." }, 400);
   }
 
@@ -247,12 +250,31 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const fullName = body.fullName?.trim() ?? "";
-  const email = body.email?.trim().toLowerCase() ?? "";
-  const phone = body.phone?.trim() ?? "";
-  const dateOfBirth = body.dateOfBirth?.trim() ?? "";
-  const congregationId = body.congregationId?.trim() ?? "";
-  const requestedRoleId = body.requestedRoleId?.trim() || null;
+  const submittedFields = [
+    body.fullName,
+    body.email,
+    body.phone,
+    body.dateOfBirth,
+    body.congregationId,
+  ];
+  if (
+    submittedFields.some((value) => typeof value !== "string") ||
+    (body.requestedRoleId !== undefined &&
+      body.requestedRoleId !== null &&
+      typeof body.requestedRoleId !== "string")
+  ) {
+    return json({ error: "Los datos enviados no tienen un formato válido." }, 400);
+  }
+
+  const fullName = body.fullName!.trim();
+  const email = body.email!.trim().toLowerCase();
+  const phone = body.phone!.trim();
+  const dateOfBirth = body.dateOfBirth!.trim();
+  const congregationId = body.congregationId!.trim();
+  const requestedRoleId =
+    typeof body.requestedRoleId === "string"
+      ? body.requestedRoleId.trim() || null
+      : null;
 
   if (fullName.length < 3 || fullName.length > 140) {
     return json({ error: "Ingresa tu nombre completo." }, 400);
