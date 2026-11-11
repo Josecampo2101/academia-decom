@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 type AccessState = "checking" | "allowed" | "denied" | "error";
+type DemoSubmissionStatus = "Sin guardar" | "Borrador" | "En revisión" | "Requiere ajustes" | "Calificada";
+type DemoAttempt = { number: number; submittedAt: string; answer: string; referenceUrl: string; status: "En revisión" | "Requiere ajustes" | "Calificada" };
+type DemoWork = { answer: string; referenceUrl: string; status: DemoSubmissionStatus; attempts: DemoAttempt[]; savedAt: string | null };
 
 const activities: Record<string, {
   title: string;
@@ -61,6 +64,11 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
   const supabase = useMemo(() => createClient(), []);
   const [access, setAccess] = useState<AccessState>("checking");
   const [displayName, setDisplayName] = useState("Estudiante");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [workLoaded, setWorkLoaded] = useState(false);
+  const [workStatus, setWorkStatus] = useState<DemoSubmissionStatus>("Sin guardar");
+  const [attempts, setAttempts] = useState<DemoAttempt[]>([]);
+  const [savedAt, setSavedAt] = useState<string | null>(null);
   const [answer, setAnswer] = useState("");
   const [referenceUrl, setReferenceUrl] = useState("");
   const [confirmation, setConfirmation] = useState(false);
@@ -77,6 +85,7 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
           return;
         }
         setDisplayName(String(user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email?.split("@")[0] ?? "Estudiante"));
+        setUserId(user.id);
         const { data: assignments, error: assignmentError } = await supabase.from("user_role_assignments").select("role_id").eq("user_id", user.id);
         if (assignmentError) throw assignmentError;
         if (!active) return;
@@ -99,11 +108,53 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
     return () => { active = false; };
   }, [router, supabase]);
 
-  function validateDraft(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  const storageKey = userId && activityId ? `academia-decom:demo-work:${userId}:${activityId}` : null;
+
+  useEffect(() => {
+    if (!storageKey) return;
+    try {
+      const raw = window.localStorage.getItem(storageKey);
+      if (raw) {
+        const saved = JSON.parse(raw) as DemoWork;
+        setAnswer(saved.answer ?? "");
+        setReferenceUrl(saved.referenceUrl ?? "");
+        setWorkStatus(saved.status ?? "Sin guardar");
+        setAttempts(Array.isArray(saved.attempts) ? saved.attempts : []);
+        setSavedAt(saved.savedAt ?? null);
+      }
+    } catch (error) {
+      console.error("No fue posible recuperar el borrador local:", error);
+      setValidationMessage("No pudimos recuperar el borrador guardado en este navegador.");
+    } finally {
+      setWorkLoaded(true);
+    }
+  }, [storageKey]);
+
+  function persistWork(next: DemoWork) {
+    if (!storageKey) {
+      setValidationMessage("No fue posible identificar la sesión para guardar este trabajo local.");
+      return false;
+    }
+    try {
+      window.localStorage.setItem(storageKey, JSON.stringify(next));
+      setAnswer(next.answer);
+      setReferenceUrl(next.referenceUrl);
+      setWorkStatus(next.status);
+      setAttempts(next.attempts);
+      setSavedAt(next.savedAt);
+      setValidationMessage("");
+      return true;
+    } catch (error) {
+      console.error("No fue posible guardar el trabajo local:", error);
+      setValidationMessage("El navegador no permitió guardar el borrador. Comprueba el espacio disponible y los permisos de almacenamiento.");
+      return false;
+    }
+  }
+
+  function validateResponse() {
     if (answer.trim().length < 40) {
-      setValidationMessage("Desarrolla una respuesta de al menos 40 caracteres para probar la validación.");
-      return;
+      setValidationMessage("Desarrolla una respuesta de al menos 40 caracteres para continuar.");
+      return false;
     }
     if (referenceUrl.trim()) {
       try {
@@ -111,17 +162,61 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
         if (!["http:", "https:"].includes(parsed.protocol)) throw new Error("URL no permitida");
       } catch {
         setValidationMessage("Escribe un enlace válido que comience con https:// o http://.");
-        return;
+        return false;
       }
     }
     if (!confirmation) {
       setValidationMessage("Confirma que revisaste tu respuesta antes de continuar.");
-      return;
+      return false;
     }
-    setValidationMessage("Validación local completada. No se ha enviado ni guardado ninguna entrega.");
+    return true;
   }
 
-  if (access === "checking") {
+  function saveDraft() {
+    if (workStatus === "En revisión" || workStatus === "Calificada") {
+      setValidationMessage("Esta entrega ya fue enviada. No puedes modificarla en este estado.");
+      return;
+    }
+    const next: DemoWork = {
+      answer,
+      referenceUrl,
+      status: "Borrador",
+      attempts,
+      savedAt: new Date().toISOString(),
+    };
+    if (persistWork(next)) setValidationMessage("Borrador guardado en este navegador. Todavía no se ha enviado al tutor.");
+  }
+
+  function submitWork(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!validateResponse()) return;
+    if (workStatus === "En revisión" || workStatus === "Calificada") {
+      setValidationMessage("Esta entrega ya fue enviada y no admite cambios en este estado.");
+      return;
+    }
+    const nextAttempt: DemoAttempt = {
+      number: attempts.length + 1,
+      submittedAt: new Date().toISOString(),
+      answer,
+      referenceUrl,
+      status: "En revisión",
+    };
+    const next: DemoWork = {
+      answer,
+      referenceUrl,
+      status: "En revisión",
+      attempts: [...attempts, nextAttempt],
+      savedAt: new Date().toISOString(),
+    };
+    if (persistWork(next)) {
+      setConfirmation(false);
+      setValidationMessage("Envío simulado registrado localmente. No se ha transmitido al tutor ni al servidor.");
+    }
+  }
+
+  function validateDraft(event: FormEvent<HTMLFormElement>) { event.preventDefault(); validateResponse(); }
+
+  if (access === "checking" || (access === "allowed" && !workLoaded)) {
     return <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]"><div className="h-10 w-10 animate-spin rounded-full border-4 border-[#087DB5]/20 border-t-[#087DB5]" /></main>;
   }
 
@@ -178,7 +273,7 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
             </ul>
           </div>
 
-          <form onSubmit={validateDraft} className="mt-8 space-y-5">
+          <form onSubmit={submitWork} className="mt-8 space-y-5">
             <div>
               <label htmlFor="activity-answer" className="text-sm font-bold">Tu respuesta</label>
               <p className="mt-1 text-xs text-slate-400">Desarrolla tu análisis con tus propias palabras.</p>
@@ -191,7 +286,7 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
             </div>
             <label className="flex items-start gap-3 text-xs leading-5 text-slate-500"><input type="checkbox" checked={confirmation} onChange={(event) => { setConfirmation(event.target.checked); setValidationMessage(""); }} className="mt-0.5 h-4 w-4 accent-[#087DB5]" /><span>Confirmo que esta respuesta es de mi autoría y que he revisado las instrucciones.</span></label>
             {validationMessage && <p role="status" className={`rounded-xl p-3 text-xs leading-5 ${validationMessage.startsWith("Validación") ? "bg-teal-50 text-teal-800" : "bg-amber-50 text-amber-800"}`}>{validationMessage}</p>}
-            <button type="submit" className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white hover:bg-[#066a9b]">Validar respuesta de demostración</button>
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap"><button type="button" onClick={saveDraft} disabled={workStatus === "En revisión" || workStatus === "Calificada"} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40">Guardar borrador</button><button type="submit" disabled={workStatus === "En revisión" || workStatus === "Calificada"} className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white hover:bg-[#066a9b] disabled:cursor-not-allowed disabled:opacity-40">{workStatus === "Requiere ajustes" ? "Enviar nueva versión" : "Enviar actividad (demo)"}</button></div>
           </form>
         </section>
 
@@ -202,12 +297,13 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
             <div className="mt-4 space-y-4">
               <div><p className="text-[10px] font-semibold text-slate-400">FECHA LÍMITE</p><p className="mt-1 text-xs font-semibold text-slate-600">{activity.due}</p></div>
               <div><p className="text-[10px] font-semibold text-slate-400">FORMATO</p><p className="mt-1 text-xs leading-5 text-slate-600">{activity.formats}</p></div>
-              <div><p className="text-[10px] font-semibold text-slate-400">ESTADO</p><span className="mt-1 inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-800">No enviada · Demo</span></div>
+              <div><p className="text-[10px] font-semibold text-slate-400">ESTADO</p><span className="mt-1 inline-flex rounded-full bg-sky-50 px-2.5 py-1 text-[10px] font-bold text-sky-800">{workStatus} · Demo</span>{savedAt && <p className="mt-1 text-[10px] text-slate-400">Último cambio: {new Date(savedAt).toLocaleString("es-CO")}</p>}</div>
             </div>
           </section>
+          {attempts.length > 0 && <section className="rounded-3xl border border-slate-200 bg-white p-5"><h2 className="text-sm font-bold">Historial de intentos</h2><ol className="mt-3 space-y-3">{attempts.map((attempt) => <li key={attempt.number} className="border-l-2 border-[#19A7A0] pl-3"><p className="text-xs font-semibold">Intento {attempt.number} · {attempt.status}</p><p className="mt-1 text-[10px] text-slate-400">{new Date(attempt.submittedAt).toLocaleString("es-CO")}</p><p className="mt-1 line-clamp-3 text-xs leading-5 text-slate-500">{attempt.answer}</p></li>)}</ol></section>}
           <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5">
             <h2 className="text-sm font-bold text-amber-900">Importante</h2>
-            <p className="mt-2 text-xs leading-5 text-amber-800">Esta pantalla no envía archivos ni guarda entregas. La conexión real se implementará cuando estén aprobadas las tablas, políticas y reglas de reenvío académicas.</p>
+            <p className="mt-2 text-xs leading-5 text-amber-800">El borrador y los intentos de demostración se guardan únicamente en el almacenamiento local de este navegador y de esta sesión. No se envían al tutor ni al servidor; la conexión real requiere tablas, políticas y reglas de reenvío aprobadas.</p>
           </section>
           <button type="button" onClick={() => router.push("/dashboard/estudiante/leccion/coherencia-mensajes")} className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-600 hover:bg-slate-50">← Volver a la lección</button>
         </aside>
