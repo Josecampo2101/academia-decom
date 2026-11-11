@@ -12,11 +12,11 @@ import {
 } from "../../lib/academic/assessment-review-bridge.ts";
 
 const previousWindow = globalThis.window;
-const storage = new Map<string, string>();
+const storage = new Map();
 globalThis.window = {
   localStorage: {
-    getItem: (key: string) => storage.get(key) ?? null,
-    setItem: (key: string, value: string) => storage.set(key, value),
+    getItem: (key) => storage.get(key) ?? null,
+    setItem: (key, value) => storage.set(key, value),
   },
   dispatchEvent: () => true,
 } as unknown as Window & typeof globalThis;
