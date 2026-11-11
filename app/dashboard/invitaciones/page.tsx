@@ -172,7 +172,7 @@ export default function InvitationsPage() {
 
       const { data: requestRows, error: requestsError } = await supabase.rpc(
         "get_invitation_requests",
-        { p_status: requestFilter === "all" ? null : requestFilter }
+        requestFilter === "all" ? {} : { p_status: requestFilter }
       );
       if (requestsError) throw requestsError;
       setRequests((requestRows ?? []) as InvitationRequest[]);
@@ -283,7 +283,7 @@ export default function InvitationsPage() {
       const { error } = await supabase.rpc("review_invitation_request", {
         p_request_id: request.request_id,
         p_decision: decision,
-        p_decision_note: decisionNotes[request.request_id]?.trim() || null,
+        p_decision_note: decisionNotes[request.request_id]?.trim() || undefined,
       });
       if (error) throw error;
 
