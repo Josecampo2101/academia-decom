@@ -119,6 +119,7 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
       if (raw) {
         const saved = JSON.parse(raw) as DemoWork;
         // Hydration from browser storage is an intentional state restoration.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setAnswer(saved.answer ?? "");
         setReferenceUrl(saved.referenceUrl ?? "");
         setWorkStatus(saved.status ?? "Sin guardar");
@@ -128,7 +129,6 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
       const shared = readDemoBridge().find((item) => item.studentId === userId && item.activityId === activityId);
       if (shared) {
         // Restore the latest tutor decision after the student's own draft data.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSharedReview(shared.review);
         if (shared.status === "Requiere ajustes") setWorkStatus("Requiere ajustes");
         else if (shared.status === "Calificada") setWorkStatus("Calificada");
