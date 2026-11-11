@@ -35,11 +35,18 @@ function hashInvitationToken(token: string) {
 
 const TURNSTILE_ACTION = "invitation_application";
 
+const TURNSTILE_TEST_SECRET_KEY =
+  "1x0000000000000000000000000000000AA";
+
 async function verifyCaptcha(token: string) {
   const secret = process.env.TURNSTILE_SECRET_KEY;
   const expectedHost = process.env.TURNSTILE_EXPECTED_HOSTNAME;
+  const isExplicitLocalTest =
+    process.env.NODE_ENV !== "production" &&
+    process.env.TURNSTILE_TEST_MODE === "true" &&
+    secret === TURNSTILE_TEST_SECRET_KEY;
 
-  if (!secret || !expectedHost) {
+  if (!secret || (!expectedHost && !isExplicitLocalTest)) {
     return { ok: false, unavailable: true };
   }
 
@@ -70,8 +77,9 @@ async function verifyCaptcha(token: string) {
     return {
       ok:
         result.success === true &&
-        result.hostname === expectedHost &&
-        result.action === TURNSTILE_ACTION,
+        (isExplicitLocalTest ||
+          (result.hostname === expectedHost &&
+            result.action === TURNSTILE_ACTION)),
       unavailable: false,
     };
   } catch {
