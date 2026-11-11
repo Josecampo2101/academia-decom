@@ -47,6 +47,7 @@ export default function StudentActivitiesPage() {
           router.replace("/conexion");
           return;
         }
+        setUserId(user.id);
         const { data: assignments, error: assignmentError } = await supabase.from("user_role_assignments").select("role_id").eq("user_id", user.id);
         if (assignmentError) throw assignmentError;
         if (!active) return;
