@@ -164,6 +164,10 @@ export default function StudentDashboardPage() {
   const firstName = displayName.trim().split(/\s+/)[0] || "Estudiante";
 
   function navigateToSection(label: string) {
+    if (label === "Actividades") {
+      router.push("/dashboard/estudiante/actividades");
+      return;
+    }
     setActiveNav(label);
     const targets: Record<string, string> = {
       Inicio: "student-home",
