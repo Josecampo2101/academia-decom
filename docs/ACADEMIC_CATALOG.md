@@ -69,6 +69,7 @@ Los archivos del repositorio usan exactamente las versiones registradas en `supa
 - `20261111183047_validate_academic_publication.sql`
 - `20261111183220_publish_academic_course_version.sql`
 - `20261111183747_enforce_academic_publication_hierarchy.sql`
+- `20261111184157_index_academic_catalog_foreign_keys.sql`
 
 La migración `20261111024732_allow_committee_create_congregations.sql` también permanece versionada porque ya estaba aplicada antes de recuperarse al repositorio.
 
