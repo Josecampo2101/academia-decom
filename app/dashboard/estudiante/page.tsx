@@ -434,8 +434,7 @@ export default function StudentDashboardPage() {
             </section>
 
             <section className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
-              <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="flex flex-wrap items-center justify-between gap-3">
+              <article id="student-courses" className="scroll-mt-24 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"><div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Organiza tu aprendizaje</p>
                     <h3 className="mt-1 text-lg font-bold text-[#102D4D]">Mis cursos</h3>
@@ -479,8 +478,7 @@ export default function StudentDashboardPage() {
                 </div>
               </article>
 
-              <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div>
+              <article id="student-tasks" className="scroll-mt-24 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"><div>
                   <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Lo que sigue</p>
                   <h3 className="mt-1 text-lg font-bold text-[#102D4D]">Pendientes y actividades</h3>
                 </div>
@@ -507,8 +505,7 @@ export default function StudentDashboardPage() {
             </section>
 
             <section className="grid gap-5 lg:grid-cols-2">
-              <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="flex items-center gap-3">
+              <article id="student-tutoring" className="scroll-mt-24 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"><div className="flex items-center gap-3">
                   <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#E6F5F4] text-xl text-[#15958F]">♧</span>
                   <div>
                     <h3 className="text-base font-bold text-[#102D4D]">Acompañamiento tutorial</h3>
@@ -523,8 +520,7 @@ export default function StudentDashboardPage() {
                 </div>
               </article>
 
-              <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="flex items-center justify-between">
+              <article id="student-achievements" className="scroll-mt-24 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"><div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-base font-bold text-[#102D4D]">Reconocimientos</h3>
                     <p className="mt-0.5 text-xs text-slate-400">Tus avances también merecen celebrarse</p>
