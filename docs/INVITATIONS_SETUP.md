@@ -106,3 +106,19 @@ Los mensajes de enlace faltante que aparecen al abrir las rutas sin parámetros 
 La política de lectura de `congregations` consultaba `memberships`, mientras que la política de lectura de `memberships` consultaba `congregations`. Se rompió el ciclo moviendo la comprobación de pertenencia activa a `private.is_active_congregation_member(uuid)`, una función `SECURITY DEFINER` acotada, con `search_path` vacío, validación de `auth.uid()` y ejecución concedida solo a `authenticated`. El esquema `private` no debe añadirse a los esquemas expuestos por la Data API.
 
 La migración `20261111100116_break_congregations_memberships_rls_cycle` reemplaza únicamente la política SELECT de congregaciones; conserva las políticas de escritura y el control por distrito. La consulta de verificación con la cuenta nacional autenticada debe poder leer las congregaciones sin producir el error PostgreSQL `42P17`.
+
+
+### Turnstile de prueba para desarrollo local
+
+Cloudflare publica credenciales de prueba que permiten validar el formulario sin crear un widget real. Para usarlas localmente, coloca en `.env.local`:
+
+```dotenv
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+TURNSTILE_TEST_MODE=true
+TURNSTILE_EXPECTED_HOSTNAME=localhost
+```
+
+El servidor solo acepta este modo si `NODE_ENV` no es `production`, `TURNSTILE_TEST_MODE=true` y la clave secreta coincide exactamente con la credencial oficial de prueba. En producción siempre exige la verificación de hostname y acción con las claves reales. No copies las credenciales de prueba al entorno productivo.
+
+Referencia oficial: [Cloudflare — Test your Turnstile implementation](https://developers.cloudflare.com/turnstile/troubleshooting/testing/).
