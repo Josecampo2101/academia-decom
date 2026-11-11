@@ -39,6 +39,9 @@ jobs:
       - name: Verificar tipos TypeScript
         run: npm run typecheck
 
+      - name: Ejecutar pruebas automatizadas
+        run: npm test
+
       - name: Compilar aplicación
         run: npm run build
         env:
