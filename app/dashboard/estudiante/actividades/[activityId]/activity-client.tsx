@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { readDemoBridge, upsertDemoBridgeSubmission, type DemoBridgeReview } from "@/lib/academic/demo-bridge";
 
 type AccessState = "checking" | "allowed" | "denied" | "error";
 type DemoSubmissionStatus = "Sin guardar" | "Borrador" | "En revisión" | "Requiere ajustes" | "Calificada";
@@ -73,6 +74,7 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
   const [referenceUrl, setReferenceUrl] = useState("");
   const [confirmation, setConfirmation] = useState(false);
   const [validationMessage, setValidationMessage] = useState("");
+  const [sharedReview, setSharedReview] = useState<DemoBridgeReview | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -113,6 +115,18 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
   useEffect(() => {
     if (!storageKey) return;
     try {
+      const shared = readDemoBridge().find((item) => item.studentId === userId && item.activityId === activityId);
+      if (shared) {
+        setSharedReview(shared.review);
+        if (shared.status === "Requiere ajustes") setWorkStatus("Requiere ajustes");
+        else if (shared.status === "Calificada" || shared.status === "Rechazada") setWorkStatus("Calificada");
+        else if (shared.status === "En revisión") setWorkStatus("En revisión");
+        if (shared.attempts.length) setAttempts(shared.attempts.map((attempt) => ({
+          number: attempt.number, submittedAt: attempt.submittedAt, answer: attempt.answer,
+          referenceUrl: attempt.referenceUrl,
+          status: shared.status === "Requiere ajustes" ? "Requiere ajustes" : shared.status === "Calificada" || shared.status === "Rechazada" ? "Calificada" : "En revisión",
+        })));
+      }
       const raw = window.localStorage.getItem(storageKey);
       if (raw) {
         const saved = JSON.parse(raw) as DemoWork;
@@ -130,7 +144,32 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
     } finally {
       setWorkLoaded(true);
     }
-  }, [storageKey]);
+  }, [storageKey, userId, activityId]);
+
+  useEffect(() => {
+    if (!userId || !activityId) return;
+    const refreshReview = () => {
+      const shared = readDemoBridge().find((item) => item.studentId === userId && item.activityId === activityId);
+      if (!shared) return;
+      setSharedReview(shared.review);
+      if (shared.status === "Requiere ajustes") setWorkStatus("Requiere ajustes");
+      else if (shared.status === "Calificada" || shared.status === "Rechazada") setWorkStatus("Calificada");
+      else if (shared.status === "En revisión") setWorkStatus("En revisión");
+      if (shared.attempts.length) setAttempts(shared.attempts.map((attempt) => ({
+        number: attempt.number, submittedAt: attempt.submittedAt, answer: attempt.answer,
+        referenceUrl: attempt.referenceUrl,
+        status: shared.status === "Requiere ajustes" ? "Requiere ajustes" : shared.status === "Calificada" || shared.status === "Rechazada" ? "Calificada" : "En revisión",
+      })));
+    };
+    window.addEventListener("academia-decom:demo-bridge-updated", refreshReview);
+    window.addEventListener("storage", refreshReview);
+    window.addEventListener("focus", refreshReview);
+    return () => {
+      window.removeEventListener("academia-decom:demo-bridge-updated", refreshReview);
+      window.removeEventListener("storage", refreshReview);
+      window.removeEventListener("focus", refreshReview);
+    };
+  }, [userId, activityId]);
 
   function persistWork(next: DemoWork) {
     if (!storageKey) {
@@ -211,8 +250,27 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
       savedAt: new Date().toISOString(),
     };
     if (persistWork(next)) {
+      const shared = readDemoBridge().find((item) => item.studentId === userId && item.activityId === activityId);
+      const bridged = upsertDemoBridgeSubmission({
+        id: String(userId ?? "demo-student") + ":" + activityId,
+        studentId: userId ?? "demo-student",
+        studentName: displayName,
+        activityId,
+        activityTitle: activity.title,
+        course: activity.course,
+        status: "En revisión",
+        attempts: [...(shared?.attempts ?? []), {
+          number: nextAttempt.number, submittedAt: nextAttempt.submittedAt,
+          answer: nextAttempt.answer, referenceUrl: nextAttempt.referenceUrl,
+        }],
+        review: null,
+        updatedAt: new Date().toISOString(),
+      });
+      setSharedReview(null);
       setConfirmation(false);
-      setValidationMessage("Envío simulado registrado localmente. No se ha transmitido al tutor ni al servidor.");
+      setValidationMessage(bridged
+        ? "Envío demo disponible en la bandeja de tutoría de este mismo navegador. No se ha transmitido al servidor."
+        : "El intento se guardó en tu navegador, pero no pudo actualizar la bandeja demo del tutor.");
     }
   }
 
@@ -300,10 +358,11 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
               <div><p className="text-[10px] font-semibold text-slate-400">ESTADO</p><span className="mt-1 inline-flex rounded-full bg-sky-50 px-2.5 py-1 text-[10px] font-bold text-sky-800">{workStatus} · Demo</span>{savedAt && <p className="mt-1 text-[10px] text-slate-400">Último cambio: {new Date(savedAt).toLocaleString("es-CO")}</p>}</div>
             </div>
           </section>
+          {sharedReview && <section className="rounded-3xl border border-teal-200 bg-teal-50 p-5"><h2 className="text-sm font-bold text-teal-900">Retroalimentación del tutor · demo</h2><p className="mt-2 text-xs font-semibold text-teal-800">{sharedReview.decision} · {new Date(sharedReview.reviewedAt).toLocaleString("es-CO")}</p><p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-teal-900">{sharedReview.feedback || "El tutor no agregó observaciones."}</p>{sharedReview.decision === "Solicitar ajustes" && <p className="mt-3 text-xs font-semibold text-teal-900">Puedes preparar una nueva versión y enviarla como siguiente intento.</p>}</section>}
           {attempts.length > 0 && <section className="rounded-3xl border border-slate-200 bg-white p-5"><h2 className="text-sm font-bold">Historial de intentos</h2><ol className="mt-3 space-y-3">{attempts.map((attempt) => <li key={attempt.number} className="border-l-2 border-[#19A7A0] pl-3"><p className="text-xs font-semibold">Intento {attempt.number} · {attempt.status}</p><p className="mt-1 text-[10px] text-slate-400">{new Date(attempt.submittedAt).toLocaleString("es-CO")}</p><p className="mt-1 line-clamp-3 text-xs leading-5 text-slate-500">{attempt.answer}</p></li>)}</ol></section>}
           <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5">
             <h2 className="text-sm font-bold text-amber-900">Importante</h2>
-            <p className="mt-2 text-xs leading-5 text-amber-800">El borrador y los intentos de demostración se guardan únicamente en el almacenamiento local de este navegador y de esta sesión. No se envían al tutor ni al servidor; la conexión real requiere tablas, políticas y reglas de reenvío aprobadas.</p>
+            <p className="mt-2 text-xs leading-5 text-amber-800">El borrador y los intentos de demostración se guardan en el almacenamiento local de este navegador. Los envíos aparecen en la bandeja demo del tutor y su retroalimentación puede volver a esta vista solo dentro del mismo navegador; no existe sincronización entre dispositivos ni persistencia de servidor.</p>
           </section>
           <button type="button" onClick={() => router.push("/dashboard/estudiante/leccion/coherencia-mensajes")} className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-600 hover:bg-slate-50">← Volver a la lección</button>
         </aside>
