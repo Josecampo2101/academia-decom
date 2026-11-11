@@ -92,8 +92,8 @@ export default function AcademicActivitiesAdminPage() {
       setNoticeError(true);
       return;
     }
-    if (kind === "Evaluación" && (!questions.length || questions.some((question) => !question.prompt.trim() || (question.type !== "Respuesta corta" && question.options.filter((option) => option.trim()).length < 2) || (question.type !== "Respuesta corta" && question.correctOptions.length === 0) || (question.type === "Selección única" && question.correctOptions.length !== 1)))) {
-      setNotice("Cada pregunta debe tener enunciado, opciones válidas y clave correcta. La selección única admite exactamente una respuesta correcta.");
+    if (kind === "Evaluación" && (!questions.length || questions.some((question) => !question.prompt.trim() || (question.type !== "Respuesta corta" && (question.options.length < 2 || question.options.some((option) => !option.trim()) || question.correctOptions.length === 0 || question.correctOptions.some((correct) => !question.options.some((option) => option.trim() === correct)) || (question.type !== "Selección múltiple" && question.correctOptions.length !== 1))))) {
+      setNotice("Cada pregunta debe tener enunciado, al menos dos opciones completas y una clave correcta que coincida con las opciones actuales. Solo la selección múltiple admite varias respuestas correctas.");
       setNoticeError(true);
       return;
     }
