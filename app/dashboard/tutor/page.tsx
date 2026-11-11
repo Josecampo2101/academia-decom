@@ -72,9 +72,9 @@ const demoReviews: ReviewItem[] = [
 ];
 
 const students = [
-  { name: "María Fernanda Ríos", course: "Identidad corporativa DECOM", progress: 72, activity: "Entregó una actividad", tone: "sky" },
-  { name: "Andrés Felipe Gómez", course: "Identidad corporativa DECOM", progress: 48, activity: "Tiene una entrega pendiente", tone: "amber" },
-  { name: "Daniela Pérez", course: "Identidad corporativa DECOM", progress: 86, activity: "Avance reciente", tone: "teal" },
+  { id: "maria-rios", name: "María Fernanda Ríos", course: "Identidad corporativa DECOM", progress: 72, activity: "Entregó una actividad", tone: "sky" },
+  { id: "andres-gomez", name: "Andrés Felipe Gómez", course: "Identidad corporativa DECOM", progress: 48, activity: "Tiene una entrega pendiente", tone: "amber" },
+  { id: "daniela-perez", name: "Daniela Pérez", course: "Identidad corporativa DECOM", progress: 86, activity: "Avance reciente", tone: "teal" },
 ];
 
 export default function TutorDashboardPage() {
@@ -337,6 +337,7 @@ export default function TutorDashboardPage() {
                       <span className="text-xs font-bold tabular-nums text-slate-500">{student.progress}%</span>
                     </div>
                     <p className="mt-1 text-[11px] text-slate-400">{student.activity}</p>
+                    <button type="button" onClick={() => router.push(`/dashboard/tutor/estudiantes/${student.id}`)} className="mt-2 text-[11px] font-bold text-[#087DB5] hover:underline">Ver ficha de seguimiento →</button>
                     <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
                       <div className="h-full rounded-full bg-[#19A7A0]" style={{ width: `${student.progress}%` }} />
                     </div>
