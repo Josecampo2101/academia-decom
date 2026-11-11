@@ -8,8 +8,6 @@ export type DemoBridgeAttempt = {
 export type DemoBridgeReview = {
   decision: DemoReviewDecision;
   feedback: string;
-  score: number;
-  maxPoints: number;
   reviewedAt: string;
 };
 export type DemoBridgeSubmission = {
