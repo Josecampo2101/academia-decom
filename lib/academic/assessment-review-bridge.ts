@@ -40,7 +40,7 @@ function isManualReview(value: unknown): value is ManualAssessmentReview {
   if (!isRecord(value)) return false;
   return typeof value.questionId === "string" && !!value.questionId &&
     typeof value.reviewerId === "string" && !!value.reviewerId.trim() &&
-    typeof value.feedback === "string" && value.feedback.length <= 2000 &&
+    typeof value.feedback === "string" && value.feedback.length > 0 && value.feedback.length <= 2000 &&
     typeof value.earnedPoints === "number" && Number.isInteger(value.earnedPoints) && value.earnedPoints >= 0 &&
     typeof value.possiblePoints === "number" && Number.isInteger(value.possiblePoints) && value.possiblePoints > 0 &&
     value.earnedPoints <= value.possiblePoints &&
@@ -113,18 +113,27 @@ export function readAssessmentReviewQueue(): AssessmentReviewQueueItem[] {
   if (typeof window === "undefined") return [];
   try {
     const parsed: unknown = JSON.parse(window.localStorage.getItem(ASSESSMENT_REVIEW_QUEUE_KEY) ?? "[]");
-    return Array.isArray(parsed)
-      ? parsed.map(parseQueueItem).filter((item): item is AssessmentReviewQueueItem => item !== null)
-      : [];
+    if (!Array.isArray(parsed)) return [];
+    const valid = parsed.map(parseQueueItem).filter((item): item is AssessmentReviewQueueItem => item !== null);
+    const seen = new Set<string>();
+    return valid.filter((item) => {
+      if (seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
+    });
   } catch {
     return [];
   }
 }
 
 export function writeAssessmentReviewQueue(items: AssessmentReviewQueueItem[]): boolean {
-  if (typeof window === "undefined") return false;
+  if (typeof window === "undefined" || !Array.isArray(items)) return false;
+  const validated = items.map(parseQueueItem);
+  if (validated.some((item) => item === null)) return false;
+  const safeItems = validated as AssessmentReviewQueueItem[];
+  if (new Set(safeItems.map((item) => item.id)).size !== safeItems.length) return false;
   try {
-    window.localStorage.setItem(ASSESSMENT_REVIEW_QUEUE_KEY, JSON.stringify(items));
+    window.localStorage.setItem(ASSESSMENT_REVIEW_QUEUE_KEY, JSON.stringify(safeItems));
     window.dispatchEvent(new CustomEvent("academia-decom:assessment-review-queue-updated"));
     return true;
   } catch {
@@ -133,10 +142,12 @@ export function writeAssessmentReviewQueue(items: AssessmentReviewQueueItem[]): 
 }
 
 export function upsertAssessmentReviewQueueItem(item: AssessmentReviewQueueItem): boolean {
+  const validated = parseQueueItem(item);
+  if (!validated) return false;
   const current = readAssessmentReviewQueue();
-  const index = current.findIndex((entry) => entry.id === item.id);
-  if (index >= 0) current[index] = item;
-  else current.unshift(item);
+  const index = current.findIndex((entry) => entry.id === validated.id);
+  if (index >= 0) current[index] = validated;
+  else current.unshift(validated);
   return writeAssessmentReviewQueue(current);
 }
 
