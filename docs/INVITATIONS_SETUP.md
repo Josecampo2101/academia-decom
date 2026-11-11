@@ -12,7 +12,7 @@ Configurar en desarrollo local y en el entorno de despliegue:
 | `SUPABASE_SECRET_KEY` | Solo servidor | Consultar la invitación y ejecutar la RPC protegida |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Pública | Renderizar el widget Cloudflare Turnstile |
 | `TURNSTILE_SECRET_KEY` | Solo servidor | Validar el token Turnstile con Cloudflare |
-| `TURNSTILE_EXPECTED_HOSTNAME` | Solo servidor, recomendada | Rechazar verificaciones de un hostname distinto |
+| `TURNSTILE_EXPECTED_HOSTNAME` | Solo servidor | Hostname exacto autorizado para la verificación; obligatorio |
 
 No usar el prefijo `NEXT_PUBLIC_` en la clave secreta de Turnstile ni en la clave secreta de Supabase.
 
