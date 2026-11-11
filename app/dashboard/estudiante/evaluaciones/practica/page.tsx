@@ -13,6 +13,7 @@ import {
   type AssessmentAttempt,
 } from "@/lib/academic/assessment-attempts";
 import { practiceAnswerKey, practiceQuestions } from "@/lib/academic/assessment-demo-fixtures";
+import AssessmentHistoryPanel from "./assessment-history-panel";
 
 type AccessState = "checking" | "allowed" | "denied" | "error";
 const emptyAnswers = (): AssessmentAnswers => ({ single: "", multiple: [], boolean: "", short: "" });
@@ -151,7 +152,14 @@ export default function PracticeAssessmentPage() {
           </section>
         )}
 
-        {attempts.length > 0 && <section className="rounded-3xl border border-slate-200 bg-white p-5 md:p-6"><h2 className="text-sm font-bold">Historial de intentos</h2><ol className="mt-3 space-y-2">{attempts.map((attempt, index) => <li key={attempt.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[#F4F7FA] p-3"><div><p className="text-xs font-semibold">Intento {attempts.length - index} · {attempt.result.objectiveEarned}/{attempt.result.objectivePossible} objetivas</p><p className="mt-1 text-[10px] text-slate-400">{new Date(attempt.submittedAt).toLocaleString("es-CO")}</p></div><button type="button" onClick={() => { setAnswers(attempt.answers); setSubmittedAttempt(attempt); }} className="text-xs font-semibold text-[#087DB5]">Ver resultado</button></li>)}</ol></section>}
+        <AssessmentHistoryPanel
+          attempts={attempts}
+          selectedAttemptId={submittedAttempt?.id ?? null}
+          onSelect={(attempt) => {
+            setAnswers(attempt.answers);
+            setSubmittedAttempt(attempt);
+          }}
+        />
       </div>
       {showConfirm && !submittedAttempt && <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-950/40 p-4 sm:items-center"><section role="dialog" aria-modal="true" aria-labelledby="confirm-assessment-title" className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"><h2 id="confirm-assessment-title" className="text-lg font-bold">¿Finalizar esta práctica?</h2><p className="mt-2 text-sm leading-6 text-slate-500">Has respondido las cuatro preguntas. Se guardará un nuevo intento local y podrás consultar el resultado después.</p><div className="mt-6 flex justify-end gap-2"><button type="button" onClick={() => setShowConfirm(false)} className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600">Seguir revisando</button><button type="button" onClick={finalizeAttempt} className="rounded-xl bg-[#087DB5] px-4 py-3 text-sm font-semibold text-white">Finalizar práctica</button></div></section></div>}
     </main>
