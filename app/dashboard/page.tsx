@@ -533,11 +533,11 @@ export default function DashboardPage() {
             </a>
 
             {modules.map((module) =>
-              module.name === "Mi formación" ? (
+              module.name === "Mi formación" || module.name === "Biblioteca" ? (
                 <a
                   key={module.name}
-                  href="/dashboard/formacion"
-                  className="flex w-full items-center gap-3 rounded-xl bg-[#087DB5]/10 px-4 py-3 text-left text-sm font-semibold text-[#087DB5] transition hover:bg-[#087DB5]/15"
+                  href={module.name === "Mi formación" ? "/dashboard/formacion" : "/dashboard/biblioteca"}
+                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold text-[#087DB5] transition hover:bg-[#087DB5]/10"
                 >
                   <span>{module.icon}</span>
                   {module.name}
