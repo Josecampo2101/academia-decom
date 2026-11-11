@@ -27,7 +27,7 @@ function hashInvitationToken(token: string) {
   return createHash("sha256").update(token, "utf8").digest("hex");
 }
 
-async function verifyCaptcha(token: string, request: NextRequest) {
+async function verifyCaptcha(token: string) {
   const secret = process.env.TURNSTILE_SECRET_KEY;
   const expectedHost = process.env.TURNSTILE_EXPECTED_HOSTNAME;
 
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     return json({ error: "Completa la verificación de seguridad." }, 400);
   }
 
-  const captcha = await verifyCaptcha(captchaToken, request);
+  const captcha = await verifyCaptcha(captchaToken);
   if (captcha.unavailable) {
     return json(
       { error: "La verificación de seguridad no está disponible. Inténtalo más tarde." },
