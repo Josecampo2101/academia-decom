@@ -116,6 +116,8 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
       const raw = window.localStorage.getItem(storageKey);
       if (raw) {
         const saved = JSON.parse(raw) as DemoWork;
+        // Hydration from browser storage is an intentional state restoration.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setAnswer(saved.answer ?? "");
         setReferenceUrl(saved.referenceUrl ?? "");
         setWorkStatus(saved.status ?? "Sin guardar");
