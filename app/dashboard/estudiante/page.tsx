@@ -239,7 +239,7 @@ export default function StudentDashboardPage() {
               <button
                 key={label}
                 type="button"
-                onClick={() => setActiveNav(label)}
+                onClick={() => navigateToSection(label)}
                 aria-current={activeNav === label ? "page" : undefined}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium transition ${
                   activeNav === label
@@ -264,7 +264,7 @@ export default function StudentDashboardPage() {
               </p>
               <button
                 type="button"
-                onClick={() => setActiveNav("Tutoría")}
+                onClick={() => navigateToSection("Tutoría")}
                 className="mt-3 text-xs font-bold text-[#087DB5] hover:underline"
               >
                 Ver mi tutoría
@@ -319,8 +319,8 @@ export default function StudentDashboardPage() {
             </div>
           </header>
 
-          <div className="mx-auto max-w-7xl space-y-7 px-5 py-7 md:px-8 md:py-9">
-            <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div className="mx-auto max-w-7xl space-y-7 px-5 py-7 pb-24 md:px-8 md:py-9 md:pb-9">
+            <section id="student-home" className="scroll-mt-24 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <div>
                 <p className="text-sm font-medium text-slate-500">Tu camino de aprendizaje comienza aquí</p>
                 <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-[#102D4D] md:text-3xl">
@@ -362,7 +362,7 @@ export default function StudentDashboardPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setActiveNav("Mi formación")}
+                    onClick={() => navigateToSection("Mi formación")}
                     className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#075B8D] shadow-sm transition hover:bg-slate-100"
                   >
                     Continuar aprendiendo <span aria-hidden="true">→</span>
@@ -370,7 +370,7 @@ export default function StudentDashboardPage() {
                 </div>
               </article>
 
-              <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-7">
+              <article id="student-tasks" className="scroll-mt-24 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-7">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Mi avance</p>
