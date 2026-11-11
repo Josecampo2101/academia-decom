@@ -218,3 +218,8 @@ Ruta: `/dashboard/tutor/evaluaciones`.
 - La cola valida los registros restaurados y descarta datos inconsistentes.
 
 **Límites:** es una demostración con `localStorage`, válida únicamente en el mismo perfil de navegador y origen. No sincroniza dispositivos ni sesiones de navegador separadas, no verifica que el tutor esté asignado a ese estudiante, no genera notificaciones y no registra una calificación institucional. La autorización visual de la ruta no sustituye la autorización del servidor. Para producción se requiere API transaccional, RLS, asignación tutor-estudiante, auditoría y almacenamiento persistente.
+
+
+### Integridad adicional de la cola local
+
+La restauración y escritura de la cola también deben rechazar intentos que repitan identificadores de pregunta y revisiones manuales cuyo feedback esté vacío o contenga únicamente espacios. Estas comprobaciones protegen la consistencia interna del prototipo, pero no convierten los datos del navegador en registros confiables: la implementación persistente deberá repetir las validaciones en servidor y aplicar autorización por estudiante, tutor asignado y evaluación.

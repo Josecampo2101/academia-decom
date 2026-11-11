@@ -73,6 +73,41 @@ test("writeAssessmentReviewQueue rechaza elementos inválidos y duplicados", () 
   assert.equal(storage.get("academia-decom:assessment-review-queue:v1"), storedBefore);
 });
 
+
+test("writeAssessmentReviewQueue rechaza resultados con IDs de pregunta duplicados", () => {
+  const duplicatedAttempt = {
+    ...attempt,
+    result: {
+      ...attempt.result,
+      pendingManual: 2,
+      questions: [...attempt.result.questions, ...attempt.result.questions],
+    },
+  };
+  assert.equal(writeAssessmentReviewQueue([{ ...item, attempt: duplicatedAttempt }]), false);
+});
+
+test("writeAssessmentReviewQueue rechaza revisiones con feedback solo de espacios", () => {
+  const reviewedAttempt = {
+    ...attempt,
+    result: {
+      ...attempt.result,
+      pendingManual: 0,
+      manualEarned: 0,
+      manualPossible: 1,
+      questions: [{ questionId: "short", status: "revisada", earnedPoints: 0, possiblePoints: 1 }],
+    },
+    manualReviews: [{
+      questionId: "short",
+      reviewerId: "tutor-1",
+      feedback: "   ",
+      earnedPoints: 0,
+      possiblePoints: 1,
+      reviewedAt: "2026-11-11T19:00:00.000Z",
+    }],
+  };
+  assert.equal(writeAssessmentReviewQueue([{ ...item, attempt: reviewedAttempt }]), false);
+});
+
 test("writeAssessmentReviewQueue devuelve false si localStorage falla", () => {
   const originalSetItem = globalThis.window.localStorage.setItem;
   globalThis.window.localStorage.setItem = () => { throw new Error("quota"); };
