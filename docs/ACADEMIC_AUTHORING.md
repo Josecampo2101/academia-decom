@@ -19,6 +19,7 @@ Acceso de interfaz para `national_admin` y `academic_editor`, con verificación 
 - Rúbricas opcionales para actividades, con criterios, descripciones observables y puntajes enteros; el total no puede superar 100 puntos.
 - Evaluaciones: selección única, selección múltiple, verdadero/falso y respuesta corta.
 - Constructor local de preguntas y opciones, con selección explícita de claves correctas para preguntas objetivas.
+- Puntaje entero configurable por pregunta; cada pregunta debe valer al menos un punto y la suma de una evaluación no puede superar 100 puntos.
 - Estados borrador, publicado y archivado.
 - Acciones de publicación, archivado y restauración simuladas.
 
@@ -34,7 +35,7 @@ La interfaz usa un conjunto local de programas, cursos y módulos con los mismos
 - Los comentarios y rúbricas de tutoría deben tener estados y trazabilidad.
 
 ### Evaluaciones
-- Cada pregunta debe tener tipo, enunciado, orden, puntaje, opciones y configuración de respuesta. El editor exige clave correcta para preguntas objetivas; selección única y verdadero/falso deben tener exactamente una.
+- Cada pregunta debe tener tipo, enunciado, orden, puntaje, opciones y configuración de respuesta. El editor exige clave correcta para preguntas objetivas; selección única y verdadero/falso deben tener exactamente una. Los puntajes por pregunta deben ser enteros positivos y el total de la evaluación no puede superar 100 puntos.
 - Las preguntas objetivas deben almacenar claves correctas fuera de cualquier payload visible al estudiante.
 - La selección múltiple debe definir si exige coincidencia exacta o admite crédito parcial.
 - Las preguntas de respuesta corta requieren calificación manual o criterios/rúbrica aprobados.
@@ -155,3 +156,23 @@ Límites:
 - El panel de calificaciones conserva sus fixtures de ejemplo separados; esta bandeja es una sección adicional para validar el recorrido funcional local.
 - Antes de producción, sustituir este adaptador por tablas/RPC transaccionales, RLS por matrícula y asignación tutor-estudiante, versiones inmutables, almacenamiento privado y eventos de auditoría.
 - No se han modificado Supabase, sus datos, políticas, funciones, Storage ni Vercel.
+
+
+## Intentos de evaluaciones del estudiante (prototipo local)
+
+Ruta: `/dashboard/estudiante/evaluaciones/practica`.
+
+- Cada envío crea un intento con identificador, fecha/hora, respuestas y resultado por pregunta.
+- Los intentos se almacenan en `localStorage`, separados por usuario y evaluación; se recuperan al volver a abrir la práctica.
+- El estudiante puede consultar resultados de intentos anteriores e iniciar un nuevo intento.
+- La selección única, selección múltiple y verdadero/falso se corrigen por coincidencia exacta contra la clave configurada.
+- Las respuestas cortas se marcan como `revision_manual`, no reciben puntaje automático y se contabilizan como pendientes.
+- El resultado distingue puntaje objetivo posible/obtenido y cantidad de preguntas pendientes de revisión.
+
+### Seguridad y límites
+
+- La práctica utiliza preguntas y una clave ficticia de demostración. Aunque la clave no se presenta en la interfaz, está importada por código cliente y puede inspeccionarse en el bundle; **no es un mecanismo seguro ni debe reutilizarse para evaluaciones reales**.
+- El historial existe solo en el navegador actual. No se transmite al tutor, no sincroniza dispositivos y puede perderse al borrar los datos del sitio.
+- No hay límite de intentos, temporizador vinculante, matrícula validada por servidor, calificación manual real ni auditoría.
+- En la implementación persistente, el servidor debe entregar al estudiante únicamente el payload público de preguntas, recibir respuestas mediante una operación transaccional, recuperar la clave privada en servidor y calcular allí el resultado. Las respuestas cortas deben quedar pendientes hasta que un tutor autorizado las revise.
+- Cada intento real debe referenciar una versión inmutable de la evaluación y registrar inicio, envío, estudiante, respuestas, resultado, política de intentos y eventos de auditoría.
