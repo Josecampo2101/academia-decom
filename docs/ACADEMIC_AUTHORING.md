@@ -92,3 +92,28 @@ La vista previa no incluye las claves correctas, puntajes, rúbricas privadas ni
 - No se crea esquema, RPC, Storage, RLS ni migración.
 - No se envían notificaciones ni se programan fechas de vencimiento.
 - No se modifica producción ni se despliega a Vercel.
+
+
+## Flujo de revisión y calificación del tutor (prototipo)
+
+Ruta: `/dashboard/tutor/calificaciones`.
+
+- Bandeja local de entregas con búsqueda y filtros por estado.
+- Detalle de cada entrega con número de intento y descripción del trabajo.
+- Calificación por criterio con puntajes enteros entre cero y el máximo definido en la rúbrica.
+- Cálculo automático del total y del porcentaje obtenido.
+- Retroalimentación de hasta 2.000 caracteres.
+- Decisiones de demostración: aprobar, solicitar ajustes o rechazar. Las decisiones distintas de aprobar requieren observaciones.
+- Historial ilustrativo de intentos y eventos para mostrar la trazabilidad esperada.
+- Acceso desde el panel del tutor mediante el botón “Abrir espacio de calificación”.
+
+Los puntajes y observaciones permanecen en estado local de la sesión. La acción disponible solo prepara una vista previa; no persiste la calificación, no cambia el estado de una entrega y no envía notificaciones. Los datos son ficticios. La autorización de la ruta repite la comprobación visual de roles del panel, pero no sustituye RLS ni autorización de servidor.
+
+### Reglas que deberá cumplir la implementación persistente
+
+- La rúbrica aplicada debe ser una versión inmutable vinculada a la actividad publicada y al intento entregado.
+- Cada puntaje debe estar dentro del rango del criterio; el total debe calcularse y validarse en servidor.
+- Una solicitud de ajustes debe incluir retroalimentación concreta y conservar la entrega previa.
+- Cada revisión debe registrar tutor, fecha, puntajes, decisión y versión de rúbrica.
+- El estudiante solo podrá consultar sus propias entregas y la retroalimentación autorizada.
+- La transición de estado y la creación del evento de auditoría deberán ejecutarse de forma transaccional.
