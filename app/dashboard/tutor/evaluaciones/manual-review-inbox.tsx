@@ -120,7 +120,7 @@ export default function ManualAssessmentReviewInbox({ tutorId }: Props) {
             {visibleItems.map((item) => <button key={item.id} type="button" onClick={() => selectItem(item)} aria-pressed={selected?.id === item.id} className={`w-full rounded-2xl border p-4 text-left ${selected?.id === item.id ? "border-[#087DB5] bg-sky-50" : "border-slate-200 hover:border-slate-300"}`}>
               <span className="block text-xs font-bold">{item.studentLabel || "Estudiante"}</span>
               <span className="mt-1 block break-all text-[10px] text-slate-400">Intento {item.attempt.id}</span>
-              <span className="mt-2 block text-[11px] text-slate-500">{item.attempt.result.pendingManual} pendiente(s) · {item.attempt.result.manualReviews?.length ?? 0} revisada(s)</span>
+              <span className="mt-2 block text-[11px] text-slate-500">{item.attempt.result.pendingManual} pendiente(s) · {item.attempt.manualReviews?.length ?? 0} revisada(s)</span>
             </button>)}
             {visibleItems.length === 0 && <p className="rounded-xl border border-dashed border-slate-200 p-5 text-center text-xs text-slate-500">No hay intentos para este filtro.</p>}
           </div>
