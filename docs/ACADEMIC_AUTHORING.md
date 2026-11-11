@@ -19,6 +19,7 @@ Acceso de interfaz para `national_admin` y `academic_editor`, con verificación 
 - Rúbricas opcionales para actividades, con criterios, descripciones observables y puntajes enteros; el total no puede superar 100 puntos.
 - Evaluaciones: selección única, selección múltiple, verdadero/falso y respuesta corta.
 - Constructor local de preguntas y opciones, con selección explícita de claves correctas para preguntas objetivas.
+- Puntaje entero configurable por pregunta; cada pregunta debe valer al menos un punto y la suma de una evaluación no puede superar 100 puntos.
 - Estados borrador, publicado y archivado.
 - Acciones de publicación, archivado y restauración simuladas.
 
@@ -34,7 +35,7 @@ La interfaz usa un conjunto local de programas, cursos y módulos con los mismos
 - Los comentarios y rúbricas de tutoría deben tener estados y trazabilidad.
 
 ### Evaluaciones
-- Cada pregunta debe tener tipo, enunciado, orden, puntaje, opciones y configuración de respuesta. El editor exige clave correcta para preguntas objetivas; selección única y verdadero/falso deben tener exactamente una.
+- Cada pregunta debe tener tipo, enunciado, orden, puntaje, opciones y configuración de respuesta. El editor exige clave correcta para preguntas objetivas; selección única y verdadero/falso deben tener exactamente una. Los puntajes por pregunta deben ser enteros positivos y el total de la evaluación no puede superar 100 puntos.
 - Las preguntas objetivas deben almacenar claves correctas fuera de cualquier payload visible al estudiante.
 - La selección múltiple debe definir si exige coincidencia exacta o admite crédito parcial.
 - Las preguntas de respuesta corta requieren calificación manual o criterios/rúbrica aprobados.
