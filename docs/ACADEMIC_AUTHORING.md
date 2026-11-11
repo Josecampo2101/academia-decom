@@ -117,3 +117,24 @@ Los puntajes y observaciones permanecen en estado local de la sesión. La acció
 - Cada revisión debe registrar tutor, fecha, puntajes, decisión y versión de rúbrica.
 - El estudiante solo podrá consultar sus propias entregas y la retroalimentación autorizada.
 - La transición de estado y la creación del evento de auditoría deberán ejecutarse de forma transaccional.
+
+
+## Trabajo y entregas del estudiante (prototipo local)
+
+Rutas:
+- `/dashboard/estudiante/actividades`: bandeja con filtros por estado y contadores derivados de los registros locales.
+- `/dashboard/estudiante/actividades/[activityId]`: instrucciones, respuesta, referencia externa, borrador e intentos.
+
+Comportamiento de demostración:
+- El estudiante puede guardar un borrador y recuperarlo en el mismo navegador.
+- La validación exige al menos 40 caracteres, comprueba que el enlace opcional use HTTP(S) y requiere confirmar autoría/revisión.
+- El envío simulado crea un intento con fecha, contenido y estado “En revisión”.
+- Los envíos en revisión o calificados quedan bloqueados para edición en la interfaz.
+- Se conserva un historial local de intentos y se muestran los estados en la bandeja.
+- El almacenamiento usa una clave separada por usuario autenticado y actividad.
+
+Límites:
+- Los datos se almacenan en `localStorage` del navegador; no son evidencia académica oficial ni se comparten con el tutor o con otros dispositivos.
+- No hay carga de archivos, transmisión, persistencia remota, notificaciones, fechas límite efectivas ni reentrega real desde una decisión del tutor.
+- Borrar los datos del navegador elimina los borradores y el historial de demostración.
+- La verificación de rol en cliente es únicamente de interfaz; el backend deberá autorizar cada lectura y escritura mediante RLS y operaciones transaccionales.
