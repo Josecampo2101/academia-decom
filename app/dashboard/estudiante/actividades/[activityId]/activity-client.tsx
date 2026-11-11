@@ -154,12 +154,13 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
       if (!shared) return;
       setSharedReview(shared.review);
       if (shared.status === "Requiere ajustes") setWorkStatus("Requiere ajustes");
-      else if (shared.status === "Calificada" || shared.status === "Rechazada") setWorkStatus("Calificada");
+      else if (shared.status === "Calificada") setWorkStatus("Calificada");
+      else if (shared.status === "Rechazada") setWorkStatus("Rechazada");
       else if (shared.status === "En revisión") setWorkStatus("En revisión");
       if (shared.attempts.length) setAttempts(shared.attempts.map((attempt) => ({
         number: attempt.number, submittedAt: attempt.submittedAt, answer: attempt.answer,
         referenceUrl: attempt.referenceUrl,
-        status: shared.status === "Requiere ajustes" ? "Requiere ajustes" : shared.status === "Calificada" || shared.status === "Rechazada" ? "Calificada" : "En revisión",
+        status: shared.status === "Requiere ajustes" ? "Requiere ajustes" : shared.status === "Rechazada" ? "Rechazada" : shared.status === "Calificada" ? "Calificada" : "En revisión",
       })));
     };
     // Initial synchronization reads only this browser's local demonstration record.
