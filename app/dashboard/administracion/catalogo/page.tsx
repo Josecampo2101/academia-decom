@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 type DbStatus = "draft" | "published" | "archived";
 type Level = "program" | "course" | "module" | "lesson";
 type District = { id: string; name: string };
-type Lesson = { id: string; title: string; duration: number | null; status: DbStatus; sortOrder: number; content: Record<string, unknown> };
+type Lesson = { id: string; title: string; summary: string; duration: number | null; status: DbStatus; sortOrder: number; content: Record<string, unknown> };
 type Module = { id: string; title: string; description: string; status: DbStatus; sortOrder: number; lessons: Lesson[] };
 type Course = { id: string; code: string; title: string; description: string; status: DbStatus; sortOrder: number; modules: Module[] };
 type Program = { id: string; code: string; title: string; description: string; status: DbStatus; sortOrder: number; courses: Course[] };
@@ -196,6 +196,7 @@ export default function AcademicCatalogPage() {
                   .map((lesson) => ({
                     id: lesson.id,
                     title: lesson.title,
+                    summary: lesson.summary ?? "",
                     duration: lesson.estimated_minutes,
                     status: lesson.status as DbStatus,
                     sortOrder: lesson.sort_order,
@@ -275,7 +276,7 @@ export default function AcademicCatalogPage() {
     setLevel(nextLevel);
     setEditingId(item.id);
     setTitle(item.title);
-    setDescription(nextLevel === "lesson" ? (item as Lesson).content.summary?.toString() ?? "" : "description" in item ? item.description : "");
+    setDescription(nextLevel === "lesson" ? (item as Lesson).summary : "description" in item ? item.description : "");
     setDuration(nextLevel === "lesson" ? String((item as Lesson).duration ?? 15) : "15");
     setLessonContent(nextLevel === "lesson" ? String((item as Lesson).content.markdown ?? "") : "");
     setShowForm(true);
