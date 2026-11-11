@@ -167,7 +167,8 @@ export default function StudentDashboardPage() {
     if (label === "Biblioteca") {
       router.push("/dashboard/estudiante/biblioteca");
       return;
-    }\n    if (label === "Actividades") {
+    }
+    if (label === "Actividades") {
       router.push("/dashboard/estudiante/actividades");
       return;
     }
