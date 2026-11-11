@@ -203,7 +203,8 @@ export default function CongregationsPage() {
   }, [router, supabase]);
 
   useEffect(() => {
-    loadData();
+    // Diferir la carga evita una actualización de estado síncrona dentro del efecto.
+    void Promise.resolve().then(loadData);
   }, [loadData]);
 
   const resetForm = () => {
