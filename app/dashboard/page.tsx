@@ -89,6 +89,7 @@ export default function DashboardPage() {
   >("");
 
   const isNationalAdmin = roleKeys.includes("national_admin");
+  const canManageLibrary = isNationalAdmin || roleKeys.includes("academic_editor");
 
   function openAcademicModule(moduleName: string) {
     const isStudent = roleKeys.includes("member");
@@ -588,6 +589,16 @@ export default function DashboardPage() {
             >
               <span>⚙</span> Administración
             </div>
+
+            {canManageLibrary && (
+              <a
+                href="/dashboard/administracion/biblioteca"
+                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
+              >
+                <span className="text-lg">▣</span>
+                <span>Administrar biblioteca</span>
+              </a>
+            )}
 
             {canManageInvitations && (
               <a
