@@ -24,6 +24,8 @@ export default function TutorDemoInbox() {
   }, []);
 
   useEffect(() => {
+    // Initial read synchronizes the UI with the browser's demo storage.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refresh();
     const onStorage = (event: StorageEvent) => {
       if (event.key === "academia-decom:student-tutor-demo-bridge:v1") refresh();
