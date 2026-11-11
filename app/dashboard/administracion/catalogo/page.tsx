@@ -48,6 +48,7 @@ export default function AcademicCatalogPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"Todos" | "Borrador" | "Publicado" | "Archivado">("Todos");
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [level, setLevel] = useState<Level>("course");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -261,11 +262,22 @@ export default function AcademicCatalogPage() {
   });
 
   function openCreate(nextLevel: Level) {
+    setEditingId(null);
     setLevel(nextLevel);
     setTitle("");
     setDescription("");
     setDuration("15");
     setLessonContent("");
+    setShowForm(true);
+  }
+
+  function openEdit(nextLevel: Level, item: Program | Course | Module | Lesson) {
+    setLevel(nextLevel);
+    setEditingId(item.id);
+    setTitle(item.title);
+    setDescription(nextLevel === "lesson" ? (item as Lesson).content.summary?.toString() ?? "" : "description" in item ? item.description : "");
+    setDuration(nextLevel === "lesson" ? String((item as Lesson).duration ?? 15) : "15");
+    setLessonContent(nextLevel === "lesson" ? String((item as Lesson).content.markdown ?? "") : "");
     setShowForm(true);
   }
 
@@ -277,8 +289,24 @@ export default function AcademicCatalogPage() {
     setSaving(true);
     setNoticeError(false);
     try {
-      let createdId = "";
-      if (level === "program") {
+      let createdId = editingId ?? "";
+      if (editingId) {
+        if (level === "program") {
+          const { error } = await supabase.from("academic_programs").update({ title: cleanTitle, description: description.trim() || null }).eq("id", editingId).eq("district_id", selectedDistrictId);
+          if (error) throw error;
+        } else if (level === "course") {
+          const { error } = await supabase.from("courses").update({ title: cleanTitle, description: description.trim() || null }).eq("id", editingId).eq("district_id", selectedDistrictId);
+          if (error) throw error;
+        } else if (level === "module") {
+          const { error } = await supabase.from("course_modules").update({ title: cleanTitle, description: description.trim() || null }).eq("id", editingId).eq("district_id", selectedDistrictId);
+          if (error) throw error;
+        } else {
+          const minutes = Number(duration);
+          if (!Number.isInteger(minutes) || minutes < 1 || minutes > 600) throw new Error("La duración debe ser un número entero entre 1 y 600 minutos.");
+          const { error } = await supabase.from("lessons").update({ title: cleanTitle, summary: description.trim() || null, content: { markdown: lessonContent.trim() }, estimated_minutes: minutes }).eq("id", editingId).eq("district_id", selectedDistrictId);
+          if (error) throw error;
+        }
+      } else if (level === "program") {
         const { data, error } = await supabase.from("academic_programs").insert({
           district_id: selectedDistrictId,
           code: makeCode(cleanTitle),
@@ -334,11 +362,12 @@ export default function AcademicCatalogPage() {
       }
 
       await loadCatalog(selectedDistrictId);
-      if (level === "program") setSelectedProgramId(createdId);
-      if (level === "course") setSelectedCourseId(createdId);
-      if (level === "module") setSelectedModuleId(createdId);
+      if (!editingId && level === "program") setSelectedProgramId(createdId);
+      if (!editingId && level === "course") setSelectedCourseId(createdId);
+      if (!editingId && level === "module") setSelectedModuleId(createdId);
       setShowForm(false);
-      setNotice(`“${cleanTitle}” se guardó en Supabase como borrador.`);
+      setEditingId(null);
+      setNotice(editingId ? `“${cleanTitle}” se actualizó correctamente.` : `“${cleanTitle}” se guardó en Supabase como borrador.`);
       setNoticeError(false);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "No fue posible guardar el elemento.");
@@ -418,7 +447,7 @@ export default function AcademicCatalogPage() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div><p className="text-[10px] font-bold uppercase tracking-wider text-[#19A7A0]">Programa seleccionado</p><h2 className="mt-1 text-xl font-extrabold">{selectedProgram?.title ?? "Selecciona un programa"}</h2><p className="mt-1 text-sm text-slate-500">{selectedProgram?.description}</p></div>
                 <div className="flex flex-wrap items-center gap-2">
-                  {selectedProgram && <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${statusClasses(selectedProgram.status)}`}>{statusLabel(selectedProgram.status)}</span>}
+                  {selectedProgram && <><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${statusClasses(selectedProgram.status)}`}>{statusLabel(selectedProgram.status)}</span><button type="button" onClick={() => openEdit("program", selectedProgram)} className="text-[11px] font-bold text-[#087DB5]">Editar</button></>}
                   {isNationalAdmin && selectedProgram?.status === "draft" && <button type="button" disabled={saving || !selectedProgram.courses.some((course) => course.status === "published")} onClick={() => void changeStatus("program", selectedProgram.id, "published")} className="text-[11px] font-bold text-[#087DB5] disabled:opacity-40">Publicar programa</button>}
                   {isNationalAdmin && selectedProgram?.status === "published" && <button type="button" disabled={saving} onClick={() => void changeStatus("program", selectedProgram.id, "archived")} className="text-[11px] font-bold text-slate-500 disabled:opacity-40">Archivar</button>}
                   <button type="button" onClick={() => openCreate("course")} disabled={!selectedProgram || saving} className="rounded-lg bg-[#087DB5] px-4 py-2.5 text-xs font-bold text-white disabled:opacity-40">＋ Nuevo curso</button>
@@ -429,7 +458,7 @@ export default function AcademicCatalogPage() {
                 {filteredCourses.map((course) => <div key={course.id} className={`rounded-xl border p-3 ${selectedCourse?.id === course.id ? "border-[#087DB5]/50 bg-[#087DB5]/5" : "border-slate-100"}`}>
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <button type="button" onClick={() => { setSelectedCourseId(course.id); setSelectedModuleId(course.modules[0]?.id ?? ""); }} className="min-w-0 flex-1 text-left"><span className="block text-sm font-bold">{course.title}</span><span className="mt-1 block text-xs text-slate-400">{course.description || "Sin descripción"} · {course.modules.length} módulos</span></button>
-                    <div className="flex items-center gap-2"><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${statusClasses(course.status)}`}>{statusLabel(course.status)}</span>
+                    <div className="flex items-center gap-2"><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${statusClasses(course.status)}`}>{statusLabel(course.status)}</span><button type="button" onClick={() => openEdit("course", course)} className="text-[11px] font-bold text-[#087DB5]">Editar</button>
                       {isNationalAdmin && course.status === "draft" && <button type="button" disabled={saving} onClick={() => void changeStatus("course", course.id, "published")} className="text-[11px] font-bold text-[#087DB5] disabled:opacity-40">Publicar</button>}
                       {isNationalAdmin && course.status === "published" && <button type="button" disabled={saving} onClick={() => void changeStatus("course", course.id, "archived")} className="text-[11px] font-bold text-slate-500 disabled:opacity-40">Archivar</button>}
                     </div>
@@ -443,8 +472,8 @@ export default function AcademicCatalogPage() {
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 {(selectedCourse?.modules ?? []).map((module, index) => <article key={module.id} className={`rounded-xl border p-4 ${selectedModule?.id === module.id ? "border-[#19A7A0] bg-teal-50/40" : "border-slate-100"}`}>
                   <button type="button" onClick={() => setSelectedModuleId(module.id)} className="flex w-full items-center justify-between text-left"><span className="text-sm font-bold">{index + 1}. {module.title}</span><span className="text-[10px] text-slate-400">{module.lessons.length} lecciones</span></button>
-                  <div className="mt-2 flex items-center justify-between"><span className={`rounded-full px-2 py-1 text-[10px] font-bold ${statusClasses(module.status)}`}>{statusLabel(module.status)}</span>{isNationalAdmin && module.status === "draft" && <button type="button" disabled={saving || !module.lessons.some((lesson) => lesson.status === "published")} onClick={() => void changeStatus("module", module.id, "published")} className="text-[10px] font-bold text-[#087DB5] disabled:opacity-40">Publicar módulo</button>}</div>
-                  <div className="mt-3 space-y-2">{module.lessons.map((lesson, lessonIndex) => <div key={lesson.id} className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2"><div className="min-w-0"><span className="block text-xs text-slate-600">{lessonIndex + 1}. {lesson.title}</span><span className="text-[10px] text-slate-400">{lesson.duration ?? "—"} min · {statusLabel(lesson.status)}</span></div>{isNationalAdmin && lesson.status === "draft" && <button type="button" disabled={saving || !String(lesson.content.markdown ?? "").trim()} onClick={() => void changeStatus("lesson", lesson.id, "published")} className="shrink-0 text-[10px] font-bold text-[#087DB5] disabled:opacity-40">Publicar</button>}</div>)}{module.lessons.length === 0 && <p className="text-xs text-slate-400">Aún no hay lecciones.</p>}</div>
+                  <div className="mt-2 flex items-center justify-between"><span className={`rounded-full px-2 py-1 text-[10px] font-bold ${statusClasses(module.status)}`}>{statusLabel(module.status)}</span><button type="button" onClick={() => openEdit("module", module)} className="text-[10px] font-bold text-[#087DB5]">Editar</button>{isNationalAdmin && module.status === "draft" && <button type="button" disabled={saving || !module.lessons.some((lesson) => lesson.status === "published")} onClick={() => void changeStatus("module", module.id, "published")} className="text-[10px] font-bold text-[#087DB5] disabled:opacity-40">Publicar módulo</button>}</div>
+                  <div className="mt-3 space-y-2">{module.lessons.map((lesson, lessonIndex) => <div key={lesson.id} className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2"><div className="min-w-0"><span className="block text-xs text-slate-600">{lessonIndex + 1}. {lesson.title}</span><span className="text-[10px] text-slate-400">{lesson.duration ?? "—"} min · {statusLabel(lesson.status)}</span></div><button type="button" onClick={() => openEdit("lesson", lesson)} className="shrink-0 text-[10px] font-bold text-[#087DB5]">Editar</button>{isNationalAdmin && lesson.status === "draft" && <button type="button" disabled={saving || !String(lesson.content.markdown ?? "").trim()} onClick={() => void changeStatus("lesson", lesson.id, "published")} className="shrink-0 text-[10px] font-bold text-[#087DB5] disabled:opacity-40">Publicar</button>}</div>)}{module.lessons.length === 0 && <p className="text-xs text-slate-400">Aún no hay lecciones.</p>}</div>
                 </article>)}
                 {!selectedCourse && <p className="text-sm text-slate-400">Selecciona un curso para administrar su estructura.</p>}
               </div>
@@ -454,12 +483,12 @@ export default function AcademicCatalogPage() {
         </section>
         {loadingCatalog && <p className="mt-4 text-center text-xs text-slate-400">Sincronizando catálogo con Supabase...</p>}
         {showForm && <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/40 p-0 backdrop-blur-sm sm:items-center sm:p-5"><section role="dialog" aria-modal="true" aria-labelledby="catalog-form-title" className="w-full max-w-xl rounded-t-3xl bg-white p-5 shadow-2xl sm:rounded-3xl sm:p-7">
-          <div className="flex items-center justify-between"><div><p className="text-xs font-bold uppercase tracking-wider text-[#19A7A0]">Estructura académica</p><h2 id="catalog-form-title" className="mt-1 text-xl font-extrabold">Nuevo {level === "program" ? "programa" : level === "course" ? "curso" : level === "module" ? "módulo" : "lección"}</h2></div><button type="button" onClick={() => setShowForm(false)} aria-label="Cerrar" className="rounded-lg border border-slate-200 px-3 py-2 text-slate-500">✕</button></div>
+          <div className="flex items-center justify-between"><div><p className="text-xs font-bold uppercase tracking-wider text-[#19A7A0]">Estructura académica</p><h2 id="catalog-form-title" className="mt-1 text-xl font-extrabold">{editingId ? "Editar" : "Nuevo"} {level === "program" ? "programa" : level === "course" ? "curso" : level === "module" ? "módulo" : "lección"}</h2></div><button type="button" onClick={() => setShowForm(false)} aria-label="Cerrar" className="rounded-lg border border-slate-200 px-3 py-2 text-slate-500">✕</button></div>
           <form onSubmit={saveItem} className="mt-5 space-y-4">
             <label className="block text-xs font-semibold text-slate-600">Nombre<input autoFocus required maxLength={160} value={title} onChange={(event) => setTitle(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none focus:border-[#087DB5]" placeholder={level === "lesson" ? "Ej. Introducción y objetivos" : "Escribe un nombre descriptivo"} /></label>
             {(level === "program" || level === "course" || level === "module") && <label className="block text-xs font-semibold text-slate-600">Descripción<textarea rows={3} maxLength={500} value={description} onChange={(event) => setDescription(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none focus:border-[#087DB5]" placeholder="Propósito y alcance formativo." /></label>}
             {level === "lesson" && <><label className="block text-xs font-semibold text-slate-600">Resumen<textarea rows={2} maxLength={500} value={description} onChange={(event) => setDescription(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm" placeholder="Breve descripción de la lección." /></label><label className="block text-xs font-semibold text-slate-600">Contenido de la lección<textarea required rows={5} value={lessonContent} onChange={(event) => setLessonContent(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm" placeholder="Escribe el contenido base de la lección." /></label><label className="block text-xs font-semibold text-slate-600">Duración estimada (minutos)<input required type="number" min="1" max="600" value={duration} onChange={(event) => setDuration(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm" /></label></>}
-            <div className="flex flex-col-reverse justify-end gap-2 border-t border-slate-100 pt-4 sm:flex-row"><button type="button" onClick={() => setShowForm(false)} className="rounded-xl border border-slate-200 px-5 py-3 text-xs font-bold text-slate-600">Cancelar</button><button type="submit" disabled={saving} className="rounded-xl bg-[#087DB5] px-5 py-3 text-xs font-bold text-white disabled:opacity-50">{saving ? "Guardando..." : "Crear borrador"}</button></div>
+            <div className="flex flex-col-reverse justify-end gap-2 border-t border-slate-100 pt-4 sm:flex-row"><button type="button" onClick={() => setShowForm(false)} className="rounded-xl border border-slate-200 px-5 py-3 text-xs font-bold text-slate-600">Cancelar</button><button type="submit" disabled={saving} className="rounded-xl bg-[#087DB5] px-5 py-3 text-xs font-bold text-white disabled:opacity-50">{saving ? "Guardando..." : editingId ? "Guardar cambios" : "Crear borrador"}</button></div>
           </form>
         </section></div>}
         <footer className="mt-8 border-t border-slate-200 py-5 text-center text-[11px] text-slate-400">Academia DECOM · Catálogo curricular · Datos persistentes en Supabase</footer>
