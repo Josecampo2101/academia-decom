@@ -189,3 +189,18 @@ La práctica de evaluaciones incorpora un panel de historial con:
 - Orden cronológico descendente conservado desde el almacenamiento local.
 
 El rendimiento acumulado se calcula como la suma de puntos objetivos obtenidos dividida por la suma de puntos objetivos posibles de los intentos guardados. Las preguntas de respuesta corta no entran en ese porcentaje hasta que exista una revisión real. Este panel sigue dependiendo del historial local de `localStorage`; no representa progreso institucional, no sincroniza entre dispositivos y no modifica intentos existentes.
+
+
+## Dominio de revisión manual de respuestas cortas (prototipo)
+
+El dominio de intentos incorpora una operación pura para registrar la revisión de una respuesta corta sin modificar el intento original:
+
+- Exige identificador de tutor, puntuación entera entre cero y el máximo de la pregunta, retroalimentación no vacía de hasta 2.000 caracteres y fecha válida.
+- Solo permite revisar preguntas en estado `revision_manual`; rechaza preguntas inexistentes, ya revisadas o que no requieren revisión manual.
+- Registra tutor, observación, puntos obtenidos/posibles y fecha.
+- Cambia la pregunta a `revisada`, descuenta una revisión pendiente y acumula por separado los puntos manuales.
+- Conserva inmutables las respuestas, la fecha de envío y los resultados objetivos del intento original.
+- Impide registrar dos veces la revisión de una misma pregunta.
+- El parser valida la correspondencia entre revisiones, preguntas revisadas y totales manuales al restaurar datos locales.
+
+La lógica se encuentra en `lib/academic/manual-assessment-review.ts` y tiene pruebas automatizadas. Todavía no está conectada a una interfaz de tutor ni a una identidad autenticada real. Los datos siguen siendo locales y manipulables por el usuario del navegador; no constituyen una calificación oficial ni sustituyen validación, autorización y persistencia en servidor.
