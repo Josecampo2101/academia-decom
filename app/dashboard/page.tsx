@@ -93,7 +93,8 @@ export default function DashboardPage() {
   // Permisos del módulo de reubicaciones.
   const canManageTransfers =
     roleKeys.includes("national_admin") ||
-    roleKeys.includes("district_coordinator");
+    roleKeys.includes("district_coordinator") ||
+    roleKeys.includes("area_coordinator");
 
   // Cargar preferencia de tema.
   useEffect(() => {
