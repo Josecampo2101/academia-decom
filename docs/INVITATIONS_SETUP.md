@@ -33,6 +33,9 @@ No usar el prefijo `NEXT_PUBLIC_` en la clave secreta de Turnstile ni en la clav
 - No se activa una cuenta al enviar la solicitud.
 - Los errores internos de Supabase no se devuelven al navegador.
 - La validación falla de forma cerrada si Turnstile no está configurado o no responde.
+- El servidor exige que Siteverify devuelva el hostname configurado y la acción `invitation_application`.
+- El cuerpo JSON se limita a 12 KB durante la lectura del stream; se rechazan tipos de contenido distintos de JSON.
+- Las validaciones puras de UUID, correo y fecha de nacimiento tienen pruebas unitarias ejecutadas en CI.
 - Turnstile es una barrera anti-bot; no sustituye un rate limiter persistente por IP/token. Antes de publicar el formulario ampliamente, añadir límites persistentes y alertas operativas.
 - El endpoint y la página no cambian permisos, funciones ni datos de producción.
 
