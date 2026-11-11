@@ -172,6 +172,10 @@ export default function StudentDashboardPage() {
       router.push("/dashboard/estudiante/evaluaciones");
       return;
     }
+    if (label === "Reconocimientos") {
+      router.push("/dashboard/estudiante/reconocimientos");
+      return;
+    }
     setActiveNav(label);
     const targets: Record<string, string> = {
       Inicio: "student-home",
