@@ -115,9 +115,19 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
   useEffect(() => {
     if (!storageKey) return;
     try {
+      const raw = window.localStorage.getItem(storageKey);
+      if (raw) {
+        const saved = JSON.parse(raw) as DemoWork;
+        // Hydration from browser storage is an intentional state restoration.
+        setAnswer(saved.answer ?? "");
+        setReferenceUrl(saved.referenceUrl ?? "");
+        setWorkStatus(saved.status ?? "Sin guardar");
+        setAttempts(Array.isArray(saved.attempts) ? saved.attempts : []);
+        setSavedAt(saved.savedAt ?? null);
+      }
       const shared = readDemoBridge().find((item) => item.studentId === userId && item.activityId === activityId);
       if (shared) {
-        // Restore the latest tutor decision from this browser's demo store.
+        // Restore the latest tutor decision after the student's own draft data.
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setSharedReview(shared.review);
         if (shared.status === "Requiere ajustes") setWorkStatus("Requiere ajustes");
@@ -129,16 +139,6 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
           referenceUrl: attempt.referenceUrl,
           status: shared.status === "Requiere ajustes" ? "Requiere ajustes" : shared.status === "Rechazada" ? "Rechazada" : shared.status === "Calificada" ? "Calificada" : "En revisión",
         })));
-      }
-      const raw = window.localStorage.getItem(storageKey);
-      if (raw) {
-        const saved = JSON.parse(raw) as DemoWork;
-        // Hydration from browser storage is an intentional state restoration.
-        setAnswer(saved.answer ?? "");
-        setReferenceUrl(saved.referenceUrl ?? "");
-        setWorkStatus(saved.status ?? "Sin guardar");
-        setAttempts(Array.isArray(saved.attempts) ? saved.attempts : []);
-        setSavedAt(saved.savedAt ?? null);
       }
     } catch (error) {
       console.error("No fue posible recuperar el borrador local:", error);
