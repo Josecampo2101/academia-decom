@@ -91,16 +91,7 @@ export default function PracticeAssessmentPage() {
       reviews.forEach((item) => merged.set(item.attempt.id, item.attempt));
       const next = [...merged.values()].sort((a, b) => Date.parse(b.submittedAt) - Date.parse(a.submittedAt));
       window.localStorage.setItem(storageKey, JSON.stringify(next));
-      const queueSaved = upsertAssessmentReviewQueueItem({
-        id: PRACTICE_ASSESSMENT_ID + ":" + userId + ":" + attempt.id,
-        studentId: userId ?? "",
-        studentLabel,
-        attempt,
-        createdAt: attempt.submittedAt,
-        updatedAt: attempt.submittedAt,
-      });
       setAttempts(next);
-      if (!queueSaved) setStorageError("El intento quedó guardado en tu historial local, pero no se pudo compartir con la bandeja demo del tutor.");
       setSubmittedAttempt((selected) => selected ? next.find((attempt) => attempt.id === selected.id) ?? selected : null);
     };
     window.addEventListener("focus", refreshTutorReviews);
@@ -132,8 +123,17 @@ export default function PracticeAssessmentPage() {
     try {
       const next = [attempt, ...attempts];
       window.localStorage.setItem(storageKey, JSON.stringify(next));
+      const queueSaved = upsertAssessmentReviewQueueItem({
+        id: PRACTICE_ASSESSMENT_ID + ":" + userId + ":" + attempt.id,
+        studentId: userId ?? "",
+        studentLabel,
+        attempt,
+        createdAt: attempt.submittedAt,
+        updatedAt: attempt.submittedAt,
+      });
       setAttempts(next);
       setSubmittedAttempt(attempt);
+      if (!queueSaved) setStorageError("El intento quedó guardado en tu historial local, pero no se pudo compartir con la bandeja demo del tutor.");
       setShowConfirm(false);
       setStorageError("");
     } catch (error) {
