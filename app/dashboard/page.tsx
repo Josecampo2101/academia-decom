@@ -104,6 +104,7 @@ export default function DashboardPage() {
       savedTheme === "dark" ||
       savedTheme === "system"
     ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme(savedTheme);
     }
   }, []);
