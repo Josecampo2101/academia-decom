@@ -1,81 +1,83 @@
 # Administración del catálogo académico
 
-> Prototipo funcional de interfaz. Los datos son sintéticos y locales; no existe persistencia ni escritura en Supabase.
+> Implementación inicial persistente en Supabase. El catálogo ya no usa fixtures locales ni guarda cambios únicamente en memoria.
 
 ## Ruta y acceso
 
 Ruta: `/dashboard/administracion/catalogo`.
 
-Acceso visual disponible para `national_admin` y `academic_editor`. La ruta verifica sesión y asignaciones de rol en el cliente, siguiendo el patrón del módulo de Biblioteca. Esta comprobación mejora la experiencia, pero **no sustituye** autorización en servidor, RPC ni políticas RLS.
+La interfaz verifica sesión y asignaciones:
+- `national_admin`: puede seleccionar distritos activos y administrar el catálogo.
+- `academic_editor`: puede crear contenido en los distritos donde tenga una asignación explícita.
+- La comprobación del cliente solo controla la experiencia. Las políticas RLS y funciones de base de datos son la autoridad.
+
+El lanzamiento inicial utiliza Distrito 34. El modelo conserva `district_id` en todos los niveles para incorporar otros distritos sin rediseñar las relaciones.
 
 ## Jerarquía curricular
 
-La estructura propuesta es:
-
-1. **Programa:** agrupa una línea o itinerario de formación.
-2. **Curso:** unidad formativa con descripción y estado editorial.
+1. **Programa:** línea o itinerario formativo.
+2. **Curso:** unidad formativa asociada a un programa.
 3. **Módulo:** agrupación secuencial de contenidos dentro de un curso.
-4. **Lección:** unidad de aprendizaje dentro de un módulo, con duración estimada y estado.
+4. **Lección:** unidad de aprendizaje dentro de un módulo, con contenido y duración estimada.
 
-El prototipo permite crear elementos en cada nivel, navegar entre programas y cursos, seleccionar módulos, filtrar cursos por texto/estado y simular publicación/archivo de cursos. Las altas se conservan solo en memoria durante la sesión.
+La interfaz consulta programas, cursos, módulos y lecciones en Supabase. Permite crear borradores, navegar por la estructura y filtrar cursos por texto y estado. Los códigos de programas y cursos se generan con un identificador aleatorio para evitar colisiones entre distritos.
 
-## Reglas funcionales propuestas
+## Esquema persistente
 
-- Un curso pertenece a un programa; un módulo pertenece a un curso; una lección pertenece a un módulo.
-- El orden curricular debe ser explícito y editable, no depender del orden alfabético.
-- La publicación de una lección debe considerar prerrequisitos y recursos asociados.
-- Un curso publicado no debe cambiar silenciosamente cuando se edita su contenido: se debe versionar la estructura curricular o establecer una política de actualización con trazabilidad.
-- El archivado debe impedir nuevas matrículas sin borrar historial académico.
-- Los cambios de estado deben generar auditoría con actor, fecha, estado anterior, estado nuevo y motivo.
-- La duración de una lección es una estimación pedagógica; no equivale a tiempo efectivo de conexión.
+| Tabla | Responsabilidad |
+|---|---|
+| `academic_programs` | Programas, código, descripción, estado y orden |
+| `courses` | Cursos vinculados a programa, código, nivel, estado y orden |
+| `course_modules` | Módulos vinculados a curso, estado y orden |
+| `lessons` | Lecciones, resumen, objetivos, contenido JSON y duración |
+| `curriculum_versions` | Fotografías inmutables de cursos publicados |
+| `academic_catalog_events` | Auditoría de altas y cambios del catálogo |
 
-## Modelo lógico conceptual (no es DDL aprobado)
+Las relaciones compuestas incluyen `district_id`, de modo que una fila hija no puede enlazarse a un padre de otro distrito. El orden de módulos y lecciones tiene restricciones únicas diferibles para permitir reordenamientos transaccionales en una fase posterior.
 
-- `academic_programs`: identidad, nombre, descripción, estado y orden.
-- `courses`: programa, código institucional, nombre, descripción, nivel, estado y versión curricular.
-- `course_modules`: curso, nombre, descripción, orden y estado.
-- `lessons`: módulo, nombre, objetivos, contenido, duración, orden y estado.
-- `curriculum_versions`: versión publicada e historial de cambios.
-- `academic_catalog_events`: actor, entidad, acción, cambios y fecha.
+## Publicación y versionado
 
-Las relaciones, claves, restricciones, borrado lógico, alcance distrital y compatibilidad con el modelo académico existente deben validarse antes de diseñar migraciones.
+- Los registros nuevos nacen como `draft`.
+- Los editores académicos solo pueden crear y modificar borradores dentro de su distrito.
+- La publicación está reservada a Administración nacional.
+- Una lección requiere contenido Markdown no vacío.
+- Un módulo requiere al menos una lección publicada.
+- Un curso requiere al menos un módulo publicado y una lección publicada.
+- Un programa requiere al menos un curso publicado.
+- El curso se publica mediante `publish_academic_course`. La función crea una fila en `curriculum_versions` con una fotografía del programa, curso, módulos y lecciones publicadas, y actualiza el curso en la misma transacción.
+- Una versión publicada o archivada es inmutable. Un curso publicado no se edita en el lugar; se deberá crear una nueva versión en el flujo de actualización curricular.
+- El archivado es lógico. No se conceden permisos de borrado físico sobre las tablas del catálogo.
 
-## Permisos propuestos
+Los estudiantes solo pueden consultar filas publicadas y la política de lectura exige que también estén publicados sus elementos ancestros. Las versiones publicadas solo se muestran si el curso y el programa siguen publicados.
 
-| Acción | Administración nacional | Editor académico |
-|---|---:|---:|
-| Consultar catálogo | Sí | Sí |
-| Crear programas/cursos/módulos/lecciones | Sí | Según ámbito asignado |
-| Editar borradores | Sí | Según ámbito asignado |
-| Publicar | Sí | Permiso explícito |
-| Archivar | Sí | Permiso explícito |
-| Consultar auditoría | Completa | Limitada al ámbito |
+## Seguridad y auditoría
 
-El rol no debe inferirse solo desde el frontend. Toda mutación debe comprobar permisos y ámbito en servidor y/o políticas RLS. Para el lanzamiento inicial, el ámbito institucional debe contemplar Distrito 34 sin bloquear la futura incorporación de otros distritos.
+- RLS está habilitado en las seis tablas.
+- No hay permisos de lectura para `anon`.
+- `academic_catalog_events` es de solo lectura para clientes autenticados; los eventos se escriben mediante triggers de base de datos.
+- Las tablas de contenido no conceden `DELETE` a clientes autenticados.
+- Las funciones de autorización están en el esquema no expuesto `private`, son `SECURITY DEFINER`, usan `search_path = ''` y tienen EXECUTE limitado a usuarios autenticados.
+- El frontend nunca decide por sí solo si un usuario puede publicar o consultar contenido.
 
-## Integración futura con Biblioteca y experiencia estudiantil
+## Migraciones aplicadas en producción
 
-- El catálogo curricular debe ser la fuente canónica de programas, cursos, módulos y lecciones.
-- Los recursos de Biblioteca se vincularán mediante identificadores estables a cursos, módulos o lecciones; no mediante nombres escritos libremente.
-- El panel del estudiante mostrará únicamente versiones publicadas y aplicables a su asignación académica.
-- El progreso debe registrar avance por lección y versión curricular, evitando que cambios editoriales alteren retroactivamente resultados.
-- Las evaluaciones y actividades deben asociarse a curso/módulo/lección y conservar su propia versión.
+Los archivos del repositorio usan exactamente las versiones registradas en `supabase_migrations.schema_migrations`:
 
-## Criterios de aceptación para una integración real
+- `20261111182603_create_academic_catalog_core.sql`
+- `20261111182634_restrict_academic_catalog_audit_writes.sql`
+- `20261111182700_revoke_academic_catalog_deletes.sql`
+- `20261111183047_validate_academic_publication.sql`
+- `20261111183220_publish_academic_course_version.sql`
+- `20261111183747_enforce_academic_publication_hierarchy.sql`
 
-- Ningún usuario no autorizado puede consultar o mutar el catálogo.
-- Los editores solo operan dentro de su ámbito asignado.
-- No se publica un curso que contenga módulos o lecciones incompletos según las reglas aprobadas.
-- El orden de módulos y lecciones es persistente y auditable.
-- El estudiante no ve borradores ni cursos archivados.
-- Las versiones publicadas mantienen integridad histórica para matrículas, calificaciones y reconocimientos.
-- Las operaciones críticas son transaccionales e idempotentes.
-- Las pruebas de permisos se ejecutan en un entorno aislado antes de aprobar migraciones.
+La migración `20261111024732_allow_committee_create_congregations.sql` también permanece versionada porque ya estaba aplicada antes de recuperarse al repositorio.
 
-## Límites de esta entrega
+## Estado y límites de esta entrega
 
-- No crea tablas, RPC, migraciones ni políticas RLS.
-- No modifica datos ni configuración de Supabase.
-- No implementa matrícula, seguimiento real ni publicación persistente.
-- No carga contenido ni archivos.
-- No despliega a Vercel.
+- La interfaz administrativa ya consulta y crea registros reales del catálogo.
+- El esquema y las políticas RLS están instalados en Supabase.
+- No se han sembrado programas, cursos ni lecciones ficticios en producción.
+- El formulario actual cubre altas y publicación/archivo; la edición de contenido existente y el reordenamiento visual quedan pendientes.
+- Matrículas, progreso por lección, biblioteca vinculada, actividades, evaluaciones y tutorías aún requieren sus propias tablas, RPC y políticas.
+- El panel del estudiante todavía no consume las versiones publicadas.
+- No se ha desplegado a Vercel.
