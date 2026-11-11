@@ -176,3 +176,16 @@ Ruta: `/dashboard/estudiante/evaluaciones/practica`.
 - No hay límite de intentos, temporizador vinculante, matrícula validada por servidor, calificación manual real ni auditoría.
 - En la implementación persistente, el servidor debe entregar al estudiante únicamente el payload público de preguntas, recibir respuestas mediante una operación transaccional, recuperar la clave privada en servidor y calcular allí el resultado. Las respuestas cortas deben quedar pendientes hasta que un tutor autorizado las revise.
 - Cada intento real debe referenciar una versión inmutable de la evaluación y registrar inicio, envío, estudiante, respuestas, resultado, política de intentos y eventos de auditoría.
+
+
+## Historial y consulta de intentos (mejora de interfaz)
+
+La práctica de evaluaciones incorpora un panel de historial con:
+
+- Resumen de intentos registrados, rendimiento objetivo acumulado y cantidad de respuestas que siguen pendientes de revisión manual.
+- Filtros por todos los intentos, intentos con revisión manual pendiente, intentos con respuestas incorrectas e intentos sin respuestas incorrectas.
+- Selección de un intento anterior para consultar nuevamente el detalle de respuestas y resultados.
+- Identificación visual del intento seleccionado y de los intentos que contienen respuestas incorrectas.
+- Orden cronológico descendente conservado desde el almacenamiento local.
+
+El rendimiento acumulado se calcula como la suma de puntos objetivos obtenidos dividida por la suma de puntos objetivos posibles de los intentos guardados. Las preguntas de respuesta corta no entran en ese porcentaje hasta que exista una revisión real. Este panel sigue dependiendo del historial local de `localStorage`; no representa progreso institucional, no sincroniza entre dispositivos y no modifica intentos existentes.
