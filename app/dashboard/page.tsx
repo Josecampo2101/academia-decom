@@ -90,6 +90,28 @@ export default function DashboardPage() {
 
   const isNationalAdmin = roleKeys.includes("national_admin");
 
+  function openAcademicModule(moduleName: string) {
+    const isStudent = roleKeys.includes("member");
+    const isTutor = roleKeys.includes("tutor");
+
+    if (moduleName === "Seguimiento" && isTutor) {
+      router.push("/dashboard/tutor");
+      return;
+    }
+
+    if (!isStudent) return;
+
+    const destinations: Record<string, string> = {
+      "Mi formación": "/dashboard/estudiante/formacion",
+      Biblioteca: "/dashboard/estudiante/biblioteca",
+      Evaluaciones: "/dashboard/estudiante/evaluaciones",
+      Seguimiento: "/dashboard/estudiante",
+      Reconocimientos: "/dashboard/estudiante/reconocimientos",
+    };
+    const destination = destinations[moduleName];
+    if (destination) router.push(destination);
+  }
+
   // Permisos del módulo de reubicaciones.
   const canManageTransfers =
     roleKeys.includes("national_admin") ||
@@ -539,9 +561,10 @@ export default function DashboardPage() {
               <button
                 key={module.name}
                 type="button"
-                disabled
-                title="Módulo en construcción"
-                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm ${secondaryText} opacity-70`}
+                onClick={() => openAcademicModule(module.name)}
+                disabled={!roleKeys.includes("member") && !(module.name === "Seguimiento" && roleKeys.includes("tutor"))}
+                title={roleKeys.includes("member") || (module.name === "Seguimiento" && roleKeys.includes("tutor")) ? module.description : "No tienes un perfil académico habilitado para este módulo"}
+                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] disabled:cursor-not-allowed disabled:opacity-50 ${secondaryText}`}
               >
                 <span>{module.icon}</span>
                 {module.name}
