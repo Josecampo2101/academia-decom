@@ -378,7 +378,7 @@ export default function StudentDashboardPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => navigateToSection("Mi formación")}
+                    onClick={() => router.push("/dashboard/estudiante/formacion")}
                     className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#075B8D] shadow-sm transition hover:bg-slate-100"
                   >
                     Continuar aprendiendo <span aria-hidden="true">→</span>
