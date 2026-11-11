@@ -163,6 +163,22 @@ export default function StudentDashboardPage() {
 
   const firstName = displayName.trim().split(/\s+/)[0] || "Estudiante";
 
+  function navigateToSection(label: string) {
+    setActiveNav(label);
+    const targets: Record<string, string> = {
+      Inicio: "student-home",
+      "Mi formación": "student-courses",
+      Actividades: "student-tasks",
+      Evaluaciones: "student-tasks",
+      Tutoría: "student-tutoring",
+      Reconocimientos: "student-achievements",
+    };
+    document.getElementById(targets[label] ?? "student-home")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+
   if (access === "checking") {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6">
@@ -426,7 +442,7 @@ export default function StudentDashboardPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setActiveNav("Mi formación")}
+                    onClick={() => navigateToSection("Mi formación")}
                     className="text-xs font-bold text-[#087DB5] hover:underline"
                   >
                     Ver mi ruta →
@@ -549,7 +565,7 @@ export default function StudentDashboardPage() {
           <button
             key={label}
             type="button"
-            onClick={() => setActiveNav(label)}
+            onClick={() => navigateToSection(label)}
             className={`flex flex-col items-center gap-1 rounded-lg px-1 py-2 text-[10px] font-semibold ${
               activeNav === label ? "text-[#087DB5]" : "text-slate-400"
             }`}
