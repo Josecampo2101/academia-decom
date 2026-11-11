@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 type Lesson = { id: string; title: string; duration: number; status: "Borrador" | "Publicado" };
 type Module = { id: string; title: string; lessons: Lesson[] };
@@ -30,6 +32,34 @@ const initialPrograms: Program[] = [
 type Level = "program" | "course" | "module" | "lesson";
 
 export default function AcademicCatalogPage() {
+  const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
+  const [access, setAccess] = useState<"checking" | "allowed" | "denied" | "error">("checking");
+  useEffect(() => {
+    let active = true;
+    async function verifyAccess() {
+      try {
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (!active) return;
+        if (authError || !user) { router.replace("/conexion"); return; }
+        const { data: assignments, error: assignmentError } = await supabase.from("user_role_assignments").select("role_id").eq("user_id", user.id);
+        if (assignmentError) throw assignmentError;
+        const ids = [...new Set((assignments ?? []).map((item) => item.role_id))];
+        if (!ids.length) { setAccess("denied"); return; }
+        const { data: roles, error: rolesError } = await supabase.from("roles").select("role_key").in("id", ids);
+        if (rolesError) throw rolesError;
+        if (!active) return;
+        const keys = (roles ?? []).map((role) => role.role_key);
+        setAccess(keys.includes("national_admin") || keys.includes("academic_editor") ? "allowed" : "denied");
+      } catch (error) {
+        console.error("Error verificando acceso al catálogo académico:", error);
+        if (active) setAccess("error");
+      }
+    }
+    void verifyAccess();
+    return () => { active = false; };
+  }, [router, supabase]);
+
   const [programs, setPrograms] = useState(initialPrograms);
   const [selectedProgramId, setSelectedProgramId] = useState("prog-1");
   const [selectedCourseId, setSelectedCourseId] = useState("course-1");
@@ -99,6 +129,9 @@ export default function AcademicCatalogPage() {
     setNotice(`El estado del curso cambió a ${status.toLocaleLowerCase("es")} en esta demostración.`);
     setNoticeError(false);
   }
+
+  if (access === "checking") return <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] text-sm text-slate-500">Verificando permisos del catálogo académico...</main>;
+  if (access !== "allowed") return <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-5"><section className="max-w-md rounded-2xl border border-slate-200 bg-white p-7 text-center"><h1 className="text-xl font-extrabold text-[#102D4D]">{access === "error" ? "No fue posible verificar el acceso" : "Acceso restringido"}</h1><p className="mt-2 text-sm text-slate-500">{access === "error" ? "Ocurrió un error al consultar tus permisos. Inténtalo nuevamente." : "Este módulo está disponible para Administración nacional y Editor académico."}</p><button type="button" onClick={() => router.replace("/dashboard")} className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-xs font-bold text-white">Volver al panel</button></section></main>;
 
   return (
     <main className="min-h-screen bg-[#F4F7FA] px-4 py-7 text-[#102D4D] sm:px-7 lg:px-10">
