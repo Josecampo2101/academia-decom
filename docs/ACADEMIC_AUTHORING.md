@@ -16,7 +16,7 @@ Acceso de interfaz para `national_admin` y `academic_editor`, con verificación 
 - Alta y edición de instrucciones, curso, módulo, formato de respuesta y fecha límite opcional.
 - Actividades: respuesta escrita, archivo adjunto, enlace externo o evidencia audiovisual.
 - Evaluaciones: selección única, selección múltiple, verdadero/falso y respuesta corta.
-- Constructor local de preguntas y opciones.
+- Constructor local de preguntas y opciones, con selección explícita de claves correctas para preguntas objetivas.
 - Estados borrador, publicado y archivado.
 - Acciones de publicación, archivado y restauración simuladas.
 
@@ -32,7 +32,7 @@ Los cursos y módulos se escriben como texto en esta fase; la integración poste
 - Los comentarios y rúbricas de tutoría deben tener estados y trazabilidad.
 
 ### Evaluaciones
-- Cada pregunta debe tener tipo, enunciado, orden, puntaje y configuración de respuesta.
+- Cada pregunta debe tener tipo, enunciado, orden, puntaje, opciones y configuración de respuesta. El editor exige clave correcta para preguntas objetivas; selección única y verdadero/falso deben tener exactamente una.
 - Las preguntas objetivas deben almacenar claves correctas fuera de cualquier payload visible al estudiante.
 - La selección múltiple debe definir si exige coincidencia exacta o admite crédito parcial.
 - Las preguntas de respuesta corta requieren calificación manual o criterios/rúbrica aprobados.
@@ -67,7 +67,7 @@ Las entidades deben vincularse con IDs de programa/curso/módulo/lección del ca
 
 ## Seguridad e integridad
 
-- Nunca enviar claves correctas ni rúbricas privadas en respuestas de lectura del estudiante.
+- Nunca enviar claves correctas ni rúbricas privadas en respuestas de lectura del estudiante. La clave configurada en esta interfaz es solo estado local y no representa una implementación segura de backend.
 - Validar acceso a curso y matrícula en servidor, no mediante IDs ocultos en el frontend.
 - Guardar archivos de entrega en Storage privado y emitir URLs firmadas tras autorización.
 - Separar borrador editorial de versión publicada.
