@@ -356,6 +356,8 @@ export default function AcademicCatalogPage() {
       let error: { message: string } | null = null;
       if (target === "program") {
         ({ error } = await supabase.from("academic_programs").update({ status }).eq("id", id).eq("district_id", selectedDistrictId));
+      } else if (target === "course" && status === "published") {
+        ({ error } = await supabase.rpc("publish_academic_course", { p_course_id: id }));
       } else if (target === "course") {
         ({ error } = await supabase.from("courses").update({ status }).eq("id", id).eq("district_id", selectedDistrictId));
       } else if (target === "module") {
