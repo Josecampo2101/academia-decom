@@ -67,19 +67,20 @@ function parseAttempt(value: unknown, assessmentId: string): AssessmentAttempt |
     typeof value.submittedAt !== "string" || !Number.isFinite(Date.parse(value.submittedAt)) ||
     !isAnswers(value.answers) || !isResult(value.result)) return null;
 
+  const result = value.result;
   const reviews: ManualAssessmentReview[] = value.manualReviews === undefined ? [] : value.manualReviews as ManualAssessmentReview[];
   if (!Array.isArray(reviews) || !reviews.every(isManualReview)) return null;
   const reviewIds = reviews.map((review) => review.questionId);
   if (new Set(reviewIds).size !== reviewIds.length) return null;
-  const reviewedQuestions = value.result.questions.filter((question) => question.status === "revisada");
+  const reviewedQuestions = result.questions.filter((question) => question.status === "revisada");
   if (reviewedQuestions.length !== reviews.length) return null;
   const manualEarned = reviews.reduce((total, review) => total + review.earnedPoints, 0);
   const manualPossible = reviews.reduce((total, review) => total + review.possiblePoints, 0);
   if (reviews.length === 0) {
-    if (value.result.manualEarned !== undefined || value.result.manualPossible !== undefined) return null;
-  } else if (value.result.manualEarned !== manualEarned || value.result.manualPossible !== manualPossible) return null;
+    if (result.manualEarned !== undefined || result.manualPossible !== undefined) return null;
+  } else if (result.manualEarned !== manualEarned || result.manualPossible !== manualPossible) return null;
   const consistent = reviews.every((review) => {
-    const question = value.result.questions.find((item) => item.questionId === review.questionId);
+    const question = result.questions.find((item) => item.questionId === review.questionId);
     return question?.status === "revisada" &&
       question.earnedPoints === review.earnedPoints &&
       question.possiblePoints === review.possiblePoints;
