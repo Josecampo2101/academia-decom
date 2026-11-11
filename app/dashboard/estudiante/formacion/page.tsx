@@ -12,9 +12,9 @@ const modules = [
     description: "Propósito, identidad y responsabilidad de la comunicación institucional.",
     status: "Completado",
     lessons: [
-      { title: "Bienvenida a Academia DECOM", duration: "5 min", status: "Completada" },
-      { title: "¿Qué es DECOM?", duration: "12 min", status: "Completada" },
-      { title: "Comunicar con propósito", duration: "10 min", status: "Completada" },
+      { id: "bienvenida", title: "Bienvenida a Academia DECOM", duration: "5 min", status: "Completada" },
+      { id: "que-es-decom", title: "¿Qué es DECOM?", duration: "12 min", status: "Completada" },
+      { id: "comunicar-con-proposito", title: "Comunicar con propósito", duration: "10 min", status: "Completada" },
     ],
   },
   {
@@ -22,9 +22,9 @@ const modules = [
     description: "Principios, lineamientos y coherencia del mensaje.",
     status: "En progreso",
     lessons: [
-      { title: "Principios de identidad corporativa", duration: "15 min", status: "Completada" },
-      { title: "Tono y lenguaje institucional", duration: "12 min", status: "Completada" },
-      { title: "Coherencia en los mensajes", duration: "14 min", status: "En curso" },
+      { id: "principios-identidad", title: "Principios de identidad corporativa", duration: "15 min", status: "Completada" },
+      { id: "tono-lenguaje", title: "Tono y lenguaje institucional", duration: "12 min", status: "Completada" },
+      { id: "coherencia-mensajes", title: "Coherencia en los mensajes", duration: "14 min", status: "En curso" },
     ],
   },
   {
@@ -32,9 +32,9 @@ const modules = [
     description: "Uso responsable de los lineamientos en piezas y publicaciones.",
     status: "Bloqueado",
     lessons: [
-      { title: "Aplicación en medios escritos", duration: "18 min", status: "Bloqueada" },
-      { title: "Revisión de piezas institucionales", duration: "20 min", status: "Bloqueada" },
-      { title: "Actividad integradora", duration: "30 min", status: "Bloqueada" },
+      { id: "aplicacion-escritos", title: "Aplicación en medios escritos", duration: "18 min", status: "Bloqueada" },
+      { id: "revision-piezas", title: "Revisión de piezas institucionales", duration: "20 min", status: "Bloqueada" },
+      { id: "actividad-integradora", title: "Actividad integradora", duration: "30 min", status: "Bloqueada" },
     ],
   },
 ];
@@ -209,7 +209,7 @@ export default function StudentFormationPage() {
                         <p className="mt-1 text-[10px] text-slate-400">{lesson.duration}</p>
                       </div>
                       <span className="text-[10px] font-semibold text-slate-400">{lesson.status}</span>
-                      {lesson.status === "En curso" && <span className="rounded-lg bg-[#087DB5] px-3 py-2 text-[10px] font-bold text-white">Continuar</span>}
+                      {lesson.status !== "Bloqueada" && <button type="button" onClick={() => router.push(`/dashboard/estudiante/leccion/${lesson.id}`)} className="rounded-lg bg-[#087DB5] px-3 py-2 text-[10px] font-bold text-white hover:bg-[#066a9b]">{lesson.status === "En curso" ? "Continuar" : "Repasar"}</button>}
                       {lesson.status === "Bloqueada" && <span className="text-xs text-slate-300" aria-label="Lección bloqueada">🔒</span>}
                       {lessonIndex === 0 && module.status === "Completado" && <span className="sr-only">Primera lección completada</span>}
                     </div>
