@@ -168,6 +168,10 @@ export default function StudentDashboardPage() {
       router.push("/dashboard/estudiante/actividades");
       return;
     }
+    if (label === "Evaluaciones") {
+      router.push("/dashboard/estudiante/evaluaciones");
+      return;
+    }
     setActiveNav(label);
     const targets: Record<string, string> = {
       Inicio: "student-home",
@@ -500,7 +504,7 @@ export default function StudentDashboardPage() {
                       </div>
                       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                         <p className="text-[11px] text-slate-400">{task.due}</p>
-                        <button type="button" onClick={() => router.push(task.id === "task-1" ? "/dashboard/estudiante/actividades/aplicacion-identidad" : "/dashboard/estudiante/actividades")} className="rounded-lg border border-slate-200 px-3 py-2 text-[11px] font-bold text-[#087DB5] hover:border-[#087DB5] hover:bg-sky-50">Ver actividad →</button>
+                        <button type="button" onClick={() => router.push(task.id === "task-1" ? "/dashboard/estudiante/actividades/aplicacion-identidad" : "/dashboard/estudiante/evaluaciones")} className="rounded-lg border border-slate-200 px-3 py-2 text-[11px] font-bold text-[#087DB5] hover:border-[#087DB5] hover:bg-sky-50">Ver actividad →</button>
                       </div>
                     </div>
                   ))}
