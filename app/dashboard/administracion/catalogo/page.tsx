@@ -198,7 +198,7 @@ export default function AcademicCatalogPage() {
                     duration: lesson.estimated_minutes,
                     status: lesson.status as DbStatus,
                     sortOrder: lesson.sort_order,
-                    content: (lesson.content ?? {}) as Record<string, unknown>,
+                    content: lesson.content && typeof lesson.content === "object" && !Array.isArray(lesson.content) ? lesson.content : {},
                   })),
               })),
           })),
