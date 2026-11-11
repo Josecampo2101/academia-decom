@@ -6,8 +6,6 @@ on:
       - "fix/**"
       - "feature/**"
   pull_request:
-    branches:
-      - main
 
 permissions:
   contents: read
@@ -37,6 +35,9 @@ jobs:
 
       - name: Revisar estilo y errores estáticos
         run: npm run lint
+
+      - name: Verificar tipos TypeScript
+        run: npm run typecheck
 
       - name: Compilar aplicación
         run: npm run build
