@@ -13,14 +13,15 @@ Acceso de interfaz para `national_admin` y `academic_editor`, con verificación 
 - Catálogo unificado de actividades y evaluaciones.
 - Búsqueda por título, curso y módulo.
 - Filtros por tipo de contenido y estado editorial.
-- Alta y edición de instrucciones, curso, módulo, formato de respuesta y fecha límite opcional.
+- Alta y edición de instrucciones, programa, curso, módulo, formato de respuesta y fecha límite opcional.
+- Selección curricular jerárquica mediante IDs estables de programa, curso y módulo; las opciones de curso y módulo dependen de la selección superior.
 - Actividades: respuesta escrita, archivo adjunto, enlace externo o evidencia audiovisual.
 - Evaluaciones: selección única, selección múltiple, verdadero/falso y respuesta corta.
 - Constructor local de preguntas y opciones, con selección explícita de claves correctas para preguntas objetivas.
 - Estados borrador, publicado y archivado.
 - Acciones de publicación, archivado y restauración simuladas.
 
-Los cursos y módulos se escriben como texto en esta fase; la integración posterior debe reemplazarlos por relaciones a identificadores estables del catálogo académico.
+La interfaz usa un conjunto local de programas, cursos y módulos con los mismos identificadores de referencia del prototipo del catálogo académico. Los nombres se presentan al usuario, pero el contenido conserva `programId`, `courseId` y `moduleId`; cambiar de programa reinicia curso y módulo, y cambiar de curso reinicia módulo. Estos fixtures están duplicados entre prototipos y deberán sustituirse por una fuente compartida/API cuando exista persistencia.
 
 ## Reglas funcionales propuestas
 
@@ -85,7 +86,7 @@ La vista previa no incluye las claves correctas, puntajes, rúbricas privadas ni
 ## Límites de esta entrega
 
 - No hay persistencia, envío de actividades ni calificación real.
-- No se conectan preguntas al catálogo curricular ni a la Biblioteca.
+- La selección curricular utiliza fixtures locales; todavía no consulta el catálogo persistido ni se conecta a la Biblioteca.
 - No se crea esquema, RPC, Storage, RLS ni migración.
 - No se envían notificaciones ni se programan fechas de vencimiento.
 - No se modifica producción ni se despliega a Vercel.
