@@ -76,6 +76,12 @@ Las entidades deben vincularse con IDs de programa/curso/módulo/lección del ca
 - No permitir que el estudiante cambie puntajes, estado de entrega ni identidad del autor.
 - Definir retención y trazabilidad de intentos, entregas y revisiones.
 
+## Vista previa del estudiante
+
+El editor ofrece una vista previa del contenido sin guardar. Presenta título, curso, módulo, instrucciones, fecha límite y formato de entrega. Para evaluaciones muestra enunciados y opciones de respuesta; para actividades representa el área de entrega correspondiente.
+
+La vista previa no incluye las claves correctas, puntajes, rúbricas privadas ni retroalimentación del tutor. Sus controles son ilustrativos y no envían respuestas, archivos ni intentos. Esta separación es obligatoria también en la futura API de lectura del estudiante: los datos sensibles de evaluación deben permanecer en el servidor y solo exponerse después de aplicar la política de revisión aprobada.
+
 ## Límites de esta entrega
 
 - No hay persistencia, envío de actividades ni calificación real.
