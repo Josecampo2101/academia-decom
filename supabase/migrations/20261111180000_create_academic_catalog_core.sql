@@ -270,6 +270,13 @@ begin
   else
     new.updated_by := coalesce((select auth.uid()), new.updated_by);
   end if;
+
+  if new.status = 'published' then
+    new.published_at := coalesce(new.published_at, now());
+  elsif new.status = 'archived' then
+    new.archived_at := coalesce(new.archived_at, now());
+  end if;
+
   new.updated_at := now();
   return new;
 end;
@@ -441,6 +448,27 @@ for each row execute function private.prevent_published_catalog_mutation();
 create trigger courses_validate_publication
 before update on public.courses
 for each row execute function private.validate_course_publication();
+create or replace function private.set_curriculum_version_metadata()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+begin
+  if tg_op = 'INSERT' then
+    new.created_by := coalesce(new.created_by, (select auth.uid()));
+    if new.status = 'published' then
+      new.published_at := coalesce(new.published_at, now());
+    end if;
+  end if;
+  return new;
+end;
+$function$;
+
+create trigger curriculum_versions_set_metadata
+before insert on public.curriculum_versions
+for each row execute function private.set_curriculum_version_metadata();
+
 create trigger curriculum_versions_immutable
 before update or delete on public.curriculum_versions
 for each row execute function private.prevent_published_version_mutation();
@@ -480,6 +508,7 @@ revoke all on function private.can_update_academic_catalog(uuid, text) from publ
 revoke all on function private.set_academic_updated_at() from public, anon, authenticated;
 revoke all on function private.prevent_published_catalog_mutation() from public, anon, authenticated;
 revoke all on function private.prevent_published_version_mutation() from public, anon, authenticated;
+revoke all on function private.set_curriculum_version_metadata() from public, anon, authenticated;
 revoke all on function private.validate_course_publication() from public, anon, authenticated;
 revoke all on function private.record_academic_catalog_event() from public, anon, authenticated;
 
