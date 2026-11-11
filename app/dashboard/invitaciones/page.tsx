@@ -55,11 +55,9 @@ export default function InvitationsPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const loadData = useCallback(async () => {
-    setLoading(true);
-    setErrorMessage("");
-
     try {
       const { data: authData, error: authError } = await supabase.auth.getUser();
+      setErrorMessage("");
       if (authError || !authData.user) {
         router.replace("/");
         return;
