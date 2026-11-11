@@ -85,6 +85,30 @@ export default function TutorDashboardPage() {
   const [filter, setFilter] = useState<"Todas" | ReviewStatus>("Todas");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<ReviewItem | null>(null);
+  const [reviewCriteria, setReviewCriteria] = useState<string[]>([]);
+  const [reviewFeedback, setReviewFeedback] = useState("");
+  const [reviewDecision, setReviewDecision] = useState<"Aprobar" | "Solicitar cambios" | "Rechazar" | "">("");
+  const [reviewPreview, setReviewPreview] = useState(false);
+
+  const rubricItems = [
+    "Cumple el propósito de la actividad.",
+    "Aplica correctamente los lineamientos institucionales.",
+    "Presenta información clara y coherente.",
+    "Justifica sus decisiones de comunicación.",
+  ];
+
+  function openReview(item: ReviewItem) {
+    setSelected(item);
+    setReviewCriteria([]);
+    setReviewFeedback("");
+    setReviewDecision("");
+    setReviewPreview(false);
+  }
+
+  function closeReview() {
+    setSelected(null);
+    setReviewPreview(false);
+  }
 
   useEffect(() => {
     let active = true;
@@ -283,7 +307,7 @@ export default function TutorDashboardPage() {
                         }`}>{item.status}</span>
                       </div>
                     </div>
-                    <button type="button" onClick={() => setSelected(item)} className="shrink-0 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-[#087DB5] transition hover:border-[#087DB5] hover:bg-sky-50">
+                    <button type="button" onClick={() => openReview(item)} className="shrink-0 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-[#087DB5] transition hover:border-[#087DB5] hover:bg-sky-50">
                       {item.status === "Revisada" ? "Ver detalle" : "Abrir entrega"} →
                     </button>
                   </div>
@@ -344,20 +368,50 @@ export default function TutorDashboardPage() {
                 <h2 id="review-dialog-title" className="mt-2 text-xl font-bold text-[#102D4D]">{selected.activity}</h2>
                 <p className="mt-1 text-sm text-slate-500">{selected.student} · {selected.course}</p>
               </div>
-              <button type="button" aria-label="Cerrar detalle" onClick={() => setSelected(null)} className="rounded-xl border border-slate-200 px-3 py-2 text-slate-500 hover:bg-slate-50">✕</button>
+              <button type="button" aria-label="Cerrar detalle" onClick={closeReview} className="rounded-xl border border-slate-200 px-3 py-2 text-slate-500 hover:bg-slate-50">✕</button>
             </div>
             <div className="mt-6 rounded-2xl bg-[#F4F7FA] p-5">
               <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Descripción de la entrega</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">{selected.excerpt}</p>
               <p className="mt-3 text-xs text-slate-400">Envío de demostración: {selected.submitted}</p>
             </div>
-            <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-              <p className="text-sm font-bold text-amber-900">Espacio de revisión en construcción</p>
-              <p className="mt-1 text-xs leading-5 text-amber-800">La rúbrica, los archivos adjuntos y las decisiones de aprobación se conectarán cuando estén definidos el esquema académico y los permisos de tutoría. Esta vista no guarda ni modifica calificaciones.</p>
+            <div className="mt-6">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-sm font-bold text-[#102D4D]">Rúbrica de revisión</h3>
+                <span className="text-[11px] text-slate-400">{reviewCriteria.length} de {rubricItems.length} criterios revisados</span>
+              </div>
+              <div className="mt-3 space-y-2">
+                {rubricItems.map((criterion) => (
+                  <label key={criterion} className="flex items-start gap-3 rounded-xl border border-slate-100 p-3 text-xs leading-5 text-slate-600">
+                    <input type="checkbox" checked={reviewCriteria.includes(criterion)} onChange={(event) => setReviewCriteria((current) => event.target.checked ? [...current, criterion] : current.filter((item) => item !== criterion))} className="mt-0.5 h-4 w-4 accent-[#087DB5]" />
+                    {criterion}
+                  </label>
+                ))}
+              </div>
             </div>
-            <div className="mt-6 flex justify-end">
-              <button type="button" onClick={() => setSelected(null)} className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white hover:bg-[#066a9b]">Cerrar</button>
+            <div className="mt-5">
+              <label htmlFor="tutor-feedback" className="text-sm font-bold">Retroalimentación para el estudiante</label>
+              <textarea id="tutor-feedback" value={reviewFeedback} onChange={(event) => { setReviewFeedback(event.target.value); setReviewPreview(false); }} rows={4} maxLength={2000} placeholder="Escribe observaciones claras, respetuosas y orientadas a la mejora..." className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm leading-6 outline-none focus:border-[#087DB5]" />
+              <p className="mt-1 text-right text-[10px] text-slate-400">{reviewFeedback.length}/2000</p>
             </div>
+            <div className="mt-5">
+              <p className="text-sm font-bold">Decisión propuesta</p>
+              <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                {(["Aprobar", "Solicitar cambios", "Rechazar"] as const).map((decision) => (
+                  <button key={decision} type="button" aria-pressed={reviewDecision === decision} onClick={() => { setReviewDecision(decision); setReviewPreview(false); }} className={`rounded-xl border px-3 py-3 text-xs font-semibold transition ${reviewDecision === decision ? "border-[#087DB5] bg-sky-50 text-[#087DB5]" : "border-slate-200 text-slate-500 hover:bg-slate-50"}`}>{decision}</button>
+                ))}
+              </div>
+            </div>
+            {reviewPreview && (
+              <p role="status" className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-amber-900">
+                Vista previa local: propuesta “{reviewDecision}”, {reviewCriteria.length}/{rubricItems.length} criterios marcados y {reviewFeedback.trim().length} caracteres de retroalimentación. No se ha guardado, notificado ni modificado ninguna calificación.
+              </p>
+            )}
+            <div className="mt-6 flex flex-col-reverse justify-between gap-3 border-t border-slate-100 pt-5 sm:flex-row">
+              <button type="button" onClick={closeReview} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cerrar</button>
+              <button type="button" disabled={!reviewDecision || reviewCriteria.length === 0} onClick={() => setReviewPreview(true)} className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white hover:bg-[#066a9b] disabled:cursor-not-allowed disabled:opacity-40">Previsualizar revisión</button>
+            </div>
+            <p className="mt-4 rounded-xl bg-[#F4F7FA] p-3 text-[11px] leading-5 text-slate-500">Prototipo local. Las rúbricas, los archivos, la decisión final y la auditoría se conectarán después de aprobar el modelo académico y los permisos de tutoría.</p>
           </section>
         </div>
       )}
