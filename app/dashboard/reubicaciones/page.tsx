@@ -366,7 +366,7 @@ export default function ReubicacionesPage() {
         {
           p_membership_id: selected.membership_id,
           p_to_congregation_id: destinationId,
-          p_observations: observations.trim() || null,
+          p_observations: observations.trim() || undefined,
         }
       );
 
@@ -483,7 +483,7 @@ export default function ReubicacionesPage() {
         {
           p_review_id: review.review_id,
           p_decision: decision,
-          p_observations: reviewObservations.trim() || null,
+          p_observations: reviewObservations.trim() || undefined,
         }
       );
 
