@@ -187,13 +187,14 @@ Reglas de seguridad obligatorias:
 1. Resolver la identidad con la sesión autenticada del servidor; no aceptar un `user_id`, rol, distrito o congregación enviado por el cliente como prueba de autorización.
 2. Comprobar el ámbito vigente mediante las asignaciones existentes y funciones de autorización probadas; un rol global no debe confundirse con una asignación distrital.
 3. Para cada tabla expuesta, habilitar RLS y definir políticas específicas de SELECT/INSERT/UPDATE/DELETE. No crear una política genérica `authenticated` sin predicado de ámbito.
-4. Para UPDATE, validar tanto la fila original (`USING`) como los valores resultantes (`WITH CHECK`).
-5. Mantener las tablas de entregas, intentos, respuestas, revisiones, notas, eventos y certificados privadas por defecto; exponer solo vistas/consultas mínimas con autorización comprobada.
-6. Las funciones privilegiadas deben estar en un esquema no expuesto, con `search_path` seguro, validación de identidad y privilegios EXECUTE mínimos. No añadir `SECURITY DEFINER` como solución genérica a errores RLS.
-7. Los archivos de estudiantes deben almacenarse en buckets privados, con rutas no predecibles y políticas de Storage que comprueben inscripción y asignación tutorial.
-8. No confiar en metadatos editables por el usuario para autorizar roles.
-9. Las operaciones de calificación, aprobación, XP y certificado deben ejecutarse en servidor y dejar trazabilidad.
-10. Los reportes distritales deben agregar datos sin exponer detalles personales que el rol no necesita.
+4. La exposición a la Data API es independiente de RLS. Desde el cambio de Supabase aplicado a todos los proyectos el 30 de octubre de 2026, las tablas nuevas del esquema `public` no se exponen automáticamente; cada tabla debe tener una decisión explícita de exposición y grants mínimos, además de RLS. No asumir que crear la tabla la hace accesible por REST.
+5. Para UPDATE, validar tanto la fila original (`USING`) como los valores resultantes (`WITH CHECK`).
+6. Mantener las tablas de entregas, intentos, respuestas, revisiones, notas, eventos y certificados privadas por defecto; exponer solo vistas/consultas mínimas con autorización comprobada.
+7. Las funciones privilegiadas deben estar en un esquema no expuesto, con `search_path` seguro, validación de identidad y privilegios EXECUTE mínimos. No añadir `SECURITY DEFINER` como solución genérica a errores RLS.
+8. Los archivos de estudiantes deben almacenarse en buckets privados, con rutas no predecibles y políticas de Storage que comprueben inscripción y asignación tutorial.
+9. No confiar en metadatos editables por el usuario para autorizar roles.
+10. Las operaciones de calificación, aprobación, XP y certificado deben ejecutarse en servidor y dejar trazabilidad.
+11. Los reportes distritales deben agregar datos sin exponer detalles personales que el rol no necesita.
 
 ### Matriz de acciones de alto nivel
 
