@@ -126,7 +126,9 @@ export default function CongregationsPage() {
       const roleKeys = (roles ?? []).map((role) => role.role_key);
 
       const nationalAdmin = roleKeys.includes("national_admin");
-      const districtCoordinator = roleKeys.includes("district_coordinator");
+      const districtCoordinator =
+        roleKeys.includes("district_coordinator") ||
+        roleKeys.includes("area_coordinator");
 
       setIsNationalAdmin(nationalAdmin);
 
@@ -142,7 +144,8 @@ export default function CongregationsPage() {
               (roles ?? []).some(
                 (role) =>
                   role.id === assignment.role_id &&
-                  role.role_key === "district_coordinator"
+                  (role.role_key === "district_coordinator" ||
+                    role.role_key === "area_coordinator")
               )
             )
             .map((assignment) => assignment.district_id)
@@ -203,7 +206,8 @@ export default function CongregationsPage() {
   }, [router, supabase]);
 
   useEffect(() => {
-    loadData();
+    // Diferir la carga evita una actualización de estado síncrona dentro del efecto.
+    void Promise.resolve().then(loadData);
   }, [loadData]);
 
   const resetForm = () => {

@@ -93,7 +93,8 @@ export default function DashboardPage() {
   // Permisos del módulo de reubicaciones.
   const canManageTransfers =
     roleKeys.includes("national_admin") ||
-    roleKeys.includes("district_coordinator");
+    roleKeys.includes("district_coordinator") ||
+    roleKeys.includes("area_coordinator");
 
   // Cargar preferencia de tema.
   useEffect(() => {
@@ -104,6 +105,8 @@ export default function DashboardPage() {
       savedTheme === "dark" ||
       savedTheme === "system"
     ) {
+      // Leer localStorage tras montar evita discrepancias entre SSR e hidratación.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme(savedTheme);
     }
   }, []);
