@@ -19,7 +19,7 @@ globalThis.window = {
     setItem: (key, value) => storage.set(key, value),
   },
   dispatchEvent: () => true,
-} as unknown as Window & typeof globalThis;
+};
 
 test("el flujo estudiante-tutor-estudiante conserva y devuelve la revisión manual", () => {
   const studentId = "student-flow-1";
