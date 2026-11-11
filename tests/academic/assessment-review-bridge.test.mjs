@@ -65,9 +65,12 @@ test("readAssessmentReviewQueue elimina IDs duplicados sin duplicar intentos", (
 });
 
 test("writeAssessmentReviewQueue rechaza elementos inválidos y duplicados", () => {
+  const dispatchesBefore = dispatchCount;
+  const storedBefore = storage.get("academia-decom:assessment-review-queue:v1");
   assert.equal(writeAssessmentReviewQueue([{ ...item, id: "incorrecto" }]), false);
   assert.equal(writeAssessmentReviewQueue([item, item]), false);
-  assert.equal(dispatchCount, 1);
+  assert.equal(dispatchCount, dispatchesBefore);
+  assert.equal(storage.get("academia-decom:assessment-review-queue:v1"), storedBefore);
 });
 
 test("writeAssessmentReviewQueue devuelve false si localStorage falla", () => {
