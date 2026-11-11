@@ -8,7 +8,8 @@ type ContentKind = "Actividad" | "Evaluación";
 type EditorialStatus = "Borrador" | "Publicado" | "Archivado";
 type QuestionType = "Selección única" | "Selección múltiple" | "Verdadero o falso" | "Respuesta corta";
 type Question = { id: string; prompt: string; type: QuestionType; options: string[]; correctOptions: string[] };
-type AcademicItem = { id: string; title: string; kind: ContentKind; programId: string; courseId: string; moduleId: string; course: string; module: string; instructions: string; status: EditorialStatus; responseType: string; dueDate: string; questions: Question[]; updatedAt: string };
+type RubricCriterion = { id: string; title: string; description: string; points: number };
+type AcademicItem = { id: string; title: string; kind: ContentKind; programId: string; courseId: string; moduleId: string; course: string; module: string; instructions: string; status: EditorialStatus; responseType: string; dueDate: string; questions: Question[]; rubric: RubricCriterion[]; updatedAt: string };
 
 const curriculumPrograms = [{ id: "prog-1", title: "Comunicación institucional", courses: [{ id: "course-1", title: "Fundamentos de la comunicación", modules: [{ id: "module-1", title: "Bases de la comunicación" }, { id: "module-2", title: "Planeación del mensaje" }] }, { id: "course-2", title: "Redacción para medios", modules: [{ id: "module-3", title: "Escritura y edición" }] }] }, { id: "prog-2", title: "Producción de medios", courses: [{ id: "course-3", title: "Producción audiovisual", modules: [] }] }];
 
@@ -17,6 +18,8 @@ const initialItems: AcademicItem[] = [
   { id: "eval-01", title: "Comprobación de fundamentos", kind: "Evaluación", programId: "prog-1", courseId: "course-1", moduleId: "module-1", course: "Fundamentos de la comunicación", module: "Bases de la comunicación", instructions: "Responde las preguntas para comprobar la comprensión de los conceptos fundamentales.", status: "Borrador", responseType: "Calificación automática", dueDate: "", questions: [{ id: "q-1", prompt: "¿Qué debe orientar la elección del medio?", type: "Selección única", options: ["El propósito y el público", "La preferencia personal", "La tendencia del momento"], correctOptions: ["El propósito y el público"] }, { id: "q-2", prompt: "La identidad institucional se limita al logotipo.", type: "Verdadero o falso", options: ["Verdadero", "Falso"], correctOptions: ["Falso"] }], updatedAt: "11 nov 2026" },
   { id: "act-02", title: "Reflexión: comunicar con propósito", kind: "Actividad", programId: "prog-1", courseId: "course-2", moduleId: "module-3", course: "Redacción para medios", module: "Escritura y edición", instructions: "Explica cómo se relacionan el propósito, el público y el medio en una comunicación institucional.", status: "Borrador", responseType: "Respuesta escrita", dueDate: "", questions: [], updatedAt: "11 nov 2026" },
 ];
+
+const emptyCriterion = (): RubricCriterion => ({ id: `criterion-${Date.now()}-${Math.random().toString(16).slice(2)}`, title: "", description: "", points: 10 });
 
 const emptyQuestion = (): Question => ({ id: `q-${Date.now()}-${Math.random().toString(16).slice(2)}`, prompt: "", type: "Selección única", options: ["", ""], correctOptions: [] });
 
@@ -46,6 +49,7 @@ export default function AcademicActivitiesAdminPage() {
   const [responseType, setResponseType] = useState("Respuesta escrita");
   const [dueDate, setDueDate] = useState("");
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [rubric, setRubric] = useState<RubricCriterion[]>([]);
   const [notice, setNotice] = useState("Espacio de autoría de demostración: no guarda información institucional.");
   const [noticeError, setNoticeError] = useState(false);
 
@@ -82,11 +86,11 @@ export default function AcademicActivitiesAdminPage() {
   const stats = { total: items.length, activities: items.filter((item) => item.kind === "Actividad").length, assessments: items.filter((item) => item.kind === "Evaluación").length, published: items.filter((item) => item.status === "Publicado").length };
 
   function resetForm(nextKind: ContentKind) {
-    setPreviewOpen(false); setEditingId(null); setKind(nextKind); setTitle(""); setProgramId("prog-1"); setCourseId("course-1"); setModuleId(""); setCourse("Fundamentos de la comunicación"); setModule(""); setInstructions(""); setResponseType(nextKind === "Actividad" ? "Respuesta escrita" : "Calificación automática"); setDueDate(""); setQuestions(nextKind === "Evaluación" ? [emptyQuestion()] : []); setShowForm(true);
+    setPreviewOpen(false); setEditingId(null); setKind(nextKind); setTitle(""); setProgramId("prog-1"); setCourseId("course-1"); setModuleId(""); setCourse("Fundamentos de la comunicación"); setModule(""); setInstructions(""); setResponseType(nextKind === "Actividad" ? "Respuesta escrita" : "Calificación automática"); setDueDate(""); setQuestions(nextKind === "Evaluación" ? [emptyQuestion()] : []); setRubric(nextKind === "Actividad" ? [emptyCriterion()] : []); setShowForm(true);
   }
 
   function editItem(item: AcademicItem) {
-    setPreviewOpen(false); setEditingId(item.id); setKind(item.kind); setTitle(item.title); setProgramId(item.programId); setCourseId(item.courseId); setModuleId(item.moduleId); setCourse(item.course); setModule(item.module); setInstructions(item.instructions); setResponseType(item.responseType); setDueDate(item.dueDate); setQuestions(item.questions.map((question) => ({ ...question, options: [...question.options], correctOptions: [...(question.correctOptions ?? [])] }))); setShowForm(true);
+    setPreviewOpen(false); setEditingId(item.id); setKind(item.kind); setTitle(item.title); setProgramId(item.programId); setCourseId(item.courseId); setModuleId(item.moduleId); setCourse(item.course); setModule(item.module); setInstructions(item.instructions); setResponseType(item.responseType); setDueDate(item.dueDate); setQuestions(item.questions.map((question) => ({ ...question, options: [...question.options], correctOptions: [...(question.correctOptions ?? [])] }))); setRubric((item.rubric ?? []).map((criterion) => ({ ...criterion }))); setShowForm(true);
   }
 
   function updateQuestion(id: string, patch: Partial<Question>) {
@@ -122,11 +126,19 @@ export default function AcademicActivitiesAdminPage() {
       setNoticeError(true);
       return;
     }
+    const invalidRubric = kind === "Actividad" && rubric.some((criterion) => !criterion.title.trim() || !Number.isInteger(criterion.points) || criterion.points < 1);
+    const rubricTotal = rubric.reduce((total, criterion) => total + criterion.points, 0);
+    if (invalidRubric || rubricTotal > 100) {
+      setNotice("Cada criterio debe tener un nombre y un puntaje entero mayor que cero. La suma de la rúbrica no puede superar 100 puntos.");
+      setNoticeError(true);
+      return;
+    }
+    const normalizedRubric = rubric.map((criterion) => ({ ...criterion, title: criterion.title.trim(), description: criterion.description.trim() }));
     const normalizedQuestions = questions.map((question) => ({ ...question, prompt: question.prompt.trim(), options: question.options.map((option) => option.trim()).filter(Boolean), correctOptions: question.correctOptions.filter((option) => question.options.includes(option)) }));
     if (editingId) {
-      setItems((current) => current.map((item) => item.id === editingId ? { ...item, title: cleanTitle, kind, programId, courseId, moduleId, course, module: module.trim(), instructions: cleanInstructions, responseType, dueDate, questions: normalizedQuestions, updatedAt: "11 nov 2026" } : item));
+      setItems((current) => current.map((item) => item.id === editingId ? { ...item, title: cleanTitle, kind, programId, courseId, moduleId, course, module: module.trim(), instructions: cleanInstructions, responseType, dueDate, questions: normalizedQuestions, rubric: normalizedRubric, updatedAt: "11 nov 2026" } : item));
     } else {
-      setItems((current) => [{ id: `item-${Date.now()}`, title: cleanTitle, kind, programId, courseId, moduleId, course, module: module.trim(), instructions: cleanInstructions, status: "Borrador", responseType, dueDate, questions: normalizedQuestions, updatedAt: "11 nov 2026" }, ...current]);
+      setItems((current) => [{ id: `item-${Date.now()}`, title: cleanTitle, kind, programId, courseId, moduleId, course, module: module.trim(), instructions: cleanInstructions, status: "Borrador", responseType, dueDate, questions: normalizedQuestions, rubric: normalizedRubric, updatedAt: "11 nov 2026" }, ...current]);
     }
     setShowForm(false);
     setNotice(editingId ? "Los cambios se guardaron en la demostración." : "El contenido se creó como borrador local.");
