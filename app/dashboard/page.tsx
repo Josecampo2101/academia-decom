@@ -593,6 +593,16 @@ export default function DashboardPage() {
 
             {canManageAcademicCatalog && (
               <a
+                href="/dashboard/administracion/actividades"
+                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
+              >
+                <span className="text-lg">✓</span>
+                <span>Actividades y evaluaciones</span>
+              </a>
+            )}
+
+            {canManageAcademicCatalog && (
+              <a
                 href="/dashboard/administracion/catalogo"
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
