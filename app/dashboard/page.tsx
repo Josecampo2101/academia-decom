@@ -533,18 +533,42 @@ export default function DashboardPage() {
               <span>⌂</span> Inicio
             </a>
 
-            {modules.map((module) => (
-              <button
-                key={module.name}
-                type="button"
-                disabled
-                title="Módulo en construcción"
-                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm ${secondaryText} opacity-70`}
-              >
-                <span>{module.icon}</span>
-                {module.name}
-              </button>
-            ))}
+            {modules.map((module) => {
+              const adminDestination =
+                module.name === "Mi formación"
+                  ? "/dashboard/formacion"
+                  : module.name === "Biblioteca"
+                    ? "/dashboard/biblioteca"
+                    : null;
+              const canOpenAdminModule =
+                isNationalAdmin || roleKeys.includes("academic_editor");
+
+              if (adminDestination && canOpenAdminModule) {
+                return (
+                  <a
+                    key={module.name}
+                    href={adminDestination}
+                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold text-[#087DB5] transition hover:bg-[#087DB5]/10"
+                  >
+                    <span>{module.icon}</span>
+                    {module.name}
+                  </a>
+                );
+              }
+
+              return (
+                <button
+                  key={module.name}
+                  type="button"
+                  disabled
+                  title="Módulo en construcción"
+                  className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm ${secondaryText} opacity-70`}
+                >
+                  <span>{module.icon}</span>
+                  {module.name}
+                </button>
+              );
+            })}
 
             <div className={`my-5 border-t ${borderColor}`} />
 
