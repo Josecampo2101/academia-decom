@@ -14,6 +14,7 @@ import {
 } from "@/lib/academic/assessment-attempts";
 import { practiceAnswerKey, practiceQuestions } from "@/lib/academic/assessment-demo-fixtures";
 import AssessmentHistoryPanel from "./assessment-history-panel";
+import { getStudentAssessmentReviews, upsertAssessmentReviewQueueItem } from "@/lib/academic/assessment-review-bridge";
 
 type AccessState = "checking" | "allowed" | "denied" | "error";
 const emptyAnswers = (): AssessmentAnswers => ({ single: "", multiple: [], boolean: "", short: "" });
@@ -23,6 +24,7 @@ export default function PracticeAssessmentPage() {
   const supabase = useMemo(() => createClient(), []);
   const [access, setAccess] = useState<AccessState>("checking");
   const [userId, setUserId] = useState<string | null>(null);
+  const [studentLabel, setStudentLabel] = useState("Estudiante");
   const [answers, setAnswers] = useState<AssessmentAnswers>(emptyAnswers);
   const [attempts, setAttempts] = useState<AssessmentAttempt[]>([]);
   const [submittedAttempt, setSubmittedAttempt] = useState<AssessmentAttempt | null>(null);
@@ -48,6 +50,7 @@ export default function PracticeAssessmentPage() {
         const keys = (roles ?? []).map((role) => role.role_key);
         if (keys.includes("member") || keys.includes("national_admin")) {
           setUserId(user.id);
+          setStudentLabel(String(user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email?.split("@")[0] ?? "Estudiante"));
           setAccess("allowed");
         } else setAccess("denied");
       } catch (error) {
@@ -64,18 +67,51 @@ export default function PracticeAssessmentPage() {
   useEffect(() => {
     if (!storageKey) return;
     try {
-      const restored = parseAssessmentAttempts(window.localStorage.getItem(storageKey), PRACTICE_ASSESSMENT_ID);
-      // Restauración intencional del historial local al identificar la sesión.
+      const localAttempts = parseAssessmentAttempts(window.localStorage.getItem(storageKey), PRACTICE_ASSESSMENT_ID);
+      const tutorReviews = getStudentAssessmentReviews(userId ?? "");
+      const merged = new Map(localAttempts.map((attempt) => [attempt.id, attempt]));
+      tutorReviews.forEach((item) => merged.set(item.attempt.id, item.attempt));
+      const restored = [...merged.values()].sort((a, b) => Date.parse(b.submittedAt) - Date.parse(a.submittedAt));
+      // Restauración intencional del historial local y de revisiones demo al identificar la sesión.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setAttempts(restored);
       setSubmittedAttempt(restored[0] ?? null);
+      window.localStorage.setItem(storageKey, JSON.stringify(restored));
     } catch (error) {
       console.error("No fue posible recuperar los intentos locales:", error);
       setStorageError("No se pudo recuperar el historial de este navegador.");
     } finally {
       setStorageReady(true);
     }
-  }, [storageKey]);
+    const refreshTutorReviews = () => {
+      if (!userId) return;
+      const current = parseAssessmentAttempts(window.localStorage.getItem(storageKey), PRACTICE_ASSESSMENT_ID);
+      const reviews = getStudentAssessmentReviews(userId);
+      const merged = new Map(current.map((attempt) => [attempt.id, attempt]));
+      reviews.forEach((item) => merged.set(item.attempt.id, item.attempt));
+      const next = [...merged.values()].sort((a, b) => Date.parse(b.submittedAt) - Date.parse(a.submittedAt));
+      window.localStorage.setItem(storageKey, JSON.stringify(next));
+      const queueSaved = upsertAssessmentReviewQueueItem({
+        id: PRACTICE_ASSESSMENT_ID + ":" + userId + ":" + attempt.id,
+        studentId: userId ?? "",
+        studentLabel,
+        attempt,
+        createdAt: attempt.submittedAt,
+        updatedAt: attempt.submittedAt,
+      });
+      setAttempts(next);
+      if (!queueSaved) setStorageError("El intento quedó guardado en tu historial local, pero no se pudo compartir con la bandeja demo del tutor.");
+      setSubmittedAttempt((selected) => selected ? next.find((attempt) => attempt.id === selected.id) ?? selected : null);
+    };
+    window.addEventListener("focus", refreshTutorReviews);
+    window.addEventListener("storage", refreshTutorReviews);
+    window.addEventListener("academia-decom:assessment-review-queue-updated", refreshTutorReviews);
+    return () => {
+      window.removeEventListener("focus", refreshTutorReviews);
+      window.removeEventListener("storage", refreshTutorReviews);
+      window.removeEventListener("academia-decom:assessment-review-queue-updated", refreshTutorReviews);
+    };
+  }, [storageKey, userId]);
 
   const answeredCount = practiceQuestions.filter((question) => {
     const answer = answers[question.id];
