@@ -33,8 +33,15 @@ export default function AcademicActivitiesAdminPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [kind, setKind] = useState<ContentKind>("Actividad");
   const [title, setTitle] = useState("");
-  const [course, setCourse] = useState("Identidad corporativa DECOM");
-  const [module, setModule] = useState("");
+  const [programId, setProgramId] = useState("prog-1");
+  const [courseId, setCourseId] = useState("course-1");
+  const [moduleId, setModuleId] = useState("module-1");
+  const selectedProgram = curriculumPrograms.find((program) => program.id === programId) ?? curriculumPrograms[0];
+  const availableCourses = selectedProgram.courses;
+  const selectedCourse = availableCourses.find((item) => item.id === courseId) ?? availableCourses[0];
+  const availableModules = selectedCourse?.modules ?? [];
+  const [course, setCourse] = useState("Fundamentos de la comunicación");
+  const [module, setModule] = useState("Bases de la comunicación");
   const [instructions, setInstructions] = useState("");
   const [responseType, setResponseType] = useState("Respuesta escrita");
   const [dueDate, setDueDate] = useState("");
@@ -75,11 +82,11 @@ export default function AcademicActivitiesAdminPage() {
   const stats = { total: items.length, activities: items.filter((item) => item.kind === "Actividad").length, assessments: items.filter((item) => item.kind === "Evaluación").length, published: items.filter((item) => item.status === "Publicado").length };
 
   function resetForm(nextKind: ContentKind) {
-    setPreviewOpen(false); setEditingId(null); setKind(nextKind); setTitle(""); setCourse("Identidad corporativa DECOM"); setModule(""); setInstructions(""); setResponseType(nextKind === "Actividad" ? "Respuesta escrita" : "Calificación automática"); setDueDate(""); setQuestions(nextKind === "Evaluación" ? [emptyQuestion()] : []); setShowForm(true);
+    setPreviewOpen(false); setEditingId(null); setKind(nextKind); setTitle(""); setProgramId("prog-1"); setCourseId("course-1"); setModuleId(""); setCourse("Fundamentos de la comunicación"); setModule(""); setInstructions(""); setResponseType(nextKind === "Actividad" ? "Respuesta escrita" : "Calificación automática"); setDueDate(""); setQuestions(nextKind === "Evaluación" ? [emptyQuestion()] : []); setShowForm(true);
   }
 
   function editItem(item: AcademicItem) {
-    setPreviewOpen(false); setEditingId(item.id); setKind(item.kind); setTitle(item.title); setCourse(item.course); setModule(item.module); setInstructions(item.instructions); setResponseType(item.responseType); setDueDate(item.dueDate); setQuestions(item.questions.map((question) => ({ ...question, options: [...question.options], correctOptions: [...(question.correctOptions ?? [])] }))); setShowForm(true);
+    setPreviewOpen(false); setEditingId(item.id); setKind(item.kind); setTitle(item.title); setProgramId(item.programId); setCourseId(item.courseId); setModuleId(item.moduleId); setCourse(item.course); setModule(item.module); setInstructions(item.instructions); setResponseType(item.responseType); setDueDate(item.dueDate); setQuestions(item.questions.map((question) => ({ ...question, options: [...question.options], correctOptions: [...(question.correctOptions ?? [])] }))); setShowForm(true);
   }
 
   function updateQuestion(id: string, patch: Partial<Question>) {
@@ -117,9 +124,9 @@ export default function AcademicActivitiesAdminPage() {
     }
     const normalizedQuestions = questions.map((question) => ({ ...question, prompt: question.prompt.trim(), options: question.options.map((option) => option.trim()).filter(Boolean), correctOptions: question.correctOptions.filter((option) => question.options.includes(option)) }));
     if (editingId) {
-      setItems((current) => current.map((item) => item.id === editingId ? { ...item, title: cleanTitle, kind, course, module: module.trim(), instructions: cleanInstructions, responseType, dueDate, questions: normalizedQuestions, updatedAt: "11 nov 2026" } : item));
+      setItems((current) => current.map((item) => item.id === editingId ? { ...item, title: cleanTitle, kind, programId, courseId, moduleId, course, module: module.trim(), instructions: cleanInstructions, responseType, dueDate, questions: normalizedQuestions, updatedAt: "11 nov 2026" } : item));
     } else {
-      setItems((current) => [{ id: `item-${Date.now()}`, title: cleanTitle, kind, course, module: module.trim(), instructions: cleanInstructions, status: "Borrador", responseType, dueDate, questions: normalizedQuestions, updatedAt: "11 nov 2026" }, ...current]);
+      setItems((current) => [{ id: `item-${Date.now()}`, title: cleanTitle, kind, programId, courseId, moduleId, course, module: module.trim(), instructions: cleanInstructions, status: "Borrador", responseType, dueDate, questions: normalizedQuestions, updatedAt: "11 nov 2026" }, ...current]);
     }
     setShowForm(false);
     setNotice(editingId ? "Los cambios se guardaron en la demostración." : "El contenido se creó como borrador local.");
