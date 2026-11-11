@@ -18,7 +18,7 @@ const demoActivities = [
     type: "Respuesta escrita",
   },
   {
-    id: "cuestionario-fundamentos",
+    id: "reflexion-proposito",
     title: "Reflexión: comunicar con propósito",
     course: "Identidad corporativa DECOM",
     module: "Módulo 1 · Conociendo DECOM",
