@@ -40,7 +40,7 @@ function isManualReview(value: unknown): value is ManualAssessmentReview {
   if (!isRecord(value)) return false;
   return typeof value.questionId === "string" && !!value.questionId &&
     typeof value.reviewerId === "string" && !!value.reviewerId.trim() &&
-    typeof value.feedback === "string" && value.feedback.length > 0 && value.feedback.length <= 2000 &&
+    typeof value.feedback === "string" && !!value.feedback.trim() && value.feedback.length <= 2000 &&
     typeof value.earnedPoints === "number" && Number.isInteger(value.earnedPoints) && value.earnedPoints >= 0 &&
     typeof value.possiblePoints === "number" && Number.isInteger(value.possiblePoints) && value.possiblePoints > 0 &&
     value.earnedPoints <= value.possiblePoints &&
@@ -49,6 +49,8 @@ function isManualReview(value: unknown): value is ManualAssessmentReview {
 
 function isResult(value: unknown): value is AssessmentResult {
   if (!isRecord(value) || !Array.isArray(value.questions) || !value.questions.every(isQuestionResult)) return false;
+  const questionIds = value.questions.map((question) => question.questionId);
+  if (new Set(questionIds).size !== questionIds.length) return false;
   const { objectiveEarned, objectivePossible, pendingManual, manualEarned, manualPossible } = value;
   const validManualTotals =
     (manualEarned === undefined && manualPossible === undefined) ||
