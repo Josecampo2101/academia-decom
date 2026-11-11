@@ -204,3 +204,17 @@ El dominio de intentos incorpora una operación pura para registrar la revisión
 - El parser valida la correspondencia entre revisiones, preguntas revisadas y totales manuales al restaurar datos locales.
 
 La lógica se encuentra en `lib/academic/manual-assessment-review.ts` y tiene pruebas automatizadas. Todavía no está conectada a una interfaz de tutor ni a una identidad autenticada real. Los datos siguen siendo locales y manipulables por el usuario del navegador; no constituyen una calificación oficial ni sustituyen validación, autorización y persistencia en servidor.
+
+
+## Bandeja demo de revisión manual del tutor
+
+Ruta: `/dashboard/tutor/evaluaciones`.
+
+- El panel del tutor incluye acceso a la bandeja de evaluaciones.
+- Los intentos de práctica enviados por un estudiante se copian a una cola local compartida en el mismo navegador.
+- La bandeja permite filtrar intentos pendientes, revisados y todos; consultar respuestas cortas; asignar puntaje entero dentro del máximo y registrar retroalimentación obligatoria de hasta 2.000 caracteres.
+- La revisión utiliza las reglas del dominio `reviewManualAnswer`; no modifica el intento original, conserva los resultados objetivos y registra tutor, puntaje y fecha.
+- El estudiante recupera la revisión al volver a abrir o enfocar su práctica y puede consultar el puntaje y la retroalimentación en el resultado del intento.
+- La cola valida los registros restaurados y descarta datos inconsistentes.
+
+**Límites:** es una demostración con `localStorage`, válida únicamente en el mismo perfil de navegador y origen. No sincroniza dispositivos ni sesiones de navegador separadas, no verifica que el tutor esté asignado a ese estudiante, no genera notificaciones y no registra una calificación institucional. La autorización visual de la ruta no sustituye la autorización del servidor. Para producción se requiere API transaccional, RLS, asignación tutor-estudiante, auditoría y almacenamiento persistente.
