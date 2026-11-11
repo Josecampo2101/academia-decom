@@ -21,7 +21,11 @@ type RequestRecord = {
 function response(body: unknown, status = 200) {
   return NextResponse.json(body, {
     status,
-    headers: { "Cache-Control": "no-store, max-age=0" },
+    headers: {
+      "Cache-Control": "no-store, max-age=0",
+      "X-Content-Type-Options": "nosniff",
+      "Referrer-Policy": "no-referrer",
+    },
   });
 }
 
@@ -30,9 +34,13 @@ function authorized(request: NextRequest) {
   const header = request.headers.get("authorization") ?? "";
   const supplied = header.startsWith("Bearer ") ? header.slice(7) : "";
 
-  if (!secret || !supplied || supplied.length !== secret.length) return false;
+  if (!secret || !supplied) return false;
 
-  return timingSafeEqual(Buffer.from(supplied), Buffer.from(secret));
+  const expected = Buffer.from(secret, "utf8");
+  const received = Buffer.from(supplied, "utf8");
+  if (expected.length === 0 || expected.length !== received.length) return false;
+
+  return timingSafeEqual(received, expected);
 }
 
 function escapeHtml(value: string) {
