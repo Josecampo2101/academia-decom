@@ -243,9 +243,9 @@ export default function TutorDashboardPage() {
             <h1 className="mt-2 text-2xl font-extrabold tracking-tight md:text-3xl">Panel del tutor</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Prioriza las entregas, acompaña el avance de tus estudiantes y consulta el estado de las revisiones.</p>
           </div>
-          <span className="inline-flex w-fit items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800">
+          <div className="flex flex-wrap items-center gap-2"><button type="button" onClick={() => router.push("/dashboard/tutor/calificaciones")} className="rounded-xl bg-[#087DB5] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#066a9b]">Abrir espacio de calificación →</button><span className="inline-flex w-fit items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Vista de demostración
-          </span>
+          </span></div>
         </section>
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
