@@ -15,6 +15,25 @@ const activities: Record<string, {
   criteria: string[];
   formats: string;
 }> = {
+  "reflexion-proposito": {
+    title: "Reflexión: comunicar con propósito",
+    course: "Identidad corporativa DECOM",
+    module: "Módulo 1 · Conociendo DECOM",
+    due: "Fecha límite por definir en la publicación del curso",
+    instructions: [
+      "Elige un mensaje institucional de ejemplo o plantea una situación hipotética.",
+      "Identifica qué se quiere comunicar y a qué público se dirige.",
+      "Explica por qué el medio seleccionado es adecuado para ese público.",
+      "Propón una mejora para que el mensaje sea más claro y responsable.",
+    ],
+    criteria: [
+      "Define el propósito del mensaje.",
+      "Identifica las características del público.",
+      "Justifica la selección del medio.",
+      "Propone una mejora concreta y comprensible.",
+    ],
+    formats: "Respuesta breve escrita. Los archivos adjuntos no están habilitados en esta demostración.",
+  },
   "aplicacion-identidad": {
     title: "Aplicación de la identidad visual",
     course: "Identidad corporativa DECOM",
