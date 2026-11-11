@@ -160,6 +160,8 @@ export default function InvitationsPage() {
   }, [router, supabase]);
 
   useEffect(() => {
+    // loadData first awaits Supabase authentication before updating React state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadData();
   }, [loadData]);
 
