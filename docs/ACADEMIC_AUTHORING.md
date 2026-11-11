@@ -138,3 +138,20 @@ Límites:
 - No hay carga de archivos, transmisión, persistencia remota, notificaciones, fechas límite efectivas ni reentrega real desde una decisión del tutor.
 - Borrar los datos del navegador elimina los borradores y el historial de demostración.
 - La verificación de rol en cliente es únicamente de interfaz; el backend deberá autorizar cada lectura y escritura mediante RLS y operaciones transaccionales.
+
+
+## Puente local estudiante–tutor (prototipo)
+
+- La ruta del estudiante registra los intentos enviados en un almacén de demostración compartido por las vistas de estudiante y tutor dentro del mismo navegador.
+- La bandeja adicional en `/dashboard/tutor/calificaciones` lista los intentos recibidos, permite consultar cada versión y guardar una decisión demo con retroalimentación.
+- Las decisiones `Solicitar ajustes`, `Aprobar` y `Rechazar` actualizan el estado de demostración; cuando se solicitan ajustes, el estudiante puede preparar y enviar un nuevo intento conservando el historial anterior.
+- La vista del estudiante muestra la retroalimentación de tutoría cuando vuelve a la actividad o cuando la vista recibe la actualización local.
+- Los cambios se notifican entre componentes mediante eventos del navegador y se guardan en `localStorage`; no existe comunicación de red.
+
+### Límites y precauciones
+
+- El puente funciona únicamente en el mismo perfil de navegador y origen. No sincroniza sesiones entre dispositivos, navegadores ni cuentas independientes.
+- El contenido es demostrativo y no constituye entrega oficial, calificación institucional, auditoría ni notificación.
+- El panel de calificaciones conserva sus fixtures de ejemplo separados; esta bandeja es una sección adicional para validar el recorrido funcional local.
+- Antes de producción, sustituir este adaptador por tablas/RPC transaccionales, RLS por matrícula y asignación tutor-estudiante, versiones inmutables, almacenamiento privado y eventos de auditoría.
+- No se han modificado Supabase, sus datos, políticas, funciones, Storage ni Vercel.

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import TutorDemoInbox from "./tutor-demo-inbox";
 
 type AccessState = "checking" | "allowed" | "denied" | "error";
 type ReviewStatus = "Pendiente" | "En revisión" | "Calificada" | "Requiere ajustes";
@@ -219,6 +220,7 @@ export default function TutorAssessmentWorkflowPage() {
             <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-7"><div className="flex items-center justify-between gap-3"><div><h3 className="text-sm font-bold">Historial de intentos y seguimiento</h3><p className="mt-1 text-xs text-slate-400">Registro de demostración para ilustrar la trazabilidad.</p></div><span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-semibold text-slate-500">{demoHistory.length} eventos</span></div><ol className="mt-5 space-y-4">{demoHistory.map((event, index) => <li key={event.label} className="relative flex gap-3"><span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#E5F2F8] text-[10px] font-bold text-[#087DB5]">{index + 1}</span><div className="min-w-0 flex-1 border-b border-slate-100 pb-4"><p className="text-xs font-bold">{event.label}</p><p className="mt-1 text-xs text-slate-500">{event.detail}</p><p className="mt-1 text-[10px] text-slate-400">{event.date}</p></div></li>)}</ol></section>
           </div>
         </section>
+        <TutorDemoInbox />
         <footer className="border-t border-slate-200 pt-5 text-xs text-slate-400">Academia DECOM · Revisión de entregas · Datos ficticios de demostración</footer>
       </div>
     </main>

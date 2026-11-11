@@ -3,10 +3,11 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { readDemoBridge, upsertDemoBridgeSubmission, type DemoBridgeReview } from "@/lib/academic/demo-bridge";
 
 type AccessState = "checking" | "allowed" | "denied" | "error";
-type DemoSubmissionStatus = "Sin guardar" | "Borrador" | "En revisión" | "Requiere ajustes" | "Calificada";
-type DemoAttempt = { number: number; submittedAt: string; answer: string; referenceUrl: string; status: "En revisión" | "Requiere ajustes" | "Calificada" };
+type DemoSubmissionStatus = "Sin guardar" | "Borrador" | "En revisión" | "Requiere ajustes" | "Calificada" | "Rechazada";
+type DemoAttempt = { number: number; submittedAt: string; answer: string; referenceUrl: string; status: "En revisión" | "Requiere ajustes" | "Calificada" | "Rechazada" };
 type DemoWork = { answer: string; referenceUrl: string; status: DemoSubmissionStatus; attempts: DemoAttempt[]; savedAt: string | null };
 
 const activities: Record<string, {
@@ -73,6 +74,7 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
   const [referenceUrl, setReferenceUrl] = useState("");
   const [confirmation, setConfirmation] = useState(false);
   const [validationMessage, setValidationMessage] = useState("");
+  const [sharedReview, setSharedReview] = useState<DemoBridgeReview | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -124,13 +126,54 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
         setAttempts(Array.isArray(saved.attempts) ? saved.attempts : []);
         setSavedAt(saved.savedAt ?? null);
       }
+      const shared = readDemoBridge().find((item) => item.studentId === userId && item.activityId === activityId);
+      if (shared) {
+        // Restore the latest tutor decision after the student's own draft data.
+        setSharedReview(shared.review);
+        if (shared.status === "Requiere ajustes") setWorkStatus("Requiere ajustes");
+        else if (shared.status === "Calificada") setWorkStatus("Calificada");
+        else if (shared.status === "Rechazada") setWorkStatus("Rechazada");
+        else if (shared.status === "En revisión") setWorkStatus("En revisión");
+        if (shared.attempts.length) setAttempts(shared.attempts.map((attempt) => ({
+          number: attempt.number, submittedAt: attempt.submittedAt, answer: attempt.answer,
+          referenceUrl: attempt.referenceUrl,
+          status: shared.status === "Requiere ajustes" ? "Requiere ajustes" : shared.status === "Rechazada" ? "Rechazada" : shared.status === "Calificada" ? "Calificada" : "En revisión",
+        })));
+      }
     } catch (error) {
       console.error("No fue posible recuperar el borrador local:", error);
       setValidationMessage("No pudimos recuperar el borrador guardado en este navegador.");
     } finally {
       setWorkLoaded(true);
     }
-  }, [storageKey]);
+  }, [storageKey, userId, activityId]);
+
+  useEffect(() => {
+    if (!userId || !activityId) return;
+    const refreshReview = () => {
+      const shared = readDemoBridge().find((item) => item.studentId === userId && item.activityId === activityId);
+      if (!shared) return;
+      setSharedReview(shared.review);
+      if (shared.status === "Requiere ajustes") setWorkStatus("Requiere ajustes");
+      else if (shared.status === "Calificada") setWorkStatus("Calificada");
+      else if (shared.status === "Rechazada") setWorkStatus("Rechazada");
+      else if (shared.status === "En revisión") setWorkStatus("En revisión");
+      if (shared.attempts.length) setAttempts(shared.attempts.map((attempt) => ({
+        number: attempt.number, submittedAt: attempt.submittedAt, answer: attempt.answer,
+        referenceUrl: attempt.referenceUrl,
+        status: shared.status === "Requiere ajustes" ? "Requiere ajustes" : shared.status === "Rechazada" ? "Rechazada" : shared.status === "Calificada" ? "Calificada" : "En revisión",
+      })));
+    };
+
+    window.addEventListener("academia-decom:demo-bridge-updated", refreshReview);
+    window.addEventListener("storage", refreshReview);
+    window.addEventListener("focus", refreshReview);
+    return () => {
+      window.removeEventListener("academia-decom:demo-bridge-updated", refreshReview);
+      window.removeEventListener("storage", refreshReview);
+      window.removeEventListener("focus", refreshReview);
+    };
+  }, [userId, activityId]);
 
   function persistWork(next: DemoWork) {
     if (!storageKey) {
@@ -175,7 +218,7 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
   }
 
   function saveDraft() {
-    if (workStatus === "En revisión" || workStatus === "Calificada") {
+    if (["En revisión", "Calificada", "Rechazada"].includes(workStatus)) {
       setValidationMessage("Esta entrega ya fue enviada. No puedes modificarla en este estado.");
       return;
     }
@@ -192,7 +235,7 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
   function submitWork(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!validateResponse()) return;
-    if (workStatus === "En revisión" || workStatus === "Calificada") {
+    if (workStatus === "En revisión" || workStatus === "Calificada" || workStatus === "Rechazada") {
       setValidationMessage("Esta entrega ya fue enviada y no admite cambios en este estado.");
       return;
     }
@@ -211,8 +254,27 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
       savedAt: new Date().toISOString(),
     };
     if (persistWork(next)) {
+      const shared = readDemoBridge().find((item) => item.studentId === userId && item.activityId === activityId);
+      const bridged = upsertDemoBridgeSubmission({
+        id: String(userId ?? "demo-student") + ":" + activityId,
+        studentId: userId ?? "demo-student",
+        studentName: displayName,
+        activityId,
+        activityTitle: activity.title,
+        course: activity.course,
+        status: "En revisión",
+        attempts: [...(shared?.attempts ?? []), {
+          number: nextAttempt.number, submittedAt: nextAttempt.submittedAt,
+          answer: nextAttempt.answer, referenceUrl: nextAttempt.referenceUrl,
+        }],
+        review: null,
+        updatedAt: new Date().toISOString(),
+      });
+      setSharedReview(null);
       setConfirmation(false);
-      setValidationMessage("Envío simulado registrado localmente. No se ha transmitido al tutor ni al servidor.");
+      setValidationMessage(bridged
+        ? "Envío demo disponible en la bandeja de tutoría de este mismo navegador. No se ha transmitido al servidor."
+        : "El intento se guardó en tu navegador, pero no pudo actualizar la bandeja demo del tutor.");
     }
   }
 
@@ -277,16 +339,16 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
             <div>
               <label htmlFor="activity-answer" className="text-sm font-bold">Tu respuesta</label>
               <p className="mt-1 text-xs text-slate-400">Desarrolla tu análisis con tus propias palabras.</p>
-              <textarea id="activity-answer" value={answer} disabled={workStatus === "En revisión" || workStatus === "Calificada"} onChange={(event) => { setAnswer(event.target.value); setValidationMessage(""); }} rows={9} maxLength={5000} placeholder="Escribe aquí tu propuesta y explica cómo aplicarías los principios de identidad institucional..." className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm leading-6 outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10" />
+              <textarea id="activity-answer" value={answer} disabled={workStatus === "En revisión" || workStatus === "Calificada" || workStatus === "Rechazada"} onChange={(event) => { setAnswer(event.target.value); setValidationMessage(""); }} rows={9} maxLength={5000} placeholder="Escribe aquí tu propuesta y explica cómo aplicarías los principios de identidad institucional..." className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm leading-6 outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10" />
               <div className="mt-1 flex justify-between text-[10px] text-slate-400"><span>Mínimo de prueba: 40 caracteres</span><span>{answer.length}/5000</span></div>
             </div>
             <div>
               <label htmlFor="reference-url" className="text-sm font-bold">Enlace de referencia <span className="font-normal text-slate-400">(opcional)</span></label>
-              <input id="reference-url" type="url" value={referenceUrl} disabled={workStatus === "En revisión" || workStatus === "Calificada"} onChange={(event) => { setReferenceUrl(event.target.value); setValidationMessage(""); }} placeholder="https://..." className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-[#087DB5]" />
+              <input id="reference-url" type="url" value={referenceUrl} disabled={workStatus === "En revisión" || workStatus === "Calificada" || workStatus === "Rechazada"} onChange={(event) => { setReferenceUrl(event.target.value); setValidationMessage(""); }} placeholder="https://..." className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-[#087DB5]" />
             </div>
-            <label className="flex items-start gap-3 text-xs leading-5 text-slate-500"><input type="checkbox" checked={confirmation} disabled={workStatus === "En revisión" || workStatus === "Calificada"} onChange={(event) => { setConfirmation(event.target.checked); setValidationMessage(""); }} className="mt-0.5 h-4 w-4 accent-[#087DB5]" /><span>Confirmo que esta respuesta es de mi autoría y que he revisado las instrucciones.</span></label>
+            <label className="flex items-start gap-3 text-xs leading-5 text-slate-500"><input type="checkbox" checked={confirmation} disabled={workStatus === "En revisión" || workStatus === "Calificada" || workStatus === "Rechazada"} onChange={(event) => { setConfirmation(event.target.checked); setValidationMessage(""); }} className="mt-0.5 h-4 w-4 accent-[#087DB5]" /><span>Confirmo que esta respuesta es de mi autoría y que he revisado las instrucciones.</span></label>
             {validationMessage && <p role="status" className={`rounded-xl p-3 text-xs leading-5 ${validationMessage.startsWith("Validación") ? "bg-teal-50 text-teal-800" : "bg-amber-50 text-amber-800"}`}>{validationMessage}</p>}
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap"><button type="button" onClick={saveDraft} disabled={workStatus === "En revisión" || workStatus === "Calificada"} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40">Guardar borrador</button><button type="submit" disabled={workStatus === "En revisión" || workStatus === "Calificada"} className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white hover:bg-[#066a9b] disabled:cursor-not-allowed disabled:opacity-40">{workStatus === "Requiere ajustes" ? "Enviar nueva versión" : "Enviar actividad (demo)"}</button></div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap"><button type="button" onClick={saveDraft} disabled={workStatus === "En revisión" || workStatus === "Calificada" || workStatus === "Rechazada"} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40">Guardar borrador</button><button type="submit" disabled={workStatus === "En revisión" || workStatus === "Calificada" || workStatus === "Rechazada"} className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white hover:bg-[#066a9b] disabled:cursor-not-allowed disabled:opacity-40">{workStatus === "Requiere ajustes" ? "Enviar nueva versión" : "Enviar actividad (demo)"}</button></div>
           </form>
         </section>
 
@@ -300,10 +362,11 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
               <div><p className="text-[10px] font-semibold text-slate-400">ESTADO</p><span className="mt-1 inline-flex rounded-full bg-sky-50 px-2.5 py-1 text-[10px] font-bold text-sky-800">{workStatus} · Demo</span>{savedAt && <p className="mt-1 text-[10px] text-slate-400">Último cambio: {new Date(savedAt).toLocaleString("es-CO")}</p>}</div>
             </div>
           </section>
+          {sharedReview && <section className="rounded-3xl border border-teal-200 bg-teal-50 p-5"><h2 className="text-sm font-bold text-teal-900">Retroalimentación del tutor · demo</h2><p className="mt-2 text-xs font-semibold text-teal-800">{sharedReview.decision} · {new Date(sharedReview.reviewedAt).toLocaleString("es-CO")}</p><p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-teal-900">{sharedReview.feedback || "El tutor no agregó observaciones."}</p>{sharedReview.decision === "Solicitar ajustes" && <p className="mt-3 text-xs font-semibold text-teal-900">Puedes preparar una nueva versión y enviarla como siguiente intento.</p>}</section>}
           {attempts.length > 0 && <section className="rounded-3xl border border-slate-200 bg-white p-5"><h2 className="text-sm font-bold">Historial de intentos</h2><ol className="mt-3 space-y-3">{attempts.map((attempt) => <li key={attempt.number} className="border-l-2 border-[#19A7A0] pl-3"><p className="text-xs font-semibold">Intento {attempt.number} · {attempt.status}</p><p className="mt-1 text-[10px] text-slate-400">{new Date(attempt.submittedAt).toLocaleString("es-CO")}</p><p className="mt-1 line-clamp-3 text-xs leading-5 text-slate-500">{attempt.answer}</p></li>)}</ol></section>}
           <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5">
             <h2 className="text-sm font-bold text-amber-900">Importante</h2>
-            <p className="mt-2 text-xs leading-5 text-amber-800">El borrador y los intentos de demostración se guardan únicamente en el almacenamiento local de este navegador y de esta sesión. No se envían al tutor ni al servidor; la conexión real requiere tablas, políticas y reglas de reenvío aprobadas.</p>
+            <p className="mt-2 text-xs leading-5 text-amber-800">El borrador y los intentos de demostración se guardan en el almacenamiento local de este navegador. Los envíos aparecen en la bandeja demo del tutor y su retroalimentación puede volver a esta vista solo dentro del mismo navegador; no existe sincronización entre dispositivos ni persistencia de servidor.</p>
           </section>
           <button type="button" onClick={() => router.push("/dashboard/estudiante/leccion/coherencia-mensajes")} className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-600 hover:bg-slate-50">← Volver a la lección</button>
         </aside>
