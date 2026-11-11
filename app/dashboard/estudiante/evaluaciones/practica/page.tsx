@@ -133,9 +133,8 @@ export default function PracticeAssessmentPage() {
       });
       setAttempts(next);
       setSubmittedAttempt(attempt);
-      if (!queueSaved) setStorageError("El intento quedó guardado en tu historial local, pero no se pudo compartir con la bandeja demo del tutor.");
       setShowConfirm(false);
-      setStorageError("");
+      setStorageError(queueSaved ? "" : "El intento quedó guardado en tu historial local, pero no se pudo compartir con la bandeja demo del tutor.");
     } catch (error) {
       console.error("No fue posible guardar el intento:", error);
       setStorageError("No se pudo guardar el intento. Comprueba el espacio disponible en el navegador e inténtalo de nuevo.");
