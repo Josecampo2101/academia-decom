@@ -6,8 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import { readDemoBridge, upsertDemoBridgeSubmission, type DemoBridgeReview } from "@/lib/academic/demo-bridge";
 
 type AccessState = "checking" | "allowed" | "denied" | "error";
-type DemoSubmissionStatus = "Sin guardar" | "Borrador" | "En revisión" | "Requiere ajustes" | "Calificada";
-type DemoAttempt = { number: number; submittedAt: string; answer: string; referenceUrl: string; status: "En revisión" | "Requiere ajustes" | "Calificada" };
+type DemoSubmissionStatus = "Sin guardar" | "Borrador" | "En revisión" | "Requiere ajustes" | "Calificada" | "Rechazada";
+type DemoAttempt = { number: number; submittedAt: string; answer: string; referenceUrl: string; status: "En revisión" | "Requiere ajustes" | "Calificada" | "Rechazada" };
 type DemoWork = { answer: string; referenceUrl: string; status: DemoSubmissionStatus; attempts: DemoAttempt[]; savedAt: string | null };
 
 const activities: Record<string, {
@@ -119,12 +119,13 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
       if (shared) {
         setSharedReview(shared.review);
         if (shared.status === "Requiere ajustes") setWorkStatus("Requiere ajustes");
-        else if (shared.status === "Calificada" || shared.status === "Rechazada") setWorkStatus("Calificada");
+        else if (shared.status === "Calificada") setWorkStatus("Calificada");
+        else if (shared.status === "Rechazada") setWorkStatus("Rechazada");
         else if (shared.status === "En revisión") setWorkStatus("En revisión");
         if (shared.attempts.length) setAttempts(shared.attempts.map((attempt) => ({
           number: attempt.number, submittedAt: attempt.submittedAt, answer: attempt.answer,
           referenceUrl: attempt.referenceUrl,
-          status: shared.status === "Requiere ajustes" ? "Requiere ajustes" : shared.status === "Calificada" || shared.status === "Rechazada" ? "Calificada" : "En revisión",
+          status: shared.status === "Requiere ajustes" ? "Requiere ajustes" : shared.status === "Rechazada" ? "Rechazada" : shared.status === "Calificada" ? "Calificada" : "En revisión",
         })));
       }
       const raw = window.localStorage.getItem(storageKey);
@@ -217,7 +218,7 @@ export default function StudentActivityClient({ activityId }: { activityId: stri
   }
 
   function saveDraft() {
-    if (workStatus === "En revisión" || workStatus === "Calificada") {
+    if (workStatus === "En revisión" || workStatus === "Calificada" || workStatus === "Rechazada") {
       setValidationMessage("Esta entrega ya fue enviada. No puedes modificarla en este estado.");
       return;
     }
