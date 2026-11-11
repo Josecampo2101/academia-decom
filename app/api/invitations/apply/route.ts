@@ -1,9 +1,11 @@
 import { createHash } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+import {
+  isValidDateOfBirth,
+  isValidEmail,
+  isValidUuid,
+} from "@/lib/invitations/validation.mjs";
 
 type RequestBody = {
   action?: "validate" | "submit";
@@ -23,6 +25,7 @@ const json = (body: unknown, status = 200) =>
     headers: {
       "Cache-Control": "no-store, max-age=0",
       "X-Content-Type-Options": "nosniff",
+      "Referrer-Policy": "no-referrer",
     },
   });
 
@@ -30,10 +33,13 @@ function hashInvitationToken(token: string) {
   return createHash("sha256").update(token, "utf8").digest("hex");
 }
 
-async function verifyCaptcha(token: string, request: NextRequest) {
-  const secret = process.env.TURNSTILE_SECRET_KEY;
+const TURNSTILE_ACTION = "invitation_application";
 
-  if (!secret) {
+async function verifyCaptcha(token: string) {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  const expectedHost = process.env.TURNSTILE_EXPECTED_HOSTNAME;
+
+  if (!secret || !expectedHost) {
     return { ok: false, unavailable: true };
   }
 
@@ -41,11 +47,6 @@ async function verifyCaptcha(token: string, request: NextRequest) {
     secret,
     response: token,
   });
-  const forwardedFor = request.headers.get("x-forwarded-for");
-  const remoteIp = forwardedFor?.split(",")[0]?.trim();
-
-  if (remoteIp) form.set("remoteip", remoteIp);
-
   try {
     const response = await fetch(
       "https://challenges.cloudflare.com/turnstile/v0/siteverify",
@@ -66,12 +67,11 @@ async function verifyCaptcha(token: string, request: NextRequest) {
       action?: string;
     };
 
-    const expectedHost = process.env.TURNSTILE_EXPECTED_HOSTNAME;
-    const hostnameMatches =
-      !expectedHost || result.hostname === expectedHost;
-
     return {
-      ok: result.success === true && hostnameMatches,
+      ok:
+        result.success === true &&
+        result.hostname === expectedHost &&
+        result.action === TURNSTILE_ACTION,
       unavailable: false,
     };
   } catch {
@@ -79,22 +79,67 @@ async function verifyCaptcha(token: string, request: NextRequest) {
   }
 }
 
-function isValidUuid(value: string) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-    value
-  );
+
+async function readBodyWithLimit(request: NextRequest, maxBytes: number) {
+  const reader = request.body?.getReader();
+  if (!reader) return "";
+
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      totalBytes += value.byteLength;
+      if (totalBytes > maxBytes) {
+        await reader.cancel();
+        throw new Error("BODY_TOO_LARGE");
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const body = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  return new TextDecoder("utf-8", { fatal: true }).decode(body);
 }
 
 export async function POST(request: NextRequest) {
   let body: RequestBody;
 
-  try {
-    const contentLength = Number(request.headers.get("content-length") ?? 0);
-    if (contentLength > 12_000) {
+  if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) {
+    return json({ error: "El formato de la solicitud no es válido." }, 415);
+  }
+
+  const contentLengthHeader = request.headers.get("content-length");
+  if (contentLengthHeader) {
+    if (!/^\d+$/.test(contentLengthHeader)) {
+      return json({ error: "La longitud de la solicitud no es válida." }, 400);
+    }
+    if (Number(contentLengthHeader) > 12_000) {
       return json({ error: "La solicitud es demasiado grande." }, 413);
     }
-    body = (await request.json()) as RequestBody;
-  } catch {
+  }
+
+  try {
+    const rawBody = await readBodyWithLimit(request, 12_000);
+    body = JSON.parse(rawBody) as RequestBody;
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return json({ error: "El cuerpo de la solicitud no es válido." }, 400);
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message === "BODY_TOO_LARGE") {
+      return json({ error: "La solicitud es demasiado grande." }, 413);
+    }
     return json({ error: "No se pudo leer la solicitud." }, 400);
   }
 
@@ -113,7 +158,7 @@ export async function POST(request: NextRequest) {
     return json({ error: "Completa la verificación de seguridad." }, 400);
   }
 
-  const captcha = await verifyCaptcha(captchaToken, request);
+  const captcha = await verifyCaptcha(captchaToken);
   if (captcha.unavailable) {
     return json(
       { error: "La verificación de seguridad no está disponible. Inténtalo más tarde." },
@@ -212,27 +257,14 @@ export async function POST(request: NextRequest) {
   if (fullName.length < 3 || fullName.length > 140) {
     return json({ error: "Ingresa tu nombre completo." }, 400);
   }
-  if (
-    email.length > 254 ||
-    !/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/i.test(
-      email
-    )
-  ) {
+  if (!isValidEmail(email)) {
     return json({ error: "Ingresa un correo electrónico válido." }, 400);
   }
   const phoneDigits = phone.replace(/\D/g, "");
   if (phone.length > 40 || phoneDigits.length < 7 || phoneDigits.length > 20) {
     return json({ error: "Ingresa un número de WhatsApp válido." }, 400);
   }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth)) {
-    return json({ error: "Ingresa una fecha de nacimiento válida." }, 400);
-  }
-  const birthDate = new Date(`${dateOfBirth}T00:00:00.000Z`);
-  if (
-    Number.isNaN(birthDate.getTime()) ||
-    birthDate.toISOString().slice(0, 10) !== dateOfBirth ||
-    birthDate.getTime() > Date.now()
-  ) {
+  if (!isValidDateOfBirth(dateOfBirth)) {
     return json({ error: "La fecha de nacimiento no es válida." }, 400);
   }
   if (!isValidUuid(congregationId)) {

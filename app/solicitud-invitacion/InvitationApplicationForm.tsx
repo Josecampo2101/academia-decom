@@ -20,6 +20,7 @@ declare global {
         container: HTMLElement,
         options: {
           sitekey: string;
+          action: string;
           callback: (token: string) => void;
           "expired-callback"?: () => void;
           "error-callback"?: () => void;
@@ -64,6 +65,7 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
 
     const widgetId = window.turnstile.render(captchaContainer.current, {
       sitekey: siteKey,
+      action: "invitation_application",
       theme: "light",
       callback: (value) => setCaptchaToken(value),
       "expired-callback": () => setCaptchaToken(""),
