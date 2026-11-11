@@ -83,14 +83,14 @@ export default function CongregationsPage() {
   const [error, setError] = useState("");
 
   const loadData = useCallback(async () => {
-    setLoading(true);
-    setError("");
-
     try {
       const {
         data: { user },
         error: authError,
       } = await supabase.auth.getUser();
+
+      setLoading(true);
+      setError("");
 
       if (authError) throw authError;
 
