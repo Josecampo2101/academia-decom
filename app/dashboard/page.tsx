@@ -101,6 +101,18 @@ export default function DashboardPage() {
       return;
     }
 
+    const hasManagementRole = roleKeys.some((role) =>
+      ["national_admin", "district_coordinator", "area_coordinator", "academic_editor", "local_responsible"].includes(role)
+    );
+    if (moduleName === "Seguimiento" && hasManagementRole && !isStudent) {
+      router.push("/dashboard/espacio");
+      return;
+    }
+    if (moduleName === "Mi formación" && hasManagementRole && !isStudent) {
+      router.push("/dashboard/espacio");
+      return;
+    }
+
     if (!isStudent) return;
 
     const destinations: Record<string, string> = {
