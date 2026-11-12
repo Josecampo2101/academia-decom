@@ -84,7 +84,7 @@ export default function ManualAssessmentReviewInbox() {
           studentLabel: profileById.get(attempt.user_id) ?? "Estudiante",
           responses: (responsesByAttempt.get(attempt.id) ?? []).sort((a, b) => (questionById.get(a.question_id)?.sort_order ?? 0) - (questionById.get(b.question_id)?.sort_order ?? 0)),
         };
-      });
+      }).filter((item) => item.responses.length > 0);
       setItems(next);
       setSelectedId((current) => next.some((item) => item.attempt.id === current) ? current : next[0]?.attempt.id ?? "");
       setNotice("");
