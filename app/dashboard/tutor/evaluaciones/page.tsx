@@ -11,7 +11,6 @@ export default function TutorManualAssessmentReviewsPage() {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const [access, setAccess] = useState<AccessState>("checking");
-  const [tutorId, setTutorId] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -38,7 +37,6 @@ export default function TutorManualAssessmentReviewsPage() {
         if (!active) return;
         const keys = (roles ?? []).map((role) => role.role_key);
         if (keys.includes("tutor") || keys.includes("academic_editor") || keys.includes("national_admin")) {
-          setTutorId(user.id);
           setAccess("allowed");
         } else {
           setAccess("denied");
