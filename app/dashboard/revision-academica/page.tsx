@@ -24,25 +24,33 @@ export default function AcademicReviewPage() {
   const [districts,setDistricts] = useState<District[]>([]);
   const [districtId,setDistrictId] = useState("all");
   const [plans,setPlans] = useState<Plan[]>([]);
+  const [approvedPlans,setApprovedPlans] = useState<Plan[]>([]);
   const [lessons,setLessons] = useState<Lesson[]>([]);
   const [modules,setModules] = useState<Module[]>([]);
   const [courses,setCourses] = useState<Course[]>([]);
+  const [programs,setPrograms] = useState<Program[]>([]);
   const [authors,setAuthors] = useState<Profile[]>([]);
   const [materials,setMaterials] = useState<Material[]>([]);
   const [feedback,setFeedback] = useState<Record<string,string>>({});
 
   const loadQueue = useCallback(async (ids:string[]) => {
     if(!ids.length){setPlans([]);return;}
-    const {data,error:queryError}=await supabase.from("academic_lesson_plans")
-      .select("id,district_id,lesson_id,session_title,topic,description,target_audience,learning_outcomes,teaching_method,opening_activity,lesson_development,closing_activity,assessment_strategy,homework,planned_for,estimated_minutes,created_by,created_at,review_feedback")
-      .eq("status","review").in("district_id",ids).order("created_at",{ascending:true});
-    if(queryError)throw queryError;
-    const rows=(data??[]) as Plan[];
+    const selectFields="id,district_id,lesson_id,session_title,topic,description,target_audience,learning_outcomes,teaching_method,opening_activity,lesson_development,closing_activity,assessment_strategy,homework,planned_for,estimated_minutes,created_by,created_at,review_feedback";
+    const [reviewResult,approvedResult]=await Promise.all([
+      supabase.from("academic_lesson_plans").select(selectFields).eq("status","review").in("district_id",ids).order("created_at",{ascending:true}),
+      supabase.from("academic_lesson_plans").select(selectFields).eq("status","approved").in("district_id",ids).order("created_at",{ascending:false}).limit(100),
+    ]);
+    if(reviewResult.error)throw reviewResult.error;
+    if(approvedResult.error)throw approvedResult.error;
+    const rows=(reviewResult.data??[]) as Plan[];
+    const approvedRows=(approvedResult.data??[]) as Plan[];
     setPlans(rows);
-    const lessonIds=[...new Set(rows.map(p=>p.lesson_id))];
-    const authorIds=[...new Set(rows.map(p=>p.created_by).filter(Boolean))] as string[];
-    if(!lessonIds.length){setLessons([]);setModules([]);setCourses([]);setAuthors([]);setMaterials([]);return;}
-    const {data:lessonRows,error:lessonError}=await supabase.from("lessons").select("id,title,module_id").in("id",lessonIds);
+    setApprovedPlans(approvedRows);
+    const allPlans=[...rows,...approvedRows];
+    const lessonIds=[...new Set(allPlans.map(p=>p.lesson_id))];
+    const authorIds=[...new Set(allPlans.map(p=>p.created_by).filter(Boolean))] as string[];
+    if(!lessonIds.length){setLessons([]);setModules([]);setCourses([]);setPrograms([]);setAuthors([]);setMaterials([]);return;}
+    const {data:lessonRows,error:lessonError}=await supabase.from("lessons").select("id,title,module_id,status").in("id",lessonIds);
     if(lessonError)throw lessonError;
     const lessonData=(lessonRows??[]) as Lesson[];
     setLessons(lessonData);
@@ -52,14 +60,19 @@ export default function AcademicReviewPage() {
     if(materialError)throw materialError;
     setMaterials((materialRows??[]) as Material[]);
     const moduleIds=[...new Set(lessonData.map(l=>l.module_id))];
-    const {data:moduleRows,error:moduleError}=moduleIds.length?await supabase.from("course_modules").select("id,title,course_id").in("id",moduleIds):{data:[],error:null};
+    const {data:moduleRows,error:moduleError}=moduleIds.length?await supabase.from("course_modules").select("id,title,course_id,status").in("id",moduleIds):{data:[],error:null};
     if(moduleError)throw moduleError;
     const moduleData=(moduleRows??[]) as Module[];
     setModules(moduleData);
     const courseIds=[...new Set(moduleData.map(m=>m.course_id))];
-    const {data:courseRows,error:courseError}=courseIds.length?await supabase.from("courses").select("id,title").in("id",courseIds):{data:[],error:null};
+    const {data:courseRows,error:courseError}=courseIds.length?await supabase.from("courses").select("id,title,program_id,status").in("id",courseIds):{data:[],error:null};
     if(courseError)throw courseError;
-    setCourses((courseRows??[]) as Course[]);
+    const courseData=(courseRows??[]) as Course[];
+    setCourses(courseData);
+    const programIds=[...new Set(courseData.map(item=>item.program_id))];
+    const {data:programRows,error:programError}=programIds.length?await supabase.from("academic_programs").select("id,status").in("id",programIds):{data:[],error:null};
+    if(programError)throw programError;
+    setPrograms((programRows??[]) as Program[]);
     const {data:authorRows,error:authorError}=authorIds.length?await supabase.from("profiles").select("id,full_name").in("id",authorIds):{data:[],error:null};
     if(authorError)throw authorError;
     setAuthors((authorRows??[]) as Profile[]);
@@ -104,6 +117,25 @@ export default function AcademicReviewPage() {
       if(urlError)throw urlError;
       const anchor=document.createElement("a");anchor.href=data.signedUrl;anchor.target="_blank";anchor.rel="noopener noreferrer";anchor.click();
     }
+  }
+
+  function canPublishMaterial(item:Material){
+    const lesson=lessons.find(l=>l.id===item.lesson_id);
+    const courseModule=modules.find(m=>m.id===lesson?.module_id);
+    const course=courses.find(c=>c.id===courseModule?.course_id);
+    const program=programs.find(p=>p.id===course?.program_id);
+    return lesson?.status==="published"&&courseModule?.status==="published"&&course?.status==="published"&&program?.status==="published";
+  }
+
+  async function publishMaterial(item:Material){
+    setBusyId(item.id);setError("");setNotice("");
+    try{
+      const {error:updateError}=await supabase.from("lesson_materials").update({status:"published"}).eq("id",item.id).eq("status","draft");
+      if(updateError)throw updateError;
+      setMaterials(current=>current.map(material=>material.id===item.id?{...material,status:"published"}:material));
+      setNotice("Material publicado para el estudiante.");
+    }catch(e){setError(e instanceof Error?e.message:"No fue posible publicar el material. Verifica que la lección y todos sus niveles estén publicados.");}
+    finally{setBusyId("");}
   }
 
   async function decide(plan:Plan,status:"approved"|"changes_requested"){
@@ -156,5 +188,9 @@ export default function AcademicReviewPage() {
       <label className="mt-5 block text-sm font-semibold">Observaciones de revisión<textarea value={feedback[plan.id]??""} onChange={e=>setFeedback(current=>({...current,[plan.id]:e.target.value}))} rows={3} placeholder="Indica qué debe corregir el tutor o deja una recomendación..." className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm font-normal"/></label>
       <div className="mt-4 flex flex-wrap justify-end gap-3"><button disabled={busyId===plan.id} onClick={()=>void decide(plan,"changes_requested")} className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800 disabled:opacity-50">Solicitar ajustes</button><button disabled={busyId===plan.id} onClick={()=>void decide(plan,"approved")} className="rounded-xl bg-[#19A7A0] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50">{busyId===plan.id?"Guardando...":"Aprobar planificación"}</button></div>
     </article>})}</div>}
+    <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+      <div><h2 className="text-xl font-bold">Materiales de clases aprobadas</h2><p className="mt-1 text-sm text-slate-500">Cuando la lección, el módulo, el curso y el programa estén publicados, puedes habilitar sus recursos para los estudiantes.</p></div>
+      {!approvedPlans.some(plan=>materials.some(item=>item.lesson_id===plan.lesson_id&&item.status==="draft"))?<p className="mt-4 rounded-xl border border-dashed border-slate-200 p-5 text-sm text-slate-500">No hay materiales en borrador asociados a planificaciones aprobadas.</p>:<div className="mt-4 space-y-3">{approvedPlans.map(plan=>{const pending=materials.filter(item=>item.lesson_id===plan.lesson_id&&item.status==="draft");if(!pending.length)return null;return <article key={plan.id} className="rounded-xl border border-slate-100 p-4"><p className="font-semibold">{plan.session_title}</p><p className="mt-1 text-xs text-slate-500">{lessonTitle(plan.lesson_id)} · {hierarchy(plan.lesson_id)}</p><div className="mt-3 space-y-2">{pending.map(item=><div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-slate-50 p-3"><div><p className="text-sm font-semibold">{item.title}</p><p className="text-xs text-slate-500">{item.material_type} · {item.description??"Sin descripción"}</p></div><div className="flex gap-2">{(item.storage_path||item.external_url)&&<button onClick={()=>void openMaterial(item).catch(e=>setError(e.message))} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold">Vista previa</button>}<button disabled={busyId===item.id||!canPublishMaterial(item)} title={!canPublishMaterial(item)?"Publica primero la lección y sus niveles curriculares.":""} onClick={()=>void publishMaterial(item)} className="rounded-lg bg-[#19A7A0] px-3 py-2 text-xs font-semibold text-white disabled:opacity-40">{busyId===item.id?"Publicando...":"Publicar recurso"}</button></div></div>)}</div></article>})}</div>}
+    </section>
   </div></main>;
 }
