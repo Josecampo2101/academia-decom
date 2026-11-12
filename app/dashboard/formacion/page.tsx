@@ -84,14 +84,16 @@ export default function FormationPage() {
   },[router,supabase]);
 
   useEffect(()=>{
-    if(!selectedEnrollmentId)return;
-    const selected=enrollments.find(item=>item.id===selectedEnrollmentId);
-    const availableModules=modules.filter(item=>item.course_id===selected?.course_id);
-    const availableLessons=lessons.filter(item=>availableModules.some(module=>module.id===item.module_id));
-    if(!availableLessons.some(item=>item.id===selectedLessonId))setSelectedLessonId(availableLessons[0]?.id??"");
+    void Promise.resolve().then(()=>{
+      if(!selectedEnrollmentId)return;
+      const selected=enrollments.find(item=>item.id===selectedEnrollmentId);
+      const availableModules=modules.filter(item=>item.course_id===selected?.course_id);
+      const availableLessons=lessons.filter(item=>availableModules.some(itemModule=>itemModule.id===item.module_id));
+      if(!availableLessons.some(item=>item.id===selectedLessonId))setSelectedLessonId(availableLessons[0]?.id??"");
+    });
   },[selectedEnrollmentId,enrollments,modules,lessons,selectedLessonId]);
 
-  useEffect(()=>{if(selectedLessonId)void loadMaterials(selectedLessonId).catch(e=>setError(e.message));},[selectedLessonId,loadMaterials]);
+  useEffect(()=>{if(selectedLessonId)void Promise.resolve().then(()=>loadMaterials(selectedLessonId)).catch(e=>setError(e.message));},[selectedLessonId,loadMaterials]);
 
   async function completeLesson(){
     if(!enrollment||!selectedLesson)return;
