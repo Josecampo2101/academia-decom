@@ -172,7 +172,7 @@ export default function RoleWorkspacePage() {
         <div className="grid gap-4 sm:grid-cols-3">
           <Metric label="Cursos asignados" value={enrollments.length} detail="Matrículas registradas en tu cuenta" />
           <Metric label="En curso" value={enrollments.filter(e => e.status === "active").length} detail="Puedes continuar cuando el contenido esté publicado" />
-          <Metric label="Cursos aprobados" value={enrollments.filter(e => e.status === "completed").length} detail="La aprobación final se conectará al módulo de evaluaciones" />
+          <Metric label="Cursos aprobados" value={enrollments.filter(e => e.status === "completed").length} detail="La aprobación se confirma mediante el examen final de cada curso" />
         </div>
         <div className="mt-4 space-y-3">
           {enrollments.length ? enrollments.map(e => {
@@ -182,7 +182,7 @@ export default function RoleWorkspacePage() {
             </article>;
           }) : <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-7 text-center"><p className="font-semibold">Todavía no tienes cursos asignados.</p><p className="mt-1 text-sm text-slate-500">Cuando la dirección académica registre tu matrícula, aparecerá aquí tu ruta de aprendizaje.</p></div>}
         </div>
-        <button onClick={() => router.push("/dashboard/formacion")} className="mt-4 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white hover:bg-[#066895]">Abrir mi formación</button>
+        <div className="mt-4 flex flex-wrap gap-3"><button onClick={() => router.push("/dashboard/formacion")} className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white hover:bg-[#066895]">Abrir mi formación</button><button onClick={() => router.push("/dashboard/estudiante/evaluaciones")} className="rounded-xl border border-[#087DB5] bg-white px-5 py-3 text-sm font-semibold text-[#087DB5] hover:bg-sky-50">Mis evaluaciones</button></div>
       </section>}
 
       {isDistrict && <section className="mt-7">
