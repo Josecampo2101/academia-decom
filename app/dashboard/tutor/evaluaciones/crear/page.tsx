@@ -147,7 +147,7 @@ export default function CreateAssessmentPage() {
         : [];
     let answerKey: string | string[] = answerText.trim();
     if (questionType === "multiple_choice") {
-      answerKey = answerText.split(",").map((value) => value.trim()).filter(Boolean);
+      answerKey = answerText.split(",").map((value) => value.trim()).filter(Boolean).sort((left, right) => left.localeCompare(right, "es"));
     }
     if (["single_choice", "multiple_choice", "true_false"].includes(questionType) &&
       (!options.length || !answerKey || (Array.isArray(answerKey) && !answerKey.length))) {
