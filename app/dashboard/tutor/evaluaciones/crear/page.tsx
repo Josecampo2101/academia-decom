@@ -154,6 +154,11 @@ export default function CreateAssessmentPage() {
       setNotice("Configura las opciones y la respuesta correcta antes de guardar.");
       return;
     }
+    const selectedKeys = Array.isArray(answerKey) ? answerKey : [answerKey];
+    if (questionType !== "short_answer" && selectedKeys.some((value) => !options.includes(value))) {
+      setNotice("La respuesta correcta debe coincidir exactamente con una o más opciones disponibles.");
+      return;
+    }
     setSaving(true);
     const { error } = await supabase.rpc("save_academic_assessment_question", {
       p_assessment_id: selectedAssessmentId,
