@@ -1,13 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 type DbStatus = "draft" | "published" | "archived";
 type Level = "program" | "course" | "module" | "lesson";
 type District = { id: string; name: string };
-type Lesson = { id: string; title: string; summary: string; duration: number | null; status: DbStatus; sortOrder: number; content: Record<string, unknown> };
+type Lesson = { id: string; title: string; summary: string; objectives: string[]; duration: number | null; status: DbStatus; sortOrder: number; content: Record<string, unknown> };
 type Module = { id: string; title: string; description: string; status: DbStatus; sortOrder: number; lessons: Lesson[] };
 type Course = { id: string; code: string; title: string; description: string; status: DbStatus; sortOrder: number; modules: Module[] };
 type Program = { id: string; code: string; title: string; description: string; status: DbStatus; sortOrder: number; courses: Course[] };
@@ -54,6 +54,9 @@ export default function AcademicCatalogPage() {
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("15");
   const [lessonContent, setLessonContent] = useState("");
+  const [lessonObjectives, setLessonObjectives] = useState("");
+  const [showLessonPreview, setShowLessonPreview] = useState(false);
+  const [importingLessonFile, setImportingLessonFile] = useState(false);
   const [selectedProgramId, setSelectedProgramId] = useState("");
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const [selectedModuleId, setSelectedModuleId] = useState("");
@@ -197,6 +200,7 @@ export default function AcademicCatalogPage() {
                     id: lesson.id,
                     title: lesson.title,
                     summary: lesson.summary ?? "",
+                    objectives: lesson.objectives ?? [],
                     duration: lesson.estimated_minutes,
                     status: lesson.status as DbStatus,
                     sortOrder: lesson.sort_order,
@@ -269,17 +273,57 @@ export default function AcademicCatalogPage() {
     setDescription("");
     setDuration("15");
     setLessonContent("");
+    setLessonObjectives("");
+    setShowLessonPreview(false);
     setShowForm(true);
   }
 
   function openEdit(nextLevel: Level, item: Program | Course | Module | Lesson) {
+    if (item.status !== "draft") {
+      setNotice("Los elementos publicados o archivados están protegidos. Para actualizarlos se debe crear una nueva versión curricular.");
+      setNoticeError(true);
+      return;
+    }
+    setNoticeError(false);
     setLevel(nextLevel);
     setEditingId(item.id);
     setTitle(item.title);
     setDescription(nextLevel === "lesson" ? (item as Lesson).summary : "description" in item ? item.description : "");
     setDuration(nextLevel === "lesson" ? String((item as Lesson).duration ?? 15) : "15");
     setLessonContent(nextLevel === "lesson" ? String((item as Lesson).content.markdown ?? "") : "");
+    setLessonObjectives(nextLevel === "lesson" ? ((item as Lesson).objectives ?? []).join("\n") : "");
+    setShowLessonPreview(false);
     setShowForm(true);
+  }
+
+  async function handleLessonFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.currentTarget.files?.[0];
+    event.currentTarget.value = "";
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      setNotice("El archivo supera el límite de 2 MB. Divide el material en partes más pequeñas.");
+      setNoticeError(true);
+      return;
+    }
+    if (!/\\.(md|markdown|txt)$/i.test(file.name)) {
+      setNotice("Por ahora puedes importar archivos Markdown (.md) o texto plano (.txt).");
+      setNoticeError(true);
+      return;
+    }
+    setImportingLessonFile(true);
+    try {
+      const text = await file.text();
+      if (!text.trim()) throw new Error("El archivo está vacío.");
+      setLessonContent(text);
+      setShowLessonPreview(false);
+      setNotice(`Contenido importado desde ${file.name}. Revisa el texto antes de guardar.`);
+      setNoticeError(false);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "No fue posible leer el archivo.");
+      setNoticeError(true);
+    } finally {
+      setImportingLessonFile(false);
+    }
   }
 
   async function saveItem(event: FormEvent<HTMLFormElement>) {
@@ -304,7 +348,7 @@ export default function AcademicCatalogPage() {
         } else {
           const minutes = Number(duration);
           if (!Number.isInteger(minutes) || minutes < 1 || minutes > 600) throw new Error("La duración debe ser un número entero entre 1 y 600 minutos.");
-          const { error } = await supabase.from("lessons").update({ title: cleanTitle, summary: description.trim() || null, content: { markdown: lessonContent.trim() }, estimated_minutes: minutes }).eq("id", editingId).eq("district_id", selectedDistrictId);
+          const { error } = await supabase.from("lessons").update({ title: cleanTitle, summary: description.trim() || null, content: { markdown: lessonContent.trim() }, objectives: lessonObjectives.split("\n").map((item) => item.trim()).filter(Boolean), estimated_minutes: minutes }).eq("id", editingId).eq("district_id", selectedDistrictId);
           if (error) throw error;
         }
       } else if (level === "program") {
@@ -352,6 +396,7 @@ export default function AcademicCatalogPage() {
           title: cleanTitle,
           summary: description.trim() || null,
           content: lessonContent.trim() ? { markdown: lessonContent.trim() } : {},
+          objectives: lessonObjectives.split("\n").map((item) => item.trim()).filter(Boolean),
           estimated_minutes: minutes,
           status: "draft",
           sort_order: selectedModule.lessons.length,
@@ -488,7 +533,7 @@ export default function AcademicCatalogPage() {
           <form onSubmit={saveItem} className="mt-5 space-y-4">
             <label className="block text-xs font-semibold text-slate-600">Nombre<input autoFocus required maxLength={160} value={title} onChange={(event) => setTitle(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none focus:border-[#087DB5]" placeholder={level === "lesson" ? "Ej. Introducción y objetivos" : "Escribe un nombre descriptivo"} /></label>
             {(level === "program" || level === "course" || level === "module") && <label className="block text-xs font-semibold text-slate-600">Descripción<textarea rows={3} maxLength={500} value={description} onChange={(event) => setDescription(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none focus:border-[#087DB5]" placeholder="Propósito y alcance formativo." /></label>}
-            {level === "lesson" && <><label className="block text-xs font-semibold text-slate-600">Resumen<textarea rows={2} maxLength={500} value={description} onChange={(event) => setDescription(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm" placeholder="Breve descripción de la lección." /></label><label className="block text-xs font-semibold text-slate-600">Contenido de la lección<textarea required rows={5} value={lessonContent} onChange={(event) => setLessonContent(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm" placeholder="Escribe el contenido base de la lección." /></label><label className="block text-xs font-semibold text-slate-600">Duración estimada (minutos)<input required type="number" min="1" max="600" value={duration} onChange={(event) => setDuration(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm" /></label></>}
+            {level === "lesson" && <><label className="block text-xs font-semibold text-slate-600">Resumen<textarea rows={2} maxLength={500} value={description} onChange={(event) => setDescription(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm" placeholder="Breve descripción de la lección." /></label><label className="block text-xs font-semibold text-slate-600">Objetivos de aprendizaje <span className="font-normal text-slate-400">(uno por línea)</span><textarea rows={3} maxLength={3000} value={lessonObjectives} onChange={(event) => setLessonObjectives(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm" placeholder="Identificar el propósito del DECOM.\nReconocer su relación con la misión." /></label><div className="space-y-2"><div className="flex flex-wrap items-center justify-between gap-2"><label className="text-xs font-semibold text-slate-600">Contenido de la lección <span className="font-normal text-slate-400">(Markdown)</span></label><div className="flex items-center gap-2"><label className="cursor-pointer rounded-lg border border-slate-200 px-3 py-2 text-[11px] font-bold text-[#087DB5]">{importingLessonFile ? "Importando..." : "Importar .md / .txt"}<input type="file" accept=".md,.markdown,.txt,text/markdown,text/plain" onChange={(event) => void handleLessonFileChange(event)} disabled={importingLessonFile} className="hidden" /></label><button type="button" onClick={() => setShowLessonPreview((value) => !value)} className="rounded-lg border border-slate-200 px-3 py-2 text-[11px] font-bold text-slate-600">{showLessonPreview ? "Editar texto" : "Vista previa"}</button></div></div>{showLessonPreview ? <div className="min-h-40 max-h-72 overflow-auto rounded-xl border border-slate-200 bg-slate-50 p-4"><pre className="whitespace-pre-wrap break-words font-sans text-sm leading-6 text-slate-700">{lessonContent || "Todavía no hay contenido para previsualizar."}</pre></div> : <textarea rows={10} value={lessonContent} onChange={(event) => setLessonContent(event.target.value)} className="w-full rounded-xl border border-slate-200 px-3 py-3 font-mono text-sm leading-6" placeholder="# Título de la lección\n\nDesarrolla aquí el contenido formativo..." />}<p className="text-[10px] leading-5 text-slate-400">Importación inicial limitada a Markdown y texto plano de hasta 2 MB. Los PDF, documentos, presentaciones, imágenes y videos requerirán una carga segura a Supabase Storage.</p></div><label className="block text-xs font-semibold text-slate-600">Duración estimada (minutos)<input required type="number" min="1" max="600" value={duration} onChange={(event) => setDuration(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm" /></label></>}
             <div className="flex flex-col-reverse justify-end gap-2 border-t border-slate-100 pt-4 sm:flex-row"><button type="button" onClick={() => setShowForm(false)} className="rounded-xl border border-slate-200 px-5 py-3 text-xs font-bold text-slate-600">Cancelar</button><button type="submit" disabled={saving} className="rounded-xl bg-[#087DB5] px-5 py-3 text-xs font-bold text-white disabled:opacity-50">{saving ? "Guardando..." : editingId ? "Guardar cambios" : "Crear borrador"}</button></div>
           </form>
         </section></div>}
