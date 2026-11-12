@@ -12,7 +12,7 @@ type AttemptRow = {
 type AssessmentRow = { id: string; title: string; course_id: string };
 type CourseRow = { id: string; title: string };
 type ResponseRow = { id: string; attempt_id: string; question_id: string; answer: Json; awarded_points: number | null; feedback: string | null };
-type QuestionRow = { id: string; prompt: string; points: number };
+type QuestionRow = { id: string; prompt: string; points: number; question_type: string; sort_order: number };
 type ReviewItem = {
   attempt: AttemptRow;
   assessmentTitle: string;
@@ -21,9 +21,7 @@ type ReviewItem = {
   responses: Array<ResponseRow & { prompt: string; points: number }>;
 };
 
-type Props = { tutorId: string };
-
-export default function ManualAssessmentReviewInbox({ tutorId }: Props) {
+export default function ManualAssessmentReviewInbox() {
   const supabase = useMemo(() => createClient(), []);
   const [items, setItems] = useState<ReviewItem[]>([]);
   const [selectedId, setSelectedId] = useState("");
@@ -60,14 +58,14 @@ export default function ManualAssessmentReviewInbox({ tutorId }: Props) {
       const questionIds = [...new Set((responseResult.data ?? []).map((item) => item.question_id))];
       const [courseResult, questionResult] = await Promise.all([
         courseIds.length ? supabase.from("courses").select("id,title").in("id", courseIds) : Promise.resolve({ data: [], error: null }),
-        questionIds.length ? supabase.from("academic_assessment_questions").select("id,prompt,points").in("id", questionIds) : Promise.resolve({ data: [], error: null }),
+        questionIds.length ? supabase.from("academic_assessment_questions").select("id,prompt,points,question_type,sort_order").in("id", questionIds) : Promise.resolve({ data: [], error: null }),
       ]);
       if (courseResult.error) throw courseResult.error;
       if (questionResult.error) throw questionResult.error;
       const assessmentById = new Map(assessments.map((item) => [item.id, item]));
       const courseById = new Map(((courseResult.data ?? []) as CourseRow[]).map((item) => [item.id, item.title]));
       const profileById = new Map((profileResult.data ?? []).map((item) => [item.id, item.full_name || "Estudiante"]));
-      const questionById = new Map(((questionResult.data ?? []) as QuestionRow[]).map((item) => [item.id, item]));
+      const questionById = new Map(((questionResult.data ?? []) as QuestionRow[]).filter((item) => item.question_type === "short_answer").map((item) => [item.id, item]));
       const responsesByAttempt = new Map<string, ReviewItem["responses"]>();
       for (const raw of responseResult.data ?? []) {
         const response = raw as ResponseRow;
@@ -84,7 +82,7 @@ export default function ManualAssessmentReviewInbox({ tutorId }: Props) {
           assessmentTitle: assessment?.title ?? "Evaluación",
           courseTitle: assessment ? courseById.get(assessment.course_id) ?? "Curso" : "Curso",
           studentLabel: profileById.get(attempt.user_id) ?? "Estudiante",
-          responses: (responsesByAttempt.get(attempt.id) ?? []).sort((a, b) => a.prompt.localeCompare(b.prompt, "es")),
+          responses: (responsesByAttempt.get(attempt.id) ?? []).sort((a, b) => (questionById.get(a.question_id)?.sort_order ?? 0) - (questionById.get(b.question_id)?.sort_order ?? 0)),
         };
       });
       setItems(next);
