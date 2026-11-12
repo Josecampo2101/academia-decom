@@ -178,8 +178,7 @@ export default function AcademicPlannerPage() {
     finally { setSaving(false); }
   }
 
-  async function addMaterial(event: FormEvent) {
-    event.preventDefault();
+  async function addMaterial() {
     if (!lessonId || !materialTitle.trim()) { setError("Selecciona una lección e indica el título del material."); return; }
     if (materialType === "lesson_text" && !materialContent.trim()) { setError("Escribe el contenido de la clase."); return; }
     if (materialType === "external_link" && !/^https?:\/\//i.test(materialUrl)) { setError("Ingresa un enlace válido que comience por http:// o https://."); return; }
@@ -298,10 +297,10 @@ export default function AcademicPlannerPage() {
               {materialType === "lesson_text" && <Field label="Contenido de la clase"><textarea rows={8} className={inputClass} value={materialContent} onChange={e=>setMaterialContent(e.target.value)} placeholder="Escribe el contenido en texto o Markdown..."/></Field>}
               {materialType === "external_link" && <Field label="URL del recurso"><input type="url" className={inputClass} value={materialUrl} onChange={e=>setMaterialUrl(e.target.value)} placeholder="https://..."/></Field>}
               {!["lesson_text","external_link"].includes(materialType) && <Field label="Seleccionar archivo" hint="Máximo 50 MB. Almacenamiento privado; solo usuarios autorizados podrán consultarlo."><input type="file" className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-sky-50 file:px-3 file:py-2 file:font-semibold file:text-[#087DB5]" accept={selectedType.accept} onChange={(e:ChangeEvent<HTMLInputElement>)=>setSelectedFile(e.target.files?.[0]??null)}/></Field>}
-              <button type="button" onClick={e=>{const form=e.currentTarget.form;if(form)void addMaterial(new Event("submit",{cancelable:true}) as unknown as FormEvent);}} disabled={uploading} className="w-full rounded-xl border border-[#087DB5] px-4 py-3 text-sm font-semibold text-[#087DB5] disabled:opacity-50">{uploading ? "Agregando material..." : "Agregar material al borrador"}</button>
+              <button type="button" onClick={()=>void addMaterial()} disabled={uploading} className="w-full rounded-xl border border-[#087DB5] px-4 py-3 text-sm font-semibold text-[#087DB5] disabled:opacity-50">{uploading ? "Agregando material..." : "Agregar material al borrador"}</button>
             </div>
             <div className="mt-6 border-t border-slate-100 pt-5"><h3 className="font-bold">Recursos de esta lección ({materials.length})</h3>
-              <div className="mt-3 space-y-2">{materials.length ? materials.map(m=><div key={m.id} className="flex items-start justify-between gap-3 rounded-xl bg-slate-50 p-3"><div className="min-w-0"><p className="truncate text-sm font-semibold">{m.title}</p><p className="mt-1 text-xs text-slate-500">{materialTypes.find(t=>t.value===m.material_type)?.label ?? m.material_type} · {m.status === "published" ? "Publicado" : "Borrador"}</p>{m.description && <p className="mt-1 text-xs text-slate-500">{m.description}</p>}</div><button type="button" onClick={()=>void removeMaterial(m)} className="text-xs font-semibold text-red-600">Eliminar</button></div>) : <p className="rounded-xl border border-dashed border-slate-200 p-4 text-center text-sm text-slate-500">Todavía no hay materiales adjuntos.</p>}</div>
+              <div className="mt-3 space-y-2">{materials.length ? materials.map(m=><div key={m.id} className="flex items-start justify-between gap-3 rounded-xl bg-slate-50 p-3"><div className="min-w-0"><p className="truncate text-sm font-semibold">{m.title}</p><p className="mt-1 text-xs text-slate-500">{materialTypes.find(t=>t.value===m.material_type)?.label ?? m.material_type} · {m.status === "published" ? "Publicado" : "Borrador"}</p>{m.description && <p className="mt-1 text-xs text-slate-500">{m.description}</p>}</div>{m.status === "draft" && <button type="button" onClick={()=>void removeMaterial(m)} className="text-xs font-semibold text-red-600">Eliminar borrador</button>}</div>) : <p className="rounded-xl border border-dashed border-slate-200 p-4 text-center text-sm text-slate-500">Todavía no hay materiales adjuntos.</p>}</div>
             </div>
           </section>
 
