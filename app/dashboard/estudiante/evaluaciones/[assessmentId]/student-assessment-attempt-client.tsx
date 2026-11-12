@@ -79,7 +79,7 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
     setNotice("");
     const { data, error } = await supabase.rpc("submit_academic_assessment", {
       p_assessment_id: assessment.id,
-      p_answers: answers as Json,
+      p_answers: Object.fromEntries(Object.entries(answers).map(([questionId, answer]) => [questionId, Array.isArray(answer) ? [...answer].sort((left, right) => left.localeCompare(right, "es")) : answer])) as Json,
     });
     setSaving(false);
     if (error) { setNotice(error.message); return; }
