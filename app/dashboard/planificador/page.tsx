@@ -12,7 +12,7 @@ type Module = { id: string; course_id: string; title: string };
 type Lesson = { id: string; module_id: string; title: string; summary: string | null; objectives: string[]; estimated_minutes: number | null; status: string };
 type AgendaItem = { id: string; lesson_id: string; session_title: string; topic: string; planned_for: string | null; status: string; estimated_minutes: number | null };
 type Material = { id: string; title: string; description: string | null; material_type: string; storage_path: string | null; external_url: string | null; content: string | null; status: string; size_bytes: number | null };
-type Plan = { id?: string; session_title: string; topic: string; description: string; target_audience: string; learning_outcomes: string[]; teaching_method: string; opening_activity: string; lesson_development: string; closing_activity: string; assessment_strategy: string; homework: string; planned_for: string; estimated_minutes: string; status: string };
+type Plan = { id?: string; session_title: string; topic: string; description: string; target_audience: string; learning_outcomes: string[]; teaching_method: string; opening_activity: string; lesson_development: string; closing_activity: string; assessment_strategy: string; homework: string; planned_for: string; estimated_minutes: string; status: string; review_feedback?: string | null };
 
 const emptyPlan: Plan = {
   session_title: "", topic: "", description: "", target_audience: "Estudiantes DECOM",
@@ -147,7 +147,7 @@ export default function AcademicPlannerPage() {
         teaching_method:p.teaching_method ?? "", opening_activity:p.opening_activity ?? "",
         lesson_development:p.lesson_development ?? "", closing_activity:p.closing_activity ?? "",
         assessment_strategy:p.assessment_strategy ?? "", homework:p.homework ?? "",
-        planned_for:p.planned_for ?? "", estimated_minutes:String(p.estimated_minutes ?? 60), status:p.status });
+        planned_for:p.planned_for ?? "", estimated_minutes:String(p.estimated_minutes ?? 60), status:p.status === "changes_requested" ? "draft" : p.status, review_feedback:p.review_feedback ?? null });
     } else setPlan({ ...emptyPlan, session_title:selectedLesson?.title ?? "" });
     setMaterials((materialResult.data ?? []) as Material[]);
   }, [supabase, selectedLesson?.title]);
@@ -169,11 +169,14 @@ export default function AcademicPlannerPage() {
         closing_activity:plan.closing_activity || null, assessment_strategy:plan.assessment_strategy || null,
         homework:plan.homework || null, planned_for:plan.planned_for || null,
         estimated_minutes:plan.estimated_minutes ? Number(plan.estimated_minutes) : null,
-        status:plan.status, updated_by:user?.id ?? null, created_by:user?.id ?? null };
-      const { error: saveError } = await supabase.from("academic_lesson_plans").upsert(payload,{onConflict:"lesson_id"});
-      if (saveError) throw saveError;
+        status:plan.status, updated_by:user?.id ?? null };
+      const saved = plan.id
+        ? await supabase.from("academic_lesson_plans").update(payload).eq("id",plan.id).select("id").single()
+        : await supabase.from("academic_lesson_plans").insert({...payload,created_by:user?.id ?? null}).select("id").single();
+      if (saved.error) throw saved.error;
+      setPlan(current=>({...current,id:saved.data.id}));
       await loadAgenda(districtId);
-      setNotice("Plan académico guardado como " + (plan.status === "review" ? "pendiente de revisión." : plan.status === "approved" ? "aprobado." : "borrador."));
+      setNotice("Plan académico guardado como " + (plan.status === "review" ? "pendiente de revisión." : "borrador."));
     } catch(e) { setError(e instanceof Error ? e.message : "No se pudo guardar el plan."); }
     finally { setSaving(false); }
   }
@@ -307,8 +310,9 @@ export default function AcademicPlannerPage() {
           <section className="rounded-2xl border border-[#19A7A0]/30 bg-[#19A7A0]/5 p-5">
             <h2 className="font-bold">5. Estado de la planificación</h2><p className="mt-1 text-sm text-slate-600">Guarda el trabajo como borrador o remítelo a revisión académica.</p>
             <div className="mt-4 space-y-3">
-              <label className="flex items-start gap-3 rounded-xl bg-white p-3"><input type="radio" name="plan-status" checked={plan.status==="draft"} onChange={()=>updatePlan("status","draft")}/><span><b className="block text-sm">Borrador</b><small className="text-xs text-slate-500">Solo visible para perfiles autorizados.</small></span></label>
-              <label className="flex items-start gap-3 rounded-xl bg-white p-3"><input type="radio" name="plan-status" checked={plan.status==="review"} onChange={()=>updatePlan("status","review")}/><span><b className="block text-sm">Enviar a revisión</b><small className="text-xs text-slate-500">Queda pendiente de validación.</small></span></label>
+              {plan.review_feedback && <div className="rounded-xl border border-amber-200 bg-amber-50 p-4"><p className="text-xs font-bold uppercase text-amber-800">Observaciones de revisión anterior</p><p className="mt-2 whitespace-pre-wrap text-sm text-amber-900">{plan.review_feedback}</p></div>}
+              <label className="flex items-start gap-3 rounded-xl bg-white p-3"><input type="radio" name="plan-status" checked={plan.status==="draft"} onChange={()=>updatePlan("status","draft")}/><span><b className="block text-sm">Guardar borrador</b><small className="text-xs text-slate-500">Conserva el trabajo para seguir editándolo.</small></span></label>
+              <label className="flex items-start gap-3 rounded-xl bg-white p-3"><input type="radio" name="plan-status" checked={plan.status==="review"} onChange={()=>updatePlan("status","review")}/><span><b className="block text-sm">Enviar a revisión</b><small className="text-xs text-slate-500">Queda pendiente de validación académica.</small></span></label>
               {plan.status==="approved" && <p className="rounded-xl bg-white p-3 text-sm text-teal-800">Esta planificación ya está aprobada.</p>}
             </div>
           </section>
