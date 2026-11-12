@@ -83,14 +83,14 @@ export default function CongregationsPage() {
   const [error, setError] = useState("");
 
   const loadData = useCallback(async () => {
-    setLoading(true);
-    setError("");
-
     try {
       const {
         data: { user },
         error: authError,
       } = await supabase.auth.getUser();
+
+      setLoading(true);
+      setError("");
 
       if (authError) throw authError;
 
@@ -126,7 +126,9 @@ export default function CongregationsPage() {
       const roleKeys = (roles ?? []).map((role) => role.role_key);
 
       const nationalAdmin = roleKeys.includes("national_admin");
-      const districtCoordinator = roleKeys.includes("district_coordinator");
+      const districtCoordinator =
+        roleKeys.includes("district_coordinator") ||
+        roleKeys.includes("area_coordinator");
 
       setIsNationalAdmin(nationalAdmin);
 
@@ -142,7 +144,8 @@ export default function CongregationsPage() {
               (roles ?? []).some(
                 (role) =>
                   role.id === assignment.role_id &&
-                  role.role_key === "district_coordinator"
+                  (role.role_key === "district_coordinator" ||
+                    role.role_key === "area_coordinator")
               )
             )
             .map((assignment) => assignment.district_id)
