@@ -157,7 +157,7 @@ export default function CreateAssessmentPage() {
     setSaving(true);
     const { error } = await supabase.rpc("save_academic_assessment_question", {
       p_assessment_id: selectedAssessmentId,
-      p_question_id: null,
+      p_question_id: null as unknown as string,
       p_question_type: questionType,
       p_prompt: prompt.trim(),
       p_options: options,
