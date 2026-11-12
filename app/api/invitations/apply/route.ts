@@ -212,6 +212,10 @@ export async function POST(request: NextRequest) {
     return json({ error: "Este enlace no admite solicitudes públicas." }, 403);
   }
 
+  if (!invitation.district_id) {
+    return json({ error: "La invitación no tiene un distrito válido." }, 410);
+  }
+
   const { data: district, error: districtError } = await supabase
     .from("districts")
     .select("id, name")
@@ -320,10 +324,17 @@ export async function POST(request: NextRequest) {
     p_phone: phone,
     p_date_of_birth: dateOfBirth,
     p_requested_congregation_id: congregationId,
-    p_requested_role_id: requestedRoleId,
+    p_requested_role_id: requestedRoleId ?? undefined,
   });
 
-  if (error || !data || data.success !== true) {
+  if (
+    error ||
+    !data ||
+    typeof data !== "object" ||
+    Array.isArray(data) ||
+    !("success" in data) ||
+    data.success !== true
+  ) {
     const message = error?.message ?? "No fue posible registrar la solicitud.";
     if (/ya existe una solicitud/i.test(message)) {
       return json({ error: "Ya existe una solicitud con este correo para esta invitación." }, 409);
