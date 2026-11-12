@@ -39,9 +39,22 @@ Los materiales admiten texto/guía, PDF, Word, presentaciones, imágenes, audio,
 
 Los campos `review_feedback`, `reviewed_by` y `reviewed_at` son metadatos de revisión. Un trigger de base de datos impide que tutores y otros perfiles no revisores aprueben o devuelvan planificaciones, o modifiquen esos metadatos.
 
+## Evaluaciones y progresión curricular
+
+- `academic_assessments` configura evaluaciones de lección, prácticas y examen final por curso.
+- `academic_assessment_questions` almacena enunciados y opciones; las claves de respuesta viven en `private.academic_assessment_answer_keys` y no se exponen al estudiante.
+- `save_academic_assessment_question` guarda preguntas y claves mediante una función autorizada; `publish_academic_assessment` valida que el instrumento tenga preguntas y claves compatibles.
+- `submit_academic_assessment` valida matrícula activa, respuestas completas, máximo de intentos y prerrequisitos del examen final; calcula la nota objetiva en PostgreSQL.
+- `academic_assessment_attempts` y `academic_assessment_responses` conservan intentos, respuestas, puntajes y retroalimentación.
+- `review_academic_assessment_response` permite al tutor calificar respuestas abiertas; la nota definitiva solo se cierra cuando no quedan respuestas pendientes.
+- Aprobar el examen final completa la matrícula y crea la matrícula activa del siguiente curso publicado del mismo programa. La lectura del historial sigue disponible para matrículas completadas.
+
+Las rutas `/dashboard/tutor/evaluaciones/crear`, `/dashboard/estudiante/evaluaciones` y `/dashboard/estudiante/evaluaciones/[assessmentId]` consumen el backend real. La antigua práctica local permanece como demostración heredada y no genera calificaciones oficiales.
+
 ## Pendientes
 
-- Evaluaciones finales, calificaciones y desbloqueo secuencial de cursos.
+- Conectar la bandeja de revisión manual del tutor a `academic_assessment_responses` (el componente heredado aún usa datos locales).
+- Incorporar el flujo de revisión de intentos y retroalimentación dentro del panel del tutor.
 - Asignación formal de tutorías y seguimiento individual.
 - Pruebas de integración con cuentas reales de cada perfil.
 - Verificación final de lint, TypeScript y build en CI antes de integrar a `main`.
