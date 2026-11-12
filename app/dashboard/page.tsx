@@ -92,55 +92,6 @@ export default function DashboardPage() {
   const canManageInvitations = roleKeys.some((role) =>
     ["national_admin", "district_coordinator", "area_coordinator"].includes(role)
   );
-  const canManageLibrary = isNationalAdmin || roleKeys.includes("academic_editor");
-  const canManageAcademicCatalog = canManageLibrary;
-
-  function openAcademicModule(moduleName: string) {
-    const isStudent = roleKeys.includes("member");
-    const isTutor = roleKeys.includes("tutor");
-    const adminDestination =
-      moduleName === "Mi formación"
-        ? "/dashboard/formacion"
-        : moduleName === "Biblioteca"
-          ? "/dashboard/biblioteca"
-          : null;
-    const canOpenAdminModule =
-      isNationalAdmin || roleKeys.includes("academic_editor");
-
-    if (adminDestination && canOpenAdminModule) {
-      router.push(adminDestination);
-      return;
-    }
-
-    if (moduleName === "Seguimiento" && isTutor) {
-      router.push("/dashboard/tutor");
-      return;
-    }
-
-    const hasManagementRole = roleKeys.some((role) =>
-      ["national_admin", "district_coordinator", "area_coordinator", "academic_editor", "local_responsible"].includes(role)
-    );
-    if (moduleName === "Seguimiento" && hasManagementRole && !isTutor) {
-      router.push("/dashboard/espacio");
-      return;
-    }
-    if (moduleName === "Mi formación" && hasManagementRole && !isStudent) {
-      router.push("/dashboard/espacio");
-      return;
-    }
-
-    if (!isStudent) return;
-
-    const destinations: Record<string, string> = {
-      "Mi formación": "/dashboard/estudiante/formacion",
-      Biblioteca: "/dashboard/estudiante/biblioteca",
-      Evaluaciones: "/dashboard/estudiante/evaluaciones",
-      Seguimiento: "/dashboard/estudiante",
-      Reconocimientos: "/dashboard/estudiante/reconocimientos",
-    };
-    const destination = destinations[moduleName];
-    if (destination) router.push(destination);
-  }
 
   // Permisos del módulo de reubicaciones.
   const canManageTransfers =
@@ -157,6 +108,7 @@ export default function DashboardPage() {
       savedTheme === "dark" ||
       savedTheme === "system"
     ) {
+      // Leer localStorage tras montar evita discrepancias entre SSR e hidratación.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme(savedTheme);
     }
@@ -584,29 +536,42 @@ export default function DashboardPage() {
               <span>⌂</span> Inicio
             </a>
 
-            {modules.map((module) => (
-              <button
-                key={module.name}
-                type="button"
-                onClick={() => openAcademicModule(module.name)}
-                disabled={
-                  !roleKeys.includes("member") &&
-                  !(module.name === "Seguimiento" && roleKeys.includes("tutor")) &&
-                  !(canOpenAdminModule && (module.name === "Mi formación" || module.name === "Biblioteca"))
-                }
-                title={
-                  roleKeys.includes("member") ||
-                  (module.name === "Seguimiento" && roleKeys.includes("tutor")) ||
-                  (canOpenAdminModule && (module.name === "Mi formación" || module.name === "Biblioteca"))
-                    ? module.description
-                    : "No tienes un perfil académico habilitado para este módulo"
-                }
-                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] disabled:cursor-not-allowed disabled:opacity-50 ${secondaryText}`}
-              >
-                <span>{module.icon}</span>
-                {module.name}
-              </button>
-            ))}
+            {modules.map((module) => {
+              const adminDestination =
+                module.name === "Mi formación"
+                  ? "/dashboard/formacion"
+                  : module.name === "Biblioteca"
+                    ? "/dashboard/biblioteca"
+                    : null;
+              const canOpenAdminModule =
+                isNationalAdmin || roleKeys.includes("academic_editor");
+
+              if (adminDestination && canOpenAdminModule) {
+                return (
+                  <a
+                    key={module.name}
+                    href={adminDestination}
+                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold text-[#087DB5] transition hover:bg-[#087DB5]/10"
+                  >
+                    <span>{module.icon}</span>
+                    {module.name}
+                  </a>
+                );
+              }
+
+              return (
+                <button
+                  key={module.name}
+                  type="button"
+                  disabled
+                  title="Módulo en construcción"
+                  className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm ${secondaryText} opacity-70`}
+                >
+                  <span>{module.icon}</span>
+                  {module.name}
+                </button>
+              );
+            })}
 
             <div className={`my-5 border-t ${borderColor}`} />
 
@@ -625,36 +590,6 @@ export default function DashboardPage() {
             >
               <span>⚙</span> Administración
             </div>
-
-            {canManageAcademicCatalog && (
-              <a
-                href="/dashboard/administracion/actividades"
-                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
-              >
-                <span className="text-lg">✓</span>
-                <span>Actividades y evaluaciones</span>
-              </a>
-            )}
-
-            {canManageAcademicCatalog && (
-              <a
-                href="/dashboard/administracion/catalogo"
-                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
-              >
-                <span className="text-lg">▤</span>
-                <span>Catálogo académico</span>
-              </a>
-            )}
-
-            {canManageLibrary && (
-              <a
-                href="/dashboard/administracion/biblioteca"
-                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
-              >
-                <span className="text-lg">▣</span>
-                <span>Administrar biblioteca</span>
-              </a>
-            )}
 
             {canManageInvitations && (
               <a
