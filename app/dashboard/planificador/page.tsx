@@ -9,6 +9,7 @@ type Program = { id: string; title: string };
 type Course = { id: string; program_id: string; title: string };
 type Module = { id: string; course_id: string; title: string };
 type Lesson = { id: string; module_id: string; title: string; summary: string | null; objectives: string[]; estimated_minutes: number | null; status: string };
+type AgendaItem = { id: string; lesson_id: string; session_title: string; topic: string; planned_for: string | null; status: string; estimated_minutes: number | null };
 type Material = { id: string; title: string; description: string | null; material_type: string; storage_path: string | null; external_url: string | null; content: string | null; status: string; size_bytes: number | null };
 type Plan = { id?: string; session_title: string; topic: string; description: string; target_audience: string; learning_outcomes: string[]; teaching_method: string; opening_activity: string; lesson_development: string; closing_activity: string; assessment_strategy: string; homework: string; planned_for: string; estimated_minutes: string; status: string };
 
@@ -57,6 +58,7 @@ export default function AcademicPlannerPage() {
   const [lessonId, setLessonId] = useState("");
   const [plan, setPlan] = useState<Plan>(emptyPlan);
   const [materials, setMaterials] = useState<Material[]>([]);
+  const [agenda, setAgenda] = useState<AgendaItem[]>([]);
   const [materialType, setMaterialType] = useState("pdf");
   const [materialTitle, setMaterialTitle] = useState("");
   const [materialDescription, setMaterialDescription] = useState("");
@@ -113,6 +115,17 @@ export default function AcademicPlannerPage() {
 
   useEffect(() => { if (districtId) void loadHierarchy(districtId).catch(e => setError(e.message)); }, [districtId, loadHierarchy]);
 
+  const loadAgenda = useCallback(async (id: string) => {
+    if (!id) { setAgenda([]); return; }
+    const { data, error: agendaError } = await supabase.from("academic_lesson_plans")
+      .select("id,lesson_id,session_title,topic,planned_for,status,estimated_minutes")
+      .eq("district_id", id).order("planned_for", { ascending: true, nullsFirst: false });
+    if (agendaError) throw agendaError;
+    setAgenda((data ?? []) as AgendaItem[]);
+  }, [supabase]);
+
+  useEffect(() => { if (districtId) void loadAgenda(districtId).catch(e => setError(e.message)); }, [districtId, loadAgenda]);
+
   const visibleCourses = courses.filter(c => c.program_id === programId);
   const visibleModules = modules.filter(m => m.course_id === courseId);
   const visibleLessons = lessons.filter(l => l.module_id === moduleId);
@@ -158,6 +171,7 @@ export default function AcademicPlannerPage() {
         status:plan.status, updated_by:user?.id ?? null, created_by:user?.id ?? null };
       const { error: saveError } = await supabase.from("academic_lesson_plans").upsert(payload,{onConflict:"lesson_id"});
       if (saveError) throw saveError;
+      await loadAgenda(districtId);
       setNotice("Plan académico guardado como " + (plan.status === "review" ? "pendiente de revisión." : plan.status === "approved" ? "aprobado." : "borrador."));
     } catch(e) { setError(e instanceof Error ? e.message : "No se pudo guardar el plan."); }
     finally { setSaving(false); }
@@ -237,6 +251,11 @@ export default function AcademicPlannerPage() {
           <Field label="Lección"><select className={inputClass} value={lessonId} onChange={e=>setLessonId(e.target.value)}>{visibleLessons.map(l=><option key={l.id} value={l.id}>{l.title}</option>)}</select></Field>
         </div>
         {!lessons.length && <p className="mt-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-800">Este distrito todavía no tiene lecciones. Primero crea el programa, curso, módulo y lección desde el catálogo académico.</p>}
+      </section>
+
+      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+        <div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-lg font-bold">Agenda de planificación</h2><p className="mt-1 text-sm text-slate-500">Sesiones registradas en el distrito, con fecha, tema y estado de revisión.</p></div><span className="rounded-full bg-sky-50 px-3 py-1.5 text-xs font-bold text-[#087DB5]">{agenda.length} plan(es)</span></div>
+        {agenda.length ? <div className="mt-4 overflow-x-auto"><table className="w-full min-w-[620px] text-left text-sm"><thead><tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-500"><th className="py-3 pr-4">Fecha</th><th className="py-3 pr-4">Clase / tema</th><th className="py-3 pr-4">Duración</th><th className="py-3">Estado</th></tr></thead><tbody>{agenda.map(item=><tr key={item.id} className="border-b border-slate-50"><td className="py-3 pr-4 text-slate-600">{item.planned_for ? new Date(item.planned_for + "T12:00:00").toLocaleDateString("es-CO") : "Sin fecha"}</td><td className="py-3 pr-4"><p className="font-semibold text-slate-800">{item.session_title}</p><p className="mt-0.5 text-xs text-slate-500">{item.topic}</p></td><td className="py-3 pr-4 text-slate-600">{item.estimated_minutes ? item.estimated_minutes + " min" : "—"}</td><td className="py-3"><span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">{item.status === "approved" ? "Aprobado" : item.status === "review" ? "En revisión" : "Borrador"}</span></td></tr>)}</tbody></table></div> : <p className="mt-4 rounded-xl border border-dashed border-slate-200 p-5 text-center text-sm text-slate-500">Aún no hay clases planificadas en este distrito. Crea la primera desde el formulario.</p>}
       </section>
 
       {selectedLesson && <form onSubmit={savePlan} className="mt-6 grid gap-6 xl:grid-cols-[1.15fr_.85fr]">
