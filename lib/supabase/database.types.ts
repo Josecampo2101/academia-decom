@@ -14,6 +14,270 @@ export type Database = {
   }
   public: {
     Tables: {
+      academic_assessment_attempts: {
+        Row: {
+          assessment_id: string
+          attempt_number: number
+          created_at: string
+          district_id: string
+          enrollment_id: string
+          graded_at: string | null
+          id: string
+          manual_pending: number
+          objective_earned: number
+          passed: boolean | null
+          score_percent: number | null
+          status: string
+          submitted_at: string
+          total_possible: number
+          user_id: string
+        }
+        Insert: {
+          assessment_id: string
+          attempt_number: number
+          created_at?: string
+          district_id: string
+          enrollment_id: string
+          graded_at?: string | null
+          id?: string
+          manual_pending?: number
+          objective_earned?: number
+          passed?: boolean | null
+          score_percent?: number | null
+          status?: string
+          submitted_at?: string
+          total_possible: number
+          user_id: string
+        }
+        Update: {
+          assessment_id?: string
+          attempt_number?: number
+          created_at?: string
+          district_id?: string
+          enrollment_id?: string
+          graded_at?: string | null
+          id?: string
+          manual_pending?: number
+          objective_earned?: number
+          passed?: boolean | null
+          score_percent?: number | null
+          status?: string
+          submitted_at?: string
+          total_possible?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academic_assessment_attempts_assessment_district_fk"
+            columns: ["assessment_id", "district_id"]
+            isOneToOne: false
+            referencedRelation: "academic_assessments"
+            referencedColumns: ["id", "district_id"]
+          },
+          {
+            foreignKeyName: "academic_assessment_attempts_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "academic_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academic_assessment_attempts_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academic_assessment_attempts_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "course_enrollments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academic_assessment_questions: {
+        Row: {
+          assessment_id: string
+          created_at: string
+          district_id: string
+          id: string
+          options: Json
+          points: number
+          prompt: string
+          question_type: string
+          sort_order: number
+        }
+        Insert: {
+          assessment_id: string
+          created_at?: string
+          district_id: string
+          id?: string
+          options?: Json
+          points?: number
+          prompt: string
+          question_type: string
+          sort_order?: number
+        }
+        Update: {
+          assessment_id?: string
+          created_at?: string
+          district_id?: string
+          id?: string
+          options?: Json
+          points?: number
+          prompt?: string
+          question_type?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academic_assessment_questions_assessment_fk"
+            columns: ["assessment_id", "district_id"]
+            isOneToOne: false
+            referencedRelation: "academic_assessments"
+            referencedColumns: ["id", "district_id"]
+          },
+          {
+            foreignKeyName: "academic_assessment_questions_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academic_assessment_responses: {
+        Row: {
+          answer: Json
+          attempt_id: string
+          awarded_points: number | null
+          created_at: string
+          feedback: string | null
+          id: string
+          is_correct: boolean | null
+          question_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+        }
+        Insert: {
+          answer: Json
+          attempt_id: string
+          awarded_points?: number | null
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          is_correct?: boolean | null
+          question_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+        }
+        Update: {
+          answer?: Json
+          attempt_id?: string
+          awarded_points?: number | null
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          is_correct?: boolean | null
+          question_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academic_assessment_responses_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "academic_assessment_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academic_assessment_responses_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "academic_assessment_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academic_assessments: {
+        Row: {
+          assessment_type: string
+          course_id: string
+          created_at: string
+          created_by: string | null
+          district_id: string
+          id: string
+          instructions: string | null
+          lesson_id: string | null
+          max_attempts: number | null
+          passing_score: number
+          published_at: string | null
+          status: string
+          time_limit_minutes: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assessment_type: string
+          course_id: string
+          created_at?: string
+          created_by?: string | null
+          district_id: string
+          id?: string
+          instructions?: string | null
+          lesson_id?: string | null
+          max_attempts?: number | null
+          passing_score?: number
+          published_at?: string | null
+          status?: string
+          time_limit_minutes?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assessment_type?: string
+          course_id?: string
+          created_at?: string
+          created_by?: string | null
+          district_id?: string
+          id?: string
+          instructions?: string | null
+          lesson_id?: string | null
+          max_attempts?: number | null
+          passing_score?: number
+          published_at?: string | null
+          status?: string
+          time_limit_minutes?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academic_assessments_course_district_fk"
+            columns: ["course_id", "district_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id", "district_id"]
+          },
+          {
+            foreignKeyName: "academic_assessments_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academic_assessments_lesson_district_fk"
+            columns: ["lesson_id", "district_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id", "district_id"]
+          },
+        ]
+      }
       academic_catalog_events: {
         Row: {
           action: string
@@ -61,6 +325,109 @@ export type Database = {
             columns: ["district_id"]
             isOneToOne: false
             referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academic_lesson_plans: {
+        Row: {
+          assessment_strategy: string | null
+          closing_activity: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          district_id: string
+          estimated_minutes: number | null
+          homework: string | null
+          id: string
+          learning_outcomes: string[]
+          lesson_development: string | null
+          lesson_id: string
+          opening_activity: string | null
+          planned_for: string | null
+          review_feedback: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          session_title: string
+          status: string
+          target_audience: string | null
+          teaching_method: string | null
+          topic: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          assessment_strategy?: string | null
+          closing_activity?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          district_id: string
+          estimated_minutes?: number | null
+          homework?: string | null
+          id?: string
+          learning_outcomes?: string[]
+          lesson_development?: string | null
+          lesson_id: string
+          opening_activity?: string | null
+          planned_for?: string | null
+          review_feedback?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          session_title: string
+          status?: string
+          target_audience?: string | null
+          teaching_method?: string | null
+          topic: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          assessment_strategy?: string | null
+          closing_activity?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          district_id?: string
+          estimated_minutes?: number | null
+          homework?: string | null
+          id?: string
+          learning_outcomes?: string[]
+          lesson_development?: string | null
+          lesson_id?: string
+          opening_activity?: string | null
+          planned_for?: string | null
+          review_feedback?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          session_title?: string
+          status?: string
+          target_audience?: string | null
+          teaching_method?: string | null
+          topic?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academic_lesson_plans_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academic_lesson_plans_lesson_district_fk"
+            columns: ["lesson_id", "district_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id", "district_id"]
+          },
+          {
+            foreignKeyName: "academic_lesson_plans_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: true
+            referencedRelation: "lessons"
             referencedColumns: ["id"]
           },
         ]
@@ -248,6 +615,57 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "congregations_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_enrollments: {
+        Row: {
+          completed_at: string | null
+          course_id: string
+          created_at: string
+          district_id: string
+          enrolled_at: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          course_id: string
+          created_at?: string
+          district_id: string
+          enrolled_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string
+          district_id?: string
+          enrolled_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_enrollments_district_id_fkey"
             columns: ["district_id"]
             isOneToOne: false
             referencedRelation: "districts"
@@ -728,6 +1146,133 @@ export type Database = {
             columns: ["role_id"]
             isOneToOne: false
             referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_materials: {
+        Row: {
+          content: string | null
+          created_at: string
+          description: string | null
+          district_id: string
+          external_url: string | null
+          id: string
+          lesson_id: string
+          material_type: string
+          mime_type: string | null
+          size_bytes: number | null
+          sort_order: number
+          status: string
+          storage_path: string | null
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          description?: string | null
+          district_id: string
+          external_url?: string | null
+          id?: string
+          lesson_id: string
+          material_type: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          sort_order?: number
+          status?: string
+          storage_path?: string | null
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          description?: string | null
+          district_id?: string
+          external_url?: string | null
+          id?: string
+          lesson_id?: string
+          material_type?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          sort_order?: number
+          status?: string
+          storage_path?: string | null
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_materials_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_materials_lesson_district_fk"
+            columns: ["lesson_id", "district_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id", "district_id"]
+          },
+          {
+            foreignKeyName: "lesson_materials_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_progress: {
+        Row: {
+          completed_at: string | null
+          enrollment_id: string
+          id: string
+          last_position_seconds: number
+          lesson_id: string
+          started_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          enrollment_id: string
+          id?: string
+          last_position_seconds?: number
+          lesson_id: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          enrollment_id?: string
+          id?: string
+          last_position_seconds?: number
+          lesson_id?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_progress_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "course_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
             referencedColumns: ["id"]
           },
         ]
@@ -1281,6 +1826,10 @@ export type Database = {
         Args: { target_district: string }
         Returns: boolean
       }
+      publish_academic_assessment: {
+        Args: { p_assessment_id: string }
+        Returns: string
+      }
       publish_academic_course: {
         Args: { p_change_summary?: string; p_course_id: string }
         Returns: string
@@ -1293,6 +1842,14 @@ export type Database = {
         }
         Returns: string
       }
+      review_academic_assessment_response: {
+        Args: {
+          p_awarded_points: number
+          p_feedback: string
+          p_response_id: string
+        }
+        Returns: Json
+      }
       review_invitation_request: {
         Args: {
           p_decision: string
@@ -1300,6 +1857,19 @@ export type Database = {
           p_request_id: string
         }
         Returns: Json
+      }
+      save_academic_assessment_question: {
+        Args: {
+          p_answer_key: Json
+          p_assessment_id: string
+          p_options: Json
+          p_points: number
+          p_prompt: string
+          p_question_id: string
+          p_question_type: string
+          p_sort_order: number
+        }
+        Returns: string
       }
       search_memberships_for_transfer: {
         Args: { p_search: string }
@@ -1313,6 +1883,10 @@ export type Database = {
           membership_id: string
           phone: string
         }[]
+      }
+      submit_academic_assessment: {
+        Args: { p_answers: Json; p_assessment_id: string }
+        Returns: Json
       }
       submit_invitation_request: {
         Args: {
