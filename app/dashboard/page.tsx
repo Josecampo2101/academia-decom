@@ -1125,37 +1125,45 @@ export default function DashboardPage() {
                 <p className={`mt-1 text-sm ${secondaryText}`}>
                   Accede a las herramientas de formación institucional.
                 </p>
+                <button
+                  type="button"
+                  onClick={() => router.push("/dashboard/espacio")}
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#066895]"
+                >
+                  Abrir mi espacio según mi perfil <span aria-hidden="true">→</span>
+                </button>
               </div>
 
               <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                {modules.map((module) => (
-                  <article
-                    key={module.name}
-                    className={`${surface} rounded-2xl border ${borderColor} p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md`}
-                  >
-                    <div
-                      className="flex h-12 w-12 items-center justify-center rounded-xl text-xl font-bold"
-                      style={{
-                        backgroundColor: `${module.color}18`,
-                        color: module.color,
-                      }}
+                {modules.map((module) => {
+                  const target = module.name === "Mi formación"
+                    ? (roleKeys.includes("member") ? "/dashboard/formacion" : "/dashboard/espacio")
+                    : module.name === "Seguimiento"
+                      ? "/dashboard/espacio"
+                      : null;
+                  return (
+                    <article
+                      key={module.name}
+                      className={`${surface} rounded-2xl border ${borderColor} p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md`}
                     >
-                      {module.icon}
-                    </div>
-
-                    <h4 className="mt-5 font-bold">{module.name}</h4>
-
-                    <p
-                      className={`mt-2 min-h-10 text-sm leading-6 ${secondaryText}`}
-                    >
-                      {module.description}
-                    </p>
-
-                    <p className="mt-5 text-xs font-semibold text-[#087DB5]">
-                      Próximamente
-                    </p>
-                  </article>
-                ))}
+                      <div
+                        className="flex h-12 w-12 items-center justify-center rounded-xl text-xl font-bold"
+                        style={{ backgroundColor: `${module.color}18`, color: module.color }}
+                      >
+                        {module.icon}
+                      </div>
+                      <h4 className="mt-5 font-bold">{module.name}</h4>
+                      <p className={`mt-2 min-h-10 text-sm leading-6 ${secondaryText}`}>{module.description}</p>
+                      {target ? (
+                        <button type="button" onClick={() => router.push(target)} className="mt-5 text-xs font-semibold text-[#087DB5] hover:underline">
+                          Abrir módulo →
+                        </button>
+                      ) : (
+                        <p className="mt-5 text-xs font-semibold text-slate-400">En preparación</p>
+                      )}
+                    </article>
+                  );
+                })}
               </div>
             </section>
 
