@@ -192,6 +192,7 @@ export default function RoleWorkspacePage() {
           <Metric label="Congregaciones" value={stats.congregations} detail="En el ámbito autorizado" />
           <Metric label="Integrantes" value={stats.members} detail="Membresías registradas" />
           <Metric label="Matrículas activas" value={stats.activeEnrollments} detail="Estudiantes en formación" />
+          <Metric label="Cursos publicados" value={stats.publishedCourses} detail="Oferta académica disponible" />
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           <button onClick={() => router.push("/dashboard/congregaciones")} className="rounded-2xl border border-slate-200 bg-white p-5 text-left hover:border-[#087DB5]"><span className="text-xs font-bold uppercase tracking-wide text-[#087DB5]">Administración territorial</span><h3 className="mt-2 font-bold">Congregaciones e integrantes</h3><p className="mt-1 text-sm text-slate-500">Consultar y gestionar los registros según el alcance del distrito.</p></button>
