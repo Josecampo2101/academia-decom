@@ -1,227 +1,178 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import TutorDemoInbox from "./tutor-demo-inbox";
 
-type AccessState = "checking" | "allowed" | "denied" | "error";
-type ReviewStatus = "Pendiente" | "En revisión" | "Calificada" | "Requiere ajustes";
-type Decision = "Aprobar" | "Solicitar ajustes" | "Rechazar";
-
-type Criterion = { id: string; title: string; description: string; points: number };
+type Activity = { id: string; title: string; total_points: number };
 type Submission = {
-  id: string;
-  student: string;
-  initials: string;
-  activity: string;
-  course: string;
-  submittedAt: string;
-  status: ReviewStatus;
-  attempt: number;
-  excerpt: string;
-  rubric: Criterion[];
+  id: string; assignment_id: string; activity_id: string; enrollment_id: string; district_id: string;
+  user_id: string; attempt_number: number; response_text: string | null; external_url: string | null;
+  status: string; awarded_points: number | null; feedback: string | null; submitted_at: string | null;
 };
+type Rubric = { id: string; activity_id: string; title: string; description: string | null; max_points: number; sort_order: number };
+type Attachment = { id: string; submission_id: string; file_name: string; mime_type: string; size_bytes: number; storage_path: string; url?: string };
+type QueueItem = { submission: Submission; activity: Activity; studentName: string };
 
-const demoSubmissions: Submission[] = [
-  {
-    id: "ENT-204", student: "María Fernanda Ríos", initials: "MR",
-    activity: "Aplicación de la identidad visual", course: "Identidad corporativa DECOM",
-    submittedAt: "11 nov 2026 · 8:42 a. m.", status: "Pendiente", attempt: 1,
-    excerpt: "Presenta una propuesta de aplicación de los elementos visuales en una pieza institucional. Explica la elección de jerarquías, contraste y adaptación al público.",
-    rubric: [
-      { id: "purpose", title: "Propósito comunicativo", description: "La pieza responde al objetivo y al público definido.", points: 25 },
-      { id: "identity", title: "Aplicación de identidad", description: "Respeta los lineamientos visuales institucionales.", points: 30 },
-      { id: "clarity", title: "Claridad y composición", description: "Organiza la información con jerarquía y legibilidad.", points: 25 },
-      { id: "argument", title: "Justificación", description: "Explica las decisiones de diseño con argumentos pertinentes.", points: 20 },
-    ],
-  },
-  {
-    id: "ENT-203", student: "Andrés Felipe Gómez", initials: "AG",
-    activity: "Análisis de comunicación institucional", course: "Fundamentos de la comunicación",
-    submittedAt: "10 nov 2026 · 4:15 p. m.", status: "En revisión", attempt: 2,
-    excerpt: "Analiza la coherencia entre mensaje, audiencia y medio. Incluye una recomendación para mejorar la claridad del mensaje.",
-    rubric: [
-      { id: "analysis", title: "Análisis del contexto", description: "Identifica audiencia, propósito y canal.", points: 35 },
-      { id: "coherence", title: "Coherencia del mensaje", description: "Relaciona de forma lógica los elementos analizados.", points: 35 },
-      { id: "proposal", title: "Propuesta de mejora", description: "Formula una recomendación viable y bien sustentada.", points: 30 },
-    ],
-  },
-  {
-    id: "ENT-202", student: "Daniela Pérez", initials: "DP",
-    activity: "Principios de identidad DECOM", course: "Identidad corporativa DECOM",
-    submittedAt: "10 nov 2026 · 11:20 a. m.", status: "Requiere ajustes", attempt: 2,
-    excerpt: "Explica los principios institucionales y su aplicación en el trabajo de comunicaciones. La segunda entrega amplía los ejemplos.",
-    rubric: [
-      { id: "principles", title: "Comprensión de principios", description: "Explica los principios con precisión.", points: 40 },
-      { id: "application", title: "Aplicación práctica", description: "Relaciona los principios con situaciones reales.", points: 35 },
-      { id: "writing", title: "Redacción", description: "Presenta ideas claras, ordenadas y correctas.", points: 25 },
-    ],
-  },
-];
-
-const demoHistory = [
-  { date: "10 nov 2026 · 2:10 p. m.", label: "Primera entrega recibida", detail: "Intento 1 · Enviado por la estudiante" },
-  { date: "10 nov 2026 · 5:35 p. m.", label: "Ajustes solicitados", detail: "Se pidió ampliar la justificación de las decisiones visuales" },
-  { date: "11 nov 2026 · 8:42 a. m.", label: "Nueva entrega recibida", detail: "Intento 2 · Pendiente de revisión" },
-];
-
-const filters = ["Todas", "Pendiente", "En revisión", "Calificada", "Requiere ajustes"] as const;
-
-export default function TutorAssessmentWorkflowPage() {
-  const router = useRouter();
+export default function TutorCalificacionesPage() {
   const supabase = useMemo(() => createClient(), []);
-  const [access, setAccess] = useState<AccessState>("checking");
-  const [displayName, setDisplayName] = useState("Tutor");
-  const [filter, setFilter] = useState<(typeof filters)[number]>("Todas");
-  const [search, setSearch] = useState("");
-  const [selectedId, setSelectedId] = useState(demoSubmissions[0].id);
-  const [scores, setScores] = useState<Record<string, Record<string, number>>>({});
+  const [items, setItems] = useState<QueueItem[]>([]);
+  const [rubric, setRubric] = useState<Rubric[]>([]);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [selectedId, setSelectedId] = useState("");
+  const [scores, setScores] = useState<Record<string, string>>({});
+  const [manualScore, setManualScore] = useState("");
   const [feedback, setFeedback] = useState("");
-  const [decision, setDecision] = useState<Decision>("Aprobar");
-  const [showPreview, setShowPreview] = useState(false);
+  const [decision, setDecision] = useState<"graded" | "changes_requested">("graded");
+  const [filter, setFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+
+  const loadData = useCallback(async () => {
+    setLoading(true); setError("");
+    try {
+      const { data: auth, error: authError } = await supabase.auth.getUser();
+      if (authError || !auth.user) throw new Error("Inicia sesión para revisar entregas.");
+      const { data: roleAssignments, error: roleAssignmentError } = await supabase.from("user_role_assignments").select("role_id").eq("user_id", auth.user.id);
+      if (roleAssignmentError) throw roleAssignmentError;
+      const roleIds = [...new Set((roleAssignments ?? []).map((row) => row.role_id))];
+      const { data: roles, error: rolesError } = roleIds.length ? await supabase.from("roles").select("role_key").in("id", roleIds) : { data: [], error: null };
+      if (rolesError) throw rolesError;
+      const roleKeys = new Set((roles ?? []).map((row) => row.role_key));
+      if (!["tutor", "academic_editor", "district_coordinator", "area_coordinator", "national_admin"].some((key) => roleKeys.has(key))) {
+        throw new Error("Tu perfil no tiene permisos para revisar entregas.");
+      }
+
+      const { data: submissionRows, error: submissionError } = await supabase.from("academic_activity_submissions")
+        .select("id, assignment_id, activity_id, enrollment_id, district_id, user_id, attempt_number, response_text, external_url, status, awarded_points, feedback, submitted_at")
+        .in("status", ["submitted", "changes_requested"]).order("submitted_at", { ascending: true });
+      if (submissionError) throw submissionError;
+      const submissions = (submissionRows ?? []) as Submission[];
+      if (!submissions.length) { setItems([]); setSelectedId(""); setRubric([]); setAttachments([]); return; }
+
+      const activityIds = [...new Set(submissions.map((row) => row.activity_id))];
+      const userIds = [...new Set(submissions.map((row) => row.user_id))];
+      const submissionIds = submissions.map((row) => row.id);
+      const [activityResult, profileResult, fileResult] = await Promise.all([
+        supabase.from("academic_activities").select("id, title, total_points").in("id", activityIds),
+        supabase.from("profiles").select("id, full_name").in("id", userIds),
+        supabase.from("academic_activity_submission_files").select("id, submission_id, file_name, mime_type, size_bytes, storage_path").in("submission_id", submissionIds),
+      ]);
+      if (activityResult.error) throw activityResult.error;
+      if (profileResult.error) throw profileResult.error;
+      if (fileResult.error) throw fileResult.error;
+      const activityMap = new Map(((activityResult.data ?? []) as Activity[]).map((row) => [row.id, row]));
+      const profileMap = new Map((profileResult.data ?? []).map((row) => [row.id, row.full_name || "Estudiante"]));
+      const nextItems = submissions.flatMap((submission) => {
+        const activity = activityMap.get(submission.activity_id);
+        return activity ? [{ submission, activity, studentName: profileMap.get(submission.user_id) || "Estudiante" }] : [];
+      });
+      setItems(nextItems);
+      setSelectedId((current) => nextItems.some((row) => row.submission.id === current) ? current : nextItems[0]?.submission.id || "");
+
+      const enriched = await Promise.all(((fileResult.data ?? []) as Attachment[]).map(async (file) => {
+        const { data } = await supabase.storage.from("academic-activity-submissions").createSignedUrl(file.storage_path, 300);
+        return { ...file, url: data?.signedUrl };
+      }));
+      setAttachments(enriched);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "No fue posible cargar la bandeja de revisión.");
+      setItems([]);
+    } finally { setLoading(false); }
+  }, [supabase]);
+
+  useEffect(() => { void loadData(); }, [loadData]);
+
+  const selected = items.find((item) => item.submission.id === selectedId) ?? null;
+  const selectedAttachments = attachments.filter((file) => file.submission_id === selectedId);
 
   useEffect(() => {
     let active = true;
-    async function verifyAccess() {
-      try {
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-        if (!active) return;
-        if (authError || !user) {
-          router.replace("/conexion");
-          return;
-        }
-        const metadataName = user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email?.split("@")[0] ?? "Tutor";
-        setDisplayName(String(metadataName));
-        const { data: assignments, error: assignmentsError } = await supabase
-          .from("user_role_assignments").select("role_id").eq("user_id", user.id);
-        if (assignmentsError) throw assignmentsError;
-        if (!active) return;
-        const roleIds = [...new Set((assignments ?? []).map((item) => item.role_id))];
-        if (roleIds.length === 0) {
-          setAccess("denied");
-          return;
-        }
-        const { data: roles, error: rolesError } = await supabase.from("roles").select("role_key").in("id", roleIds);
-        if (rolesError) throw rolesError;
-        if (!active) return;
-        const keys = (roles ?? []).map((role) => role.role_key);
-        setAccess(keys.includes("tutor") || keys.includes("national_admin") ? "allowed" : "denied");
-      } catch (error) {
-        console.error("No fue posible validar el acceso al espacio de revisión:", error);
-        if (active) setAccess("error");
-      }
+    async function loadRubric() {
+      if (!selected) { setRubric([]); return; }
+      const { data, error: rubricError } = await supabase.from("academic_activity_rubric_criteria")
+        .select("id, activity_id, title, description, max_points, sort_order")
+        .eq("activity_id", selected.submission.activity_id).order("sort_order");
+      if (!active) return;
+      if (rubricError) { setError(rubricError.message); setRubric([]); return; }
+      const rows = (data ?? []) as Rubric[];
+      setRubric(rows);
+      setScores((current) => Object.fromEntries(rows.map((row) => [row.id, current[row.id] ?? "0"])));
+      setManualScore(String(selected.submission.awarded_points ?? ""));
+      setFeedback(selected.submission.feedback ?? "");
+      setDecision("graded");
     }
-    void verifyAccess();
+    void loadRubric();
     return () => { active = false; };
-  }, [router, supabase]);
+  }, [selectedId, selected?.submission.activity_id, supabase]);
 
-  const visibleSubmissions = useMemo(() => {
-    const query = search.trim().toLocaleLowerCase("es");
-    return demoSubmissions.filter((item) => {
-      const matchesFilter = filter === "Todas" || item.status === filter;
-      const matchesQuery = !query || [item.student, item.activity, item.course, item.id]
-        .some((value) => value.toLocaleLowerCase("es").includes(query));
-      return matchesFilter && matchesQuery;
-    });
-  }, [filter, search]);
+  const visible = items.filter((item) => filter === "all" || (filter === "submitted" ? item.submission.status === "submitted" : item.submission.status === "changes_requested"));
+  const totalRubric = rubric.reduce((sum, item) => sum + item.max_points, 0);
+  const calculatedScore = rubric.reduce((sum, item) => sum + (Number(scores[item.id]) || 0), 0);
 
-  const selected = demoSubmissions.find((item) => item.id === selectedId) ?? visibleSubmissions[0] ?? demoSubmissions[0];
-  const selectedScores = scores[selected.id] ?? {};
-  const total = selected.rubric.reduce((sum, criterion) => sum + (selectedScores[criterion.id] ?? 0), 0);
-  const maxPoints = selected.rubric.reduce((sum, criterion) => sum + criterion.points, 0);
-  const allScored = selected.rubric.every((criterion) => typeof selectedScores[criterion.id] === "number");
-  const feedbackRequired = decision !== "Aprobar";
-
-  function setCriterionScore(criterion: Criterion, rawValue: string) {
-    const parsed = rawValue === "" ? 0 : Number(rawValue);
-    if (!Number.isFinite(parsed)) return;
-    const value = Math.max(0, Math.min(criterion.points, Math.round(parsed)));
-    setScores((current) => ({
-      ...current,
-      [selected.id]: { ...current[selected.id], [criterion.id]: value },
-    }));
-    setShowPreview(false);
-  }
-
-  function selectSubmission(id: string) {
-    setSelectedId(id);
-    setFeedback("");
-    setDecision("Aprobar");
-    setShowPreview(false);
-  }
-
-  if (access === "checking") {
-    return <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6"><div className="text-center"><div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-[#087DB5]/20 border-t-[#087DB5]" /><p className="mt-4 text-sm text-slate-500">Verificando tu acceso...</p></div></main>;
-  }
-
-  if (access !== "allowed") {
-    return <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6"><section className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-2xl text-amber-700">!</div><h1 className="mt-5 text-xl font-bold text-[#102D4D]">{access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}</h1><p className="mt-2 text-sm leading-6 text-slate-500">{access === "error" ? "Ocurrió un problema al consultar tus permisos. Intenta nuevamente." : "Este espacio está habilitado para tutores con una asignación vigente."}</p><div className="mt-6 flex justify-center gap-2"><button type="button" onClick={() => window.location.reload()} className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white">Reintentar</button><button type="button" onClick={() => router.push("/dashboard/tutor")} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600">Volver</button></div></section></main>;
+  async function saveReview() {
+    if (!selected || saving) return;
+    setSaving(true); setError(""); setNotice("");
+    try {
+      if (decision === "changes_requested" && !feedback.trim()) throw new Error("Escribe la retroalimentación que debe corregir el estudiante.");
+      let awarded = Number(manualScore);
+      let rubricScores: Array<{ criterion_id: string; awarded_points: number }> = [];
+      if (decision === "graded" && rubric.length) {
+        rubricScores = rubric.map((item) => ({ criterion_id: item.id, awarded_points: Number(scores[item.id]) }));
+        for (const score of rubricScores) {
+          const criterion = rubric.find((row) => row.id === score.criterion_id);
+          if (!Number.isFinite(score.awarded_points) || score.awarded_points < 0 || score.awarded_points > (criterion?.max_points ?? 0)) {
+            throw new Error("Cada puntaje debe estar dentro del máximo de su criterio.");
+          }
+        }
+        awarded = calculatedScore;
+        if (Math.abs(totalRubric - selected.activity.total_points) > 0.01) throw new Error("La rúbrica configurada no coincide con el puntaje total de la actividad. Revisa la configuración antes de calificar.");
+      }
+      if (decision === "graded" && (!Number.isFinite(awarded) || awarded < 0 || awarded > selected.activity.total_points)) {
+        throw new Error("La calificación debe estar entre 0 y " + selected.activity.total_points + ".");
+      }
+      const { error: reviewError } = await supabase.rpc("review_academic_activity_submission", {
+        p_submission_id: selected.submission.id,
+        p_awarded_points: decision === "graded" ? awarded : 0,
+        p_feedback: feedback.trim() || null,
+        p_status: decision,
+        p_rubric_scores: decision === "graded" ? rubricScores : [],
+      });
+      if (reviewError) throw reviewError;
+      setNotice(decision === "graded" ? "Calificación guardada." : "Se solicitó una corrección al estudiante.");
+      await loadData();
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "No fue posible guardar la revisión."); }
+    finally { setSaving(false); }
   }
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-5 py-4 md:px-8">
-          <div className="flex items-center gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#087DB5] text-xl font-bold text-white">✦</div><div><p className="text-sm font-extrabold tracking-wide">ACADEMIA DECOM</p><p className="text-xs text-slate-400">Revisión y evaluación de actividades</p></div></div>
-          <div className="flex items-center gap-3"><span className="hidden text-right sm:block"><span className="block text-sm font-semibold">{displayName}</span><span className="block text-xs text-slate-400">Espacio del tutor</span></span><button type="button" onClick={() => router.push("/dashboard/tutor")} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Volver a tutoría</button></div>
-        </div>
-      </header>
-
-      <div className="mx-auto max-w-[1500px] space-y-7 px-5 py-7 pb-12 md:px-8 md:py-9">
-        <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-[#19A7A0]">Acompañamiento y evaluación</p><h1 className="mt-2 text-2xl font-extrabold tracking-tight md:text-3xl">Revisión de entregas</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Evalúa cada criterio, registra observaciones y prepara una decisión para el estudiante.</p></div>
-          <span className="inline-flex w-fit items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800"><span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Datos de demostración</span>
-        </section>
-
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[
-            { label: "Pendientes", value: demoSubmissions.filter((item) => item.status === "Pendiente").length, detail: "Esperan primera revisión" },
-            { label: "En revisión", value: demoSubmissions.filter((item) => item.status === "En revisión").length, detail: "Trabajo iniciado" },
-            { label: "Calificadas", value: demoSubmissions.filter((item) => item.status === "Calificada").length, detail: "Evaluación completada" },
-            { label: "Requieren ajustes", value: demoSubmissions.filter((item) => item.status === "Requiere ajustes").length, detail: "Con nueva entrega pendiente" },
-          ].map((item) => <article key={item.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-xs font-semibold text-slate-400">{item.label}</p><p className="mt-2 text-3xl font-extrabold tabular-nums">{item.value}</p><p className="mt-1 text-xs text-slate-400">{item.detail}</p></article>)}
-        </section>
-
-        <section className="grid items-start gap-5 xl:grid-cols-[minmax(300px,0.8fr)_minmax(0,1.7fr)]">
-          <aside className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between gap-2"><h2 className="text-base font-bold">Bandeja de entregas</h2><span className="text-xs text-slate-400">{visibleSubmissions.length} resultados</span></div>
-            <label className="mt-4 block"><span className="sr-only">Buscar entregas</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar estudiante o actividad..." className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[#087DB5]" /></label>
-            <div className="mt-3 flex flex-wrap gap-2">{filters.map((item) => <button key={item} type="button" onClick={() => setFilter(item)} aria-pressed={filter === item} className={`rounded-full px-3 py-1.5 text-[11px] font-semibold ${filter === item ? "bg-[#087DB5] text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}>{item}</button>)}</div>
-            <div className="mt-4 space-y-2">
-              {visibleSubmissions.map((item) => <button key={item.id} type="button" onClick={() => selectSubmission(item.id)} aria-pressed={selected.id === item.id} className={`w-full rounded-2xl border p-4 text-left transition ${selected.id === item.id ? "border-[#087DB5] bg-sky-50/70" : "border-slate-100 hover:border-slate-300"}`}>
-                <div className="flex items-start gap-3"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#E5F2F8] text-xs font-bold text-[#087DB5]">{item.initials}</span><span className="min-w-0 flex-1"><span className="block text-xs font-bold">{item.activity}</span><span className="mt-1 block text-[11px] text-slate-500">{item.student}</span><span className="mt-2 inline-flex rounded-full bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-600">{item.status}</span></span></div>
-              </button>)}
-              {visibleSubmissions.length === 0 && <p className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-400">No hay entregas para este filtro.</p>}
-            </div>
-          </aside>
-
-          <div className="space-y-5">
-            <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-7">
-              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#19A7A0]">{selected.id} · Intento {selected.attempt}</p><h2 className="mt-2 text-xl font-bold">{selected.activity}</h2><p className="mt-1 text-sm text-slate-500">{selected.student} · {selected.course}</p></div><span className="w-fit rounded-full bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800">{selected.status}</span></div>
-              <div className="mt-5 rounded-2xl bg-[#F4F7FA] p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Entrega del estudiante</p><p className="mt-2 text-sm leading-6 text-slate-600">{selected.excerpt}</p><p className="mt-3 text-[11px] text-slate-400">Recibida: {selected.submittedAt}</p></div>
-
-              <div className="mt-6 flex flex-wrap items-end justify-between gap-3"><div><h3 className="text-sm font-bold">Rúbrica de evaluación</h3><p className="mt-1 text-xs text-slate-400">Asigna un puntaje entero por criterio, sin superar su máximo.</p></div><div className="rounded-2xl bg-[#EAF5F8] px-4 py-2 text-right"><p className="text-[10px] font-semibold uppercase text-slate-500">Puntaje preliminar</p><p className="text-2xl font-extrabold tabular-nums text-[#087DB5]">{total}<span className="text-sm font-semibold text-slate-400"> / {maxPoints}</span></p></div></div>
-              <div className="mt-4 space-y-3">
-                {selected.rubric.map((criterion) => <div key={criterion.id} className="grid gap-3 rounded-2xl border border-slate-100 p-4 sm:grid-cols-[minmax(0,1fr)_110px] sm:items-center"><div><p className="text-sm font-semibold">{criterion.title}</p><p className="mt-1 text-xs leading-5 text-slate-500">{criterion.description}</p><p className="mt-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Máximo: {criterion.points} puntos</p></div><label className="block"><span className="text-[10px] font-semibold text-slate-500">Puntaje obtenido</span><input type="number" min={0} max={criterion.points} step={1} value={selectedScores[criterion.id] ?? 0} onChange={(event) => setCriterionScore(criterion, event.target.value)} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-bold tabular-nums outline-none focus:border-[#087DB5]" /><span className="mt-1 block text-right text-[10px] text-slate-400">de {criterion.points}</span></label></div>)}
-              </div>
-              <div className="mt-4 flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3"><span className="text-xs font-semibold text-slate-500">Resultado porcentual</span><span className="text-sm font-extrabold tabular-nums">{maxPoints ? Math.round((total / maxPoints) * 100) : 0}%</span></div>
-
-              <div className="mt-6"><label htmlFor="review-feedback" className="text-sm font-bold">Retroalimentación</label><textarea id="review-feedback" value={feedback} onChange={(event) => { setFeedback(event.target.value); setShowPreview(false); }} rows={4} maxLength={2000} placeholder="Describe los logros, los aspectos por mejorar y los pasos concretos para avanzar..." className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm leading-6 outline-none focus:border-[#087DB5]" /><p className="mt-1 text-right text-[10px] text-slate-400">{feedback.length}/2000</p></div>
-
-              <div className="mt-6"><p className="text-sm font-bold">Decisión de revisión</p><div className="mt-3 grid gap-2 sm:grid-cols-3">{(["Aprobar", "Solicitar ajustes", "Rechazar"] as const).map((item) => <button key={item} type="button" aria-pressed={decision === item} onClick={() => { setDecision(item); setShowPreview(false); }} className={`rounded-xl border px-3 py-3 text-xs font-semibold transition ${decision === item ? "border-[#087DB5] bg-sky-50 text-[#087DB5]" : "border-slate-200 text-slate-500 hover:bg-slate-50"}`}>{item}</button>)}</div>{feedbackRequired && <p className="mt-2 text-[11px] text-amber-700">Esta decisión requiere explicar al estudiante qué debe corregir.</p>}</div>
-
-              {showPreview && <div role="status" className="mt-5 rounded-2xl border border-teal-200 bg-teal-50 p-4"><p className="text-sm font-bold text-teal-900">Vista previa preparada</p><p className="mt-1 text-xs leading-5 text-teal-800">Decisión: {decision}. Puntaje: {total}/{maxPoints} ({maxPoints ? Math.round((total / maxPoints) * 100) : 0}%). {feedback.trim().length} caracteres de retroalimentación. No se ha guardado, notificado ni cambiado el estado real de la entrega.</p></div>}
-
-              <div className="mt-6 flex flex-col-reverse justify-between gap-3 border-t border-slate-100 pt-5 sm:flex-row"><button type="button" onClick={() => router.push("/dashboard/tutor")} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50">Volver a bandeja general</button><button type="button" disabled={!allScored || (feedbackRequired && !feedback.trim())} onClick={() => setShowPreview(true)} className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white hover:bg-[#066a9b] disabled:cursor-not-allowed disabled:opacity-40">Previsualizar revisión</button></div>
-              <p className="mt-4 rounded-xl bg-[#F4F7FA] p-3 text-[11px] leading-5 text-slate-500">Prototipo local: los puntajes, la retroalimentación y la decisión solo viven en esta sesión. No se registra una calificación ni se envían notificaciones.</p>
+    <main className="min-h-screen bg-[#F4F7FA] px-4 py-8 text-[#102D4D] sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <header className="mb-8 flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#19A7A0]">Espacio del tutor</p><h1 className="mt-2 text-3xl font-bold">Revisión de actividades</h1><p className="mt-2 text-sm text-slate-500">Entregas reales recibidas desde las matrículas de tus cursos y del distrito.</p></div><button type="button" onClick={() => void loadData()} className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold">Actualizar bandeja</button></header>
+        {error && <div role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</div>}
+        {notice && <div role="status" className="mb-5 rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">{notice}</div>}
+        {loading ? <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">Cargando entregas...</div> : (
+          <div className="grid gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
+            <aside className="rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="mb-4 flex gap-2"><button type="button" onClick={() => setFilter("all")} className={"rounded-full px-3 py-2 text-xs font-semibold " + (filter === "all" ? "bg-[#087DB5] text-white" : "bg-slate-100 text-slate-600")}>Todas ({items.length})</button><button type="button" onClick={() => setFilter("submitted")} className={"rounded-full px-3 py-2 text-xs font-semibold " + (filter === "submitted" ? "bg-[#087DB5] text-white" : "bg-slate-100 text-slate-600")}>Nuevas</button><button type="button" onClick={() => setFilter("changes")} className={"rounded-full px-3 py-2 text-xs font-semibold " + (filter === "changes" ? "bg-[#087DB5] text-white" : "bg-slate-100 text-slate-600")}>Ajustes</button></div>
+              {visible.length === 0 ? <p className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-500">No hay entregas pendientes de revisión.</p> : <div className="space-y-2">{visible.map((item) => <button key={item.submission.id} type="button" onClick={() => setSelectedId(item.submission.id)} className={"w-full rounded-xl border p-3 text-left " + (selectedId === item.submission.id ? "border-[#087DB5] bg-sky-50" : "border-slate-100 hover:bg-slate-50")}><p className="truncate text-sm font-bold">{item.studentName}</p><p className="mt-1 truncate text-xs text-slate-600">{item.activity.title}</p><div className="mt-2 flex items-center justify-between text-[11px] text-slate-500"><span>Intento {item.submission.attempt_number}</span><span>{item.submission.status === "submitted" ? "Nueva entrega" : "Con ajustes"}</span></div></button>)}</div>}
+            </aside>
+            <section className="rounded-2xl border border-slate-200 bg-white p-6">
+              {!selected ? <div className="py-16 text-center text-sm text-slate-500">Selecciona una entrega para revisarla.</div> : <>
+                <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-wider text-[#19A7A0]">{selected.studentName}</p><h2 className="mt-1 text-xl font-bold">{selected.activity.title}</h2><p className="mt-1 text-xs text-slate-500">Intento {selected.submission.attempt_number} · {selected.submission.submitted_at ? new Date(selected.submission.submitted_at).toLocaleString("es-CO") : "Sin fecha"}</p></div><span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">{selected.submission.status === "submitted" ? "En revisión" : "Requiere ajustes"}</span></div>
+                {selected.submission.response_text && <div className="mt-6 rounded-xl bg-slate-50 p-4"><h3 className="text-xs font-bold uppercase tracking-wide text-slate-500">Respuesta del estudiante</h3><p className="mt-3 whitespace-pre-wrap text-sm leading-7">{selected.submission.response_text}</p></div>}
+                {selected.submission.external_url && <p className="mt-4 text-sm"><a href={selected.submission.external_url} target="_blank" rel="noreferrer" className="font-semibold text-[#087DB5]">Abrir enlace entregado ↗</a></p>}
+                {selectedAttachments.length > 0 && <div className="mt-5"><h3 className="text-sm font-bold">Archivos adjuntos</h3><ul className="mt-2 space-y-2">{selectedAttachments.map((file) => <li key={file.id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 p-3 text-sm"><span className="truncate">{file.file_name} · {(file.size_bytes / 1024 / 1024).toFixed(1)} MB</span>{file.url && <a href={file.url} target="_blank" rel="noreferrer" className="shrink-0 font-semibold text-[#087DB5]">Abrir</a>}</li>)}</ul></div>}
+                <div className="mt-7 border-t border-slate-100 pt-6"><h3 className="text-lg font-bold">Evaluar entrega</h3>
+                  {rubric.length > 0 ? <div className="mt-4 space-y-3">{rubric.map((criterion) => <div key={criterion.id} className="grid gap-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-[1fr_120px]"><div><p className="text-sm font-semibold">{criterion.title} <span className="text-xs font-normal text-slate-500">· máximo {criterion.max_points}</span></p>{criterion.description && <p className="mt-1 text-xs text-slate-500">{criterion.description}</p>}</div><label className="text-xs font-semibold">Puntaje<input type="number" min="0" max={criterion.max_points} step="0.01" value={scores[criterion.id] ?? "0"} onChange={(event) => setScores((current) => ({ ...current, [criterion.id]: event.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 p-2 text-sm" /></label></div>)}<p className="text-right text-sm font-bold">Total: {calculatedScore} / {totalRubric}</p></div> : <label className="mt-4 block text-xs font-semibold">Puntaje obtenido<input type="number" min="0" max={selected.activity.total_points} step="0.01" value={manualScore} onChange={(event) => setManualScore(event.target.value)} className="mt-2 w-full max-w-xs rounded-xl border border-slate-200 p-3 text-sm" /></label>}
+                  <label className="mt-4 block text-xs font-semibold">Retroalimentación<textarea rows={4} value={feedback} onChange={(event) => setFeedback(event.target.value)} maxLength={4000} className="mt-2 w-full rounded-xl border border-slate-200 p-3 text-sm font-normal" placeholder="Describe los aciertos y los aspectos por mejorar..." /></label>
+                  <div className="mt-4 flex flex-wrap items-center gap-3"><select value={decision} onChange={(event) => setDecision(event.target.value as "graded" | "changes_requested")} className="rounded-xl border border-slate-200 p-3 text-sm"><option value="graded">Calificar entrega</option><option value="changes_requested">Solicitar correcciones</option></select><button type="button" disabled={saving} onClick={() => void saveReview()} className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">{saving ? "Guardando..." : "Guardar revisión"}</button></div>
+                </div>
+              </>}
             </section>
-
-            <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-7"><div className="flex items-center justify-between gap-3"><div><h3 className="text-sm font-bold">Historial de intentos y seguimiento</h3><p className="mt-1 text-xs text-slate-400">Registro de demostración para ilustrar la trazabilidad.</p></div><span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-semibold text-slate-500">{demoHistory.length} eventos</span></div><ol className="mt-5 space-y-4">{demoHistory.map((event, index) => <li key={event.label} className="relative flex gap-3"><span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#E5F2F8] text-[10px] font-bold text-[#087DB5]">{index + 1}</span><div className="min-w-0 flex-1 border-b border-slate-100 pb-4"><p className="text-xs font-bold">{event.label}</p><p className="mt-1 text-xs text-slate-500">{event.detail}</p><p className="mt-1 text-[10px] text-slate-400">{event.date}</p></div></li>)}</ol></section>
           </div>
-        </section>
-        <TutorDemoInbox />
-        <footer className="border-t border-slate-200 pt-5 text-xs text-slate-400">Academia DECOM · Revisión de entregas · Datos ficticios de demostración</footer>
+        )}
       </div>
     </main>
   );
