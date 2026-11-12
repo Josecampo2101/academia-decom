@@ -56,10 +56,10 @@ export default function RoleWorkspacePage() {
           : { data: [], error: null };
         if (roleError) throw roleError;
         const roleMap = new Map((roleRows ?? []).map(r => [r.id, r]));
-        const assignedRoles: Role[] = (assignments ?? []).map(a => {
+        const assignedRoles: Role[] = (assignments ?? []).flatMap(a => {
           const role = roleMap.get(a.role_id);
-          return role ? { role_key: role.role_key, name: role.name, district_id: a.district_id } : null;
-        }).filter(Boolean);
+          return role ? [{ role_key: role.role_key, name: role.name, district_id: a.district_id }] : [];
+        });
         if (!alive) return;
         setEmail(user.email ?? "");
         setRoles(assignedRoles);
