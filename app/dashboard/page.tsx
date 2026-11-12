@@ -104,7 +104,7 @@ export default function DashboardPage() {
     const hasManagementRole = roleKeys.some((role) =>
       ["national_admin", "district_coordinator", "area_coordinator", "academic_editor", "local_responsible"].includes(role)
     );
-    if (moduleName === "Seguimiento" && hasManagementRole && !isStudent) {
+    if (moduleName === "Seguimiento" && hasManagementRole && !isTutor) {
       router.push("/dashboard/espacio");
       return;
     }
