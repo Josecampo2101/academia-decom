@@ -26,7 +26,6 @@ export default function EnrollmentManagementPage(){
  const [memberId,setMemberId]=useState("");
  const [courseId,setCourseId]=useState("");
  const [search,setSearch]=useState("");
- const [userId,setUserId]=useState("");
 
  const loadDistrictData=useCallback(async(id:string)=>{
   if(!id){setMembers([]);setCourses([]);setEnrollments([]);return;}
@@ -66,7 +65,7 @@ export default function EnrollmentManagementPage(){
   let active=true;
   async function init(){
    try{
-    const {data:{user},error:authError}=await supabase.auth.getUser();if(authError||!user){router.replace("/conexion");return;}setUserId(user.id);
+    const {data:{user},error:authError}=await supabase.auth.getUser();if(authError||!user){router.replace("/conexion");return;}
     const {data:assignments,error:assignmentError}=await supabase.from("user_role_assignments").select("role_id,district_id,congregation_id").eq("user_id",user.id);
     if(assignmentError)throw assignmentError;
     const roleIds=[...new Set((assignments??[]).map(a=>a.role_id))];
