@@ -8,9 +8,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 type District = { id: string; name: string };
 type Plan = { id: string; district_id: string; lesson_id: string; session_title: string; topic: string; description: string | null; target_audience: string | null; learning_outcomes: string[]; teaching_method: string | null; opening_activity: string | null; lesson_development: string | null; closing_activity: string | null; assessment_strategy: string | null; homework: string | null; planned_for: string | null; estimated_minutes: number | null; created_by: string | null; created_at: string; review_feedback: string | null };
 type Material = { id: string; lesson_id: string; title: string; description: string | null; material_type: string; storage_path: string | null; external_url: string | null; content: string | null; status: string };
-type Lesson = { id: string; title: string; module_id: string };
-type Module = { id: string; title: string; course_id: string };
-type Course = { id: string; title: string };
+type Lesson = { id: string; title: string; module_id: string; status: string };
+type Module = { id: string; title: string; course_id: string; status: string };
+type Course = { id: string; title: string; program_id: string; status: string };
+type Program = { id: string; status: string };
 type Profile = { id: string; full_name: string | null };
 
 export default function AcademicReviewPage() {
