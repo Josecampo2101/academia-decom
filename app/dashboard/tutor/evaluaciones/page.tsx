@@ -37,7 +37,7 @@ export default function TutorManualAssessmentReviewsPage() {
         if (rolesError) throw rolesError;
         if (!active) return;
         const keys = (roles ?? []).map((role) => role.role_key);
-        if (keys.includes("tutor") || keys.includes("national_admin")) {
+        if (keys.includes("tutor") || keys.includes("academic_editor") || keys.includes("national_admin")) {
           setTutorId(user.id);
           setAccess("allowed");
         } else {
@@ -57,7 +57,7 @@ export default function TutorManualAssessmentReviewsPage() {
   }
 
   if (access !== "allowed") {
-    return <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6"><section className="max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center"><h1 className="text-xl font-bold text-[#102D4D]">{access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}</h1><p className="mt-2 text-sm text-slate-500">{access === "error" ? "Intenta nuevamente." : "Este espacio está habilitado para tutores y administración nacional."}</p><button type="button" onClick={() => router.push("/dashboard/tutor")} className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white">Volver al panel</button></section></main>;
+    return <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6"><section className="max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center"><h1 className="text-xl font-bold text-[#102D4D]">{access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}</h1><p className="mt-2 text-sm text-slate-500">{access === "error" ? "Intenta nuevamente." : "Este espacio está habilitado para tutores, editores académicos y administración nacional."}</p><button type="button" onClick={() => router.push("/dashboard/tutor")} className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white">Volver al panel</button></section></main>;
   }
 
   return (
