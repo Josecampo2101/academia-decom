@@ -5,6 +5,7 @@
 | Ruta | Perfil | Responsabilidad |
 |---|---|---|
 | `/dashboard/espacio` | Todos los perfiles activos | Accesos e indicadores limitados por rol y distrito |
+| `/dashboard/estudiante` | Estudiante (`member`) | Acceso al espacio de trabajo conectado por perfil |
 | `/dashboard/formacion` | Estudiante (`member`) | Cursos matriculados, lecciones publicadas y avance |
 | `/dashboard/tutor` | Tutor | Seguimiento de sus planificaciones y observaciones |
 | `/dashboard/planificador` | Tutor, editor académico, dirección, comité y administración nacional | Preparación de sesiones y materiales |
@@ -49,7 +50,7 @@ Los campos `review_feedback`, `reviewed_by` y `reviewed_at` son metadatos de rev
 - `review_academic_assessment_response` permite al tutor calificar respuestas abiertas; la nota definitiva solo se cierra cuando no quedan respuestas pendientes.
 - Aprobar el examen final completa la matrícula y crea la matrícula activa del siguiente curso publicado del mismo programa. La lectura del historial sigue disponible para matrículas completadas.
 
-Las rutas `/dashboard/tutor/evaluaciones/crear`, `/dashboard/estudiante/evaluaciones` y `/dashboard/estudiante/evaluaciones/[assessmentId]` consumen el backend real. La antigua práctica local permanece como demostración heredada y no genera calificaciones oficiales.
+Las rutas `/dashboard/tutor/evaluaciones/crear`, `/dashboard/tutor/evaluaciones` (bandeja de revisión), `/dashboard/estudiante/evaluaciones` y `/dashboard/estudiante/evaluaciones/[assessmentId]` consumen el backend real. El antiguo recorrido `/practica` permanece como demostración heredada y no genera calificaciones oficiales. El panel `/dashboard/estudiante` reutiliza el espacio por perfil y ya no presenta cursos, tareas ni reconocimientos ficticios.
 
 ## Pendientes
 
