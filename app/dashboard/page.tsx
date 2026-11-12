@@ -129,7 +129,8 @@ export default function DashboardPage() {
   // Permisos del módulo de reubicaciones.
   const canManageTransfers =
     roleKeys.includes("national_admin") ||
-    roleKeys.includes("district_coordinator");
+    roleKeys.includes("district_coordinator") ||
+    roleKeys.includes("area_coordinator");
 
   const canManageInvitations = roleKeys.some((role) =>
     ["national_admin", "district_coordinator", "area_coordinator"].includes(role)
