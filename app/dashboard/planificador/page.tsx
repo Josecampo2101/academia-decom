@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 type District = { id: string; name: string };
 type Program = { id: string; title: string };
@@ -40,7 +41,7 @@ const buttonClass = "rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold tex
 
 export default function AcademicPlannerPage() {
   const router = useRouter();
-  const supabase = useMemo(() => createClient() as any, []);
+  const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -74,14 +75,14 @@ export default function AcademicPlannerPage() {
         if (authError || !user) { router.replace("/conexion"); return; }
         const { data: assignments, error: assignmentError } = await supabase.from("user_role_assignments").select("role_id,district_id,congregation_id").eq("user_id", user.id);
         if (assignmentError) throw assignmentError;
-        const ids = [...new Set((assignments ?? []).map((a: any) => a.role_id))];
+        const ids = [...new Set((assignments ?? []).map(a => a.role_id))];
         const { data: roles, error: rolesError } = ids.length ? await supabase.from("roles").select("id,role_key").in("id", ids) : { data: [], error: null };
         if (rolesError) throw rolesError;
-        const roleMap = new Map((roles ?? []).map((r: any) => [r.id, r.role_key]));
-        const allowed = (assignments ?? []).filter((a: any) => ["national_admin","academic_editor","tutor","district_coordinator","area_coordinator"].includes(roleMap.get(a.role_id)));
+        const roleMap = new Map((roles ?? []).map(r => [r.id, r.role_key]));
+        const allowed = (assignments ?? []).filter(a => ["national_admin","academic_editor","tutor","district_coordinator","area_coordinator"].includes(roleMap.get(a.role_id)));
         if (!allowed.length) { router.replace("/acceso-denegado"); return; }
-        const national = allowed.some((a: any) => roleMap.get(a.role_id) === "national_admin" && !a.district_id && !a.congregation_id);
-        const districtIds = [...new Set(allowed.map((a: any) => a.district_id).filter(Boolean))] as string[];
+        const national = allowed.some(a => roleMap.get(a.role_id) === "national_admin" && !a.district_id && !a.congregation_id);
+        const districtIds = [...new Set(allowed.map(a => a.district_id).filter(Boolean))] as string[];
         let query = supabase.from("districts").select("id,name").eq("status","active").order("name");
         if (!national) query = query.in("id", districtIds);
         const { data, error: districtError } = await query;
@@ -113,7 +114,7 @@ export default function AcademicPlannerPage() {
     setModuleId(m.data?.[0]?.id ?? ""); setLessonId(l.data?.[0]?.id ?? "");
   }, [supabase]);
 
-  useEffect(() => { if (districtId) void loadHierarchy(districtId).catch(e => setError(e.message)); }, [districtId, loadHierarchy]);
+  useEffect(() => { if (districtId) void Promise.resolve().then(() => loadHierarchy(districtId)).catch(e => setError(e.message)); }, [districtId, loadHierarchy]);
 
   const loadAgenda = useCallback(async (id: string) => {
     if (!id) { setAgenda([]); return; }
@@ -124,7 +125,7 @@ export default function AcademicPlannerPage() {
     setAgenda((data ?? []) as AgendaItem[]);
   }, [supabase]);
 
-  useEffect(() => { if (districtId) void loadAgenda(districtId).catch(e => setError(e.message)); }, [districtId, loadAgenda]);
+  useEffect(() => { if (districtId) void Promise.resolve().then(() => loadAgenda(districtId)).catch(e => setError(e.message)); }, [districtId, loadAgenda]);
 
   const visibleCourses = courses.filter(c => c.program_id === programId);
   const visibleModules = modules.filter(m => m.course_id === courseId);
@@ -151,7 +152,7 @@ export default function AcademicPlannerPage() {
     setMaterials((materialResult.data ?? []) as Material[]);
   }, [supabase, selectedLesson?.title]);
 
-  useEffect(() => { if (lessonId) void loadLesson(lessonId).catch(e => setError(e.message)); }, [lessonId, loadLesson]);
+  useEffect(() => { if (lessonId) void Promise.resolve().then(() => loadLesson(lessonId)).catch(e => setError(e.message)); }, [lessonId, loadLesson]);
 
   function updatePlan<K extends keyof Plan>(key: K, value: Plan[K]) { setPlan(current => ({ ...current, [key]: value })); }
 
