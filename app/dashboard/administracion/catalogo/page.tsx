@@ -305,7 +305,7 @@ export default function AcademicCatalogPage() {
       setNoticeError(true);
       return;
     }
-    if (!/\\.(md|markdown|txt)$/i.test(file.name)) {
+    if (!/\.(md|markdown|txt)$/i.test(file.name)) {
       setNotice("Por ahora puedes importar archivos Markdown (.md) o texto plano (.txt).");
       setNoticeError(true);
       return;
