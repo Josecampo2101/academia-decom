@@ -53,8 +53,7 @@ Las rutas `/dashboard/tutor/evaluaciones/crear`, `/dashboard/estudiante/evaluaci
 
 ## Pendientes
 
-- Conectar la bandeja de revisión manual del tutor a `academic_assessment_responses` (el componente heredado aún usa datos locales).
-- Incorporar el flujo de revisión de intentos y retroalimentación dentro del panel del tutor.
+- Añadir paginación y filtros por curso/estado a la bandeja de revisión cuando haya volumen real de intentos.
 - Asignación formal de tutorías y seguimiento individual.
 - Pruebas de integración con cuentas reales de cada perfil.
 - Verificación final de lint, TypeScript y build en CI antes de integrar a `main`.
