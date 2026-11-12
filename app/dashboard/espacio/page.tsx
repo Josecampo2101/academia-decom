@@ -30,7 +30,7 @@ function Metric({ label, value, detail }: { label: string; value: number | strin
 
 export default function RoleWorkspacePage() {
   const router = useRouter();
-  const supabase = useMemo(() => createClient() as unknown as SupabaseClient<any>, []);
+  const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
@@ -50,14 +50,14 @@ export default function RoleWorkspacePage() {
         const { data: assignments, error: assignmentError } = await supabase
           .from("user_role_assignments").select("role_id,district_id").eq("user_id", user.id);
         if (assignmentError) throw assignmentError;
-        const roleIds = [...new Set((assignments ?? []).map((a: any) => a.role_id))];
+        const roleIds = [...new Set((assignments ?? []).map(a => a.role_id))];
         const { data: roleRows, error: roleError } = roleIds.length
           ? await supabase.from("roles").select("id,role_key,name").in("id", roleIds)
           : { data: [], error: null };
         if (roleError) throw roleError;
-        const roleMap = new Map((roleRows ?? []).map((r: any) => [r.id, r]));
-        const assignedRoles: Role[] = (assignments ?? []).map((a: any) => {
-          const role = roleMap.get(a.role_id) as any;
+        const roleMap = new Map((roleRows ?? []).map(r => [r.id, r]));
+        const assignedRoles: Role[] = (assignments ?? []).map(a => {
+          const role = roleMap.get(a.role_id);
           return role ? { role_key: role.role_key, name: role.name, district_id: a.district_id } : null;
         }).filter(Boolean);
         if (!alive) return;
@@ -99,7 +99,7 @@ export default function RoleWorkspacePage() {
             congregationQuery = congregationQuery.in("district_id", districtIds);
             const { data: congregationRows, error: congregationError } = await supabase.from("congregations").select("id").in("district_id", districtIds);
             if (congregationError) throw congregationError;
-            const congregationIds = (congregationRows ?? []).map((c: any) => c.id);
+            const congregationIds = (congregationRows ?? []).map(c => c.id);
             memberQuery = congregationIds.length ? memberQuery.in("congregation_id", congregationIds) : memberQuery.eq("congregation_id", "00000000-0000-0000-0000-000000000000");
             enrollmentQuery = enrollmentQuery.in("district_id", districtIds);
             publishedQuery = publishedQuery.in("district_id", districtIds);
