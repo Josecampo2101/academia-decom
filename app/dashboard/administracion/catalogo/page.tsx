@@ -158,7 +158,7 @@ export default function AcademicCatalogPage() {
           .order("sort_order")
           .order("title"),
         supabase.from("lessons")
-          .select("id, district_id, module_id, title, summary, content, estimated_minutes, status, sort_order")
+          .select("id, district_id, module_id, title, summary, objectives, content, estimated_minutes, status, sort_order")
           .eq("district_id", districtId)
           .order("sort_order")
           .order("title"),
