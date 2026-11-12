@@ -146,7 +146,7 @@ export default function AcademicActivitiesAdminPage() {
     if (activity.status !== "published") return;
     setSaving(true); setError(""); setNotice("");
     try {
-      const { data: enrollments, error: enrollmentError } = await supabase.from("course_enrollments").select("id").eq("district_id", activity.course_id ? districtId : districtId).eq("course_id", activity.course_id).eq("status", "active");
+      const { data: enrollments, error: enrollmentError } = await supabase.from("course_enrollments").select("id").eq("district_id", districtId).eq("course_id", activity.course_id).eq("status", "active");
       if (enrollmentError) throw enrollmentError;
       if (!enrollments?.length) throw new Error("No hay estudiantes con matrícula activa en este curso.");
       const { data: existing, error: existingError } = await supabase.from("academic_activity_assignments").select("enrollment_id").eq("activity_id", activity.id);
