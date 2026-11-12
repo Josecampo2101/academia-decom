@@ -1125,6 +1125,13 @@ export default function DashboardPage() {
                 <p className={`mt-1 text-sm ${secondaryText}`}>
                   Accede a las herramientas de formación institucional.
                 </p>
+                <button
+                  type="button"
+                  onClick={() => router.push("/dashboard/espacio")}
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#066895]"
+                >
+                  Abrir mi espacio según mi perfil <span aria-hidden="true">→</span>
+                </button>
               </div>
 
               <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
