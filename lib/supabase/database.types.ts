@@ -1197,7 +1197,7 @@ export type Database = {
             }
           }
       get_invitation_requests: {
-        Args: { p_status?: string }
+        Args: { p_status?: string | null }
         Returns: {
           congregation_name: string
           date_of_birth: string
