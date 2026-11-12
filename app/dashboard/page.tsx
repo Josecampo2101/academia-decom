@@ -89,12 +89,28 @@ export default function DashboardPage() {
   >("");
 
   const isNationalAdmin = roleKeys.includes("national_admin");
+  const canManageInvitations = roleKeys.some((role) =>
+    ["national_admin", "district_coordinator", "area_coordinator"].includes(role)
+  );
   const canManageLibrary = isNationalAdmin || roleKeys.includes("academic_editor");
   const canManageAcademicCatalog = canManageLibrary;
 
   function openAcademicModule(moduleName: string) {
     const isStudent = roleKeys.includes("member");
     const isTutor = roleKeys.includes("tutor");
+    const adminDestination =
+      moduleName === "Mi formación"
+        ? "/dashboard/formacion"
+        : moduleName === "Biblioteca"
+          ? "/dashboard/biblioteca"
+          : null;
+    const canOpenAdminModule =
+      isNationalAdmin || roleKeys.includes("academic_editor");
+
+    if (adminDestination && canOpenAdminModule) {
+      router.push(adminDestination);
+      return;
+    }
 
     if (moduleName === "Seguimiento" && isTutor) {
       router.push("/dashboard/tutor");
@@ -131,10 +147,6 @@ export default function DashboardPage() {
     roleKeys.includes("national_admin") ||
     roleKeys.includes("district_coordinator") ||
     roleKeys.includes("area_coordinator");
-
-  const canManageInvitations = roleKeys.some((role) =>
-    ["national_admin", "district_coordinator", "area_coordinator"].includes(role)
-  );
 
   // Cargar preferencia de tema.
   useEffect(() => {
@@ -577,8 +589,18 @@ export default function DashboardPage() {
                 key={module.name}
                 type="button"
                 onClick={() => openAcademicModule(module.name)}
-                disabled={!roleKeys.includes("member") && !(module.name === "Seguimiento" && roleKeys.includes("tutor"))}
-                title={roleKeys.includes("member") || (module.name === "Seguimiento" && roleKeys.includes("tutor")) ? module.description : "No tienes un perfil académico habilitado para este módulo"}
+                disabled={
+                  !roleKeys.includes("member") &&
+                  !(module.name === "Seguimiento" && roleKeys.includes("tutor")) &&
+                  !(canOpenAdminModule && (module.name === "Mi formación" || module.name === "Biblioteca"))
+                }
+                title={
+                  roleKeys.includes("member") ||
+                  (module.name === "Seguimiento" && roleKeys.includes("tutor")) ||
+                  (canOpenAdminModule && (module.name === "Mi formación" || module.name === "Biblioteca"))
+                    ? module.description
+                    : "No tienes un perfil académico habilitado para este módulo"
+                }
                 className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] disabled:cursor-not-allowed disabled:opacity-50 ${secondaryText}`}
               >
                 <span>{module.icon}</span>
