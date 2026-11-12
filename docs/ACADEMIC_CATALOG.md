@@ -78,7 +78,10 @@ La migración `20261111024732_allow_committee_create_congregations.sql` también
 - La interfaz administrativa ya consulta y crea registros reales del catálogo.
 - El esquema y las políticas RLS están instalados en Supabase.
 - No se han sembrado programas, cursos ni lecciones ficticios en producción.
-- El formulario actual cubre altas y publicación/archivo; la edición de contenido existente y el reordenamiento visual quedan pendientes.
+- El editor permite crear y modificar programas, cursos, módulos y lecciones que sigan en borrador. Las filas publicadas o archivadas quedan protegidas en la interfaz; los cambios posteriores deberán hacerse mediante una nueva versión curricular.
+- El editor de lecciones admite resumen, objetivos de aprendizaje, contenido Markdown, vista previa de texto e importación inicial de archivos `.md`, `.markdown` y `.txt` de hasta 2 MB. La importación incorpora texto al borrador; no sube archivos binarios a Storage.
+- Se creó en Distrito 34 un primer esqueleto editorial en estado `draft`: programa **Formación DECOM** → curso **Nivel 00 · Inducción al DECOM** → módulo **Módulo 01 · Fundamentos** → lecciones **¿Qué es el DECOM?** y **Comunicación y misión**. Las lecciones están vacías deliberadamente: son espacios de trabajo, no contenido doctrinal ya aprobado.
+- Reordenamiento visual de módulos y lecciones, almacenamiento seguro de PDF/Word/PowerPoint, imágenes y videos, y sus políticas de Storage quedan pendientes.
 - Matrículas, progreso por lección, biblioteca vinculada, actividades, evaluaciones y tutorías aún requieren sus propias tablas, RPC y políticas.
 - El panel del estudiante todavía no consume las versiones publicadas.
 - No se ha desplegado a Vercel.
