@@ -25,3 +25,5 @@ on public.course_enrollments
 for update to authenticated
 using (has_role('national_admin') or can_manage_district(district_id))
 with check (has_role('national_admin') or can_manage_district(district_id));
+
+grant execute on function private.prevent_course_enrollment_identity_change() to authenticated;
