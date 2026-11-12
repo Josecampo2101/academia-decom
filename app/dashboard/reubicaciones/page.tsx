@@ -162,20 +162,52 @@ export default function ReubicacionesPage() {
           return;
         }
 
-        const [nationalResult, districtResult] = await Promise.all([
-          supabase.rpc("has_role", {
+        const { data: nationalResult, error: nationalError } =
+          await supabase.rpc("has_role", {
             requested_role: "national_admin",
-          }),
-          supabase.rpc("has_role", {
-            requested_role: "district_coordinator",
-          }),
-        ]);
+          });
 
-        if (nationalResult.error) throw nationalResult.error;
-        if (districtResult.error) throw districtResult.error;
+        if (nationalError) throw nationalError;
 
-        const national = Boolean(nationalResult.data);
-        const district = Boolean(districtResult.data);
+        const national = Boolean(nationalResult);
+
+        // La autorización distrital contempla coordinación y comité.
+        // has_role exige un distrito concreto; validamos las asignaciones
+        // propias y su ámbito territorial antes de cargar los registros.
+        const { data: assignments, error: assignmentsError } = await supabase
+          .from("user_role_assignments")
+          .select("role_id, district_id, congregation_id")
+          .eq("user_id", user.id);
+
+        if (assignmentsError) throw assignmentsError;
+
+        const roleIds = [
+          ...new Set((assignments ?? []).map((assignment) => assignment.role_id)),
+        ];
+
+        const { data: roles, error: rolesError } = roleIds.length
+          ? await supabase
+              .from("roles")
+              .select("id, role_key")
+              .in("id", roleIds)
+          : { data: [], error: null };
+
+        if (rolesError) throw rolesError;
+
+        const districtRoleIds = new Set(
+          (roles ?? [])
+            .filter((role) =>
+              ["district_coordinator", "area_coordinator"].includes(role.role_key)
+            )
+            .map((role) => role.id)
+        );
+
+        const district = (assignments ?? []).some(
+          (assignment) =>
+            districtRoleIds.has(assignment.role_id) &&
+            Boolean(assignment.district_id) &&
+            assignment.congregation_id === null
+        );
 
         if (!national && !district) {
           router.replace("/acceso-denegado");
