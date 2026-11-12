@@ -172,7 +172,7 @@ export default function InvitationsPage() {
 
       const { data: requestRows, error: requestsError } = await supabase.rpc(
         "get_invitation_requests",
-        requestFilter === "all" ? {} : { p_status: requestFilter }
+        { p_status: requestFilter === "all" ? null : requestFilter }
       );
       if (requestsError) throw requestsError;
       setRequests((requestRows ?? []) as InvitationRequest[]);
