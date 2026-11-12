@@ -49,3 +49,5 @@ drop trigger if exists academic_lesson_plan_review_guard on public.academic_less
 create trigger academic_lesson_plan_review_guard
 before insert or update on public.academic_lesson_plans
 for each row execute function private.enforce_academic_lesson_plan_review();
+
+grant execute on function private.enforce_academic_lesson_plan_review() to authenticated;
