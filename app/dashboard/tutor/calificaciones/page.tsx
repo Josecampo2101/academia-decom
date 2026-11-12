@@ -127,8 +127,7 @@ export default function TutorCalificacionesPage() {
           }
         }
         awarded = calculatedScore;
-        if (Math.abs(totalRubric - selected.activity.total_points) > 0.01) throw new Error("La rúbrica configurada no coincide con el puntaje total de la actividad. Revisa la configuración antes de calificar.");
-      }
+        }
       if (decision === "graded" && (!Number.isFinite(awarded) || awarded < 0 || awarded > selected.activity.total_points)) {
         throw new Error("La calificación debe estar entre 0 y " + selected.activity.total_points + ".");
       }
