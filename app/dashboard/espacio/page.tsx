@@ -200,6 +200,13 @@ export default function RoleWorkspacePage() {
         <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5"><h3 className="font-bold">Distritos bajo tu alcance</h3><div className="mt-3 flex flex-wrap gap-2">{districts.map(d => <span key={d.id} className="rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700">{d.name}</span>)}</div></div>
       </section>}
 
+      {roles.some(r => ["tutor", "academic_editor", "district_coordinator", "area_coordinator", "national_admin"].includes(r.role_key)) && <section className="mt-7 rounded-2xl border border-[#19A7A0]/30 bg-white p-6">
+        <p className="text-xs font-bold uppercase tracking-wide text-[#138B84]">Diseño de experiencias de aprendizaje</p>
+        <h2 className="mt-2 text-xl font-bold">Planner académico y creación de clases</h2>
+        <p className="mt-2 text-sm text-slate-500">Estructura sesiones, define temas y resultados de aprendizaje, organiza la secuencia didáctica y adjunta documentos, presentaciones, imágenes, audio, video o guías.</p>
+        <button onClick={() => router.push("/dashboard/planificador")} className="mt-4 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white">Abrir planner académico</button>
+      </section>}
+
       {roles.some(r => r.role_key === "academic_editor") && <section className="mt-7 rounded-2xl border border-slate-200 bg-white p-6">
         <p className="text-xs font-bold uppercase tracking-wide text-[#087DB5]">Contenido y currículo</p><h2 className="mt-2 text-xl font-bold">Administración del catálogo académico</h2><p className="mt-2 text-sm text-slate-500">Crea programas, cursos, módulos y lecciones; los cambios se mantienen como borradores hasta su publicación autorizada.</p><button onClick={() => router.push("/dashboard/administracion/catalogo")} className="mt-4 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white">Abrir editor académico</button>
       </section>}
