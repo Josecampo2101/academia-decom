@@ -6,7 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 type District = { id: string; name: string };
-type Plan = { id: string; district_id: string; lesson_id: string; session_title: string; topic: string; description: string | null; planned_for: string | null; estimated_minutes: number | null; created_by: string | null; created_at: string; review_feedback: string | null };
+type Plan = { id: string; district_id: string; lesson_id: string; session_title: string; topic: string; description: string | null; target_audience: string | null; learning_outcomes: string[]; teaching_method: string | null; opening_activity: string | null; lesson_development: string | null; closing_activity: string | null; assessment_strategy: string | null; homework: string | null; planned_for: string | null; estimated_minutes: number | null; created_by: string | null; created_at: string; review_feedback: string | null };
+type Material = { id: string; lesson_id: string; title: string; description: string | null; material_type: string; storage_path: string | null; external_url: string | null; content: string | null; status: string };
 type Lesson = { id: string; title: string; module_id: string };
 type Module = { id: string; title: string; course_id: string };
 type Course = { id: string; title: string };
@@ -27,23 +28,29 @@ export default function AcademicReviewPage() {
   const [modules,setModules] = useState<Module[]>([]);
   const [courses,setCourses] = useState<Course[]>([]);
   const [authors,setAuthors] = useState<Profile[]>([]);
+  const [materials,setMaterials] = useState<Material[]>([]);
   const [feedback,setFeedback] = useState<Record<string,string>>({});
 
   const loadQueue = useCallback(async (ids:string[]) => {
     if(!ids.length){setPlans([]);return;}
     const {data,error:queryError}=await supabase.from("academic_lesson_plans")
-      .select("id,district_id,lesson_id,session_title,topic,description,planned_for,estimated_minutes,created_by,created_at,review_feedback")
+      .select("id,district_id,lesson_id,session_title,topic,description,target_audience,learning_outcomes,teaching_method,opening_activity,lesson_development,closing_activity,assessment_strategy,homework,planned_for,estimated_minutes,created_by,created_at,review_feedback")
       .eq("status","review").in("district_id",ids).order("created_at",{ascending:true});
     if(queryError)throw queryError;
     const rows=(data??[]) as Plan[];
     setPlans(rows);
     const lessonIds=[...new Set(rows.map(p=>p.lesson_id))];
     const authorIds=[...new Set(rows.map(p=>p.created_by).filter(Boolean))] as string[];
-    if(!lessonIds.length){setLessons([]);setModules([]);setCourses([]);setAuthors([]);return;}
+    if(!lessonIds.length){setLessons([]);setModules([]);setCourses([]);setAuthors([]);setMaterials([]);return;}
     const {data:lessonRows,error:lessonError}=await supabase.from("lessons").select("id,title,module_id").in("id",lessonIds);
     if(lessonError)throw lessonError;
     const lessonData=(lessonRows??[]) as Lesson[];
     setLessons(lessonData);
+    const {data:materialRows,error:materialError}=await supabase.from("lesson_materials")
+      .select("id,lesson_id,title,description,material_type,storage_path,external_url,content,status")
+      .in("lesson_id",lessonIds).order("sort_order");
+    if(materialError)throw materialError;
+    setMaterials((materialRows??[]) as Material[]);
     const moduleIds=[...new Set(lessonData.map(l=>l.module_id))];
     const {data:moduleRows,error:moduleError}=moduleIds.length?await supabase.from("course_modules").select("id,title,course_id").in("id",moduleIds):{data:[],error:null};
     if(moduleError)throw moduleError;
@@ -90,6 +97,15 @@ export default function AcademicReviewPage() {
     void init();return()=>{active=false;};
   },[router,supabase,loadQueue]);
 
+  async function openMaterial(item:Material){
+    if(item.external_url){window.open(item.external_url,"_blank","noopener,noreferrer");return;}
+    if(item.storage_path){
+      const {data,error:urlError}=await supabase.storage.from("academic-lesson-materials").createSignedUrl(item.storage_path,300);
+      if(urlError)throw urlError;
+      const anchor=document.createElement("a");anchor.href=data.signedUrl;anchor.target="_blank";anchor.rel="noopener noreferrer";anchor.click();
+    }
+  }
+
   async function decide(plan:Plan,status:"approved"|"changes_requested"){
     const note=(feedback[plan.id]??"").trim();
     if(status==="changes_requested"&&!note){setError("Escribe las observaciones que debe corregir el tutor.");return;}
@@ -123,6 +139,19 @@ export default function AcademicReviewPage() {
     {!filtered.length?<section className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center"><h2 className="text-xl font-bold">No hay planificaciones pendientes</h2><p className="mt-2 text-sm text-slate-500">Cuando un tutor envíe una clase a revisión, aparecerá aquí con su estructura didáctica y sus observaciones.</p></section>:<div className="mt-6 space-y-5">{filtered.map(plan=>{const lesson=lessons.find(l=>l.id===plan.lesson_id);const courseModule=modules.find(m=>m.id===lesson?.module_id);return <article key={plan.id} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-wide text-[#087DB5]">{districtName(plan.district_id)} · {hierarchy(plan.lesson_id)}</p><h2 className="mt-2 text-xl font-bold">{plan.session_title}</h2><p className="mt-1 text-sm text-slate-500">{lessonTitle(plan.lesson_id)}{courseModule?" · "+courseModule.title:""}</p></div><span className="rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800">En revisión</span></div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2"><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs font-semibold uppercase text-slate-500">Tema</p><p className="mt-1 text-sm font-semibold">{plan.topic}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs font-semibold uppercase text-slate-500">Preparado por</p><p className="mt-1 text-sm font-semibold">{authorName(plan.created_by)}</p></div></div>
       {plan.description&&<p className="mt-4 text-sm leading-6 text-slate-600">{plan.description}</p>}
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        {plan.target_audience&&<div className="rounded-xl bg-slate-50 p-4"><p className="text-xs font-semibold uppercase text-slate-500">Público</p><p className="mt-1 text-sm">{plan.target_audience}</p></div>}
+        {plan.teaching_method&&<div className="rounded-xl bg-slate-50 p-4"><p className="text-xs font-semibold uppercase text-slate-500">Metodología</p><p className="mt-1 text-sm">{plan.teaching_method}</p></div>}
+        {plan.learning_outcomes?.length>0&&<div className="rounded-xl bg-slate-50 p-4 sm:col-span-2"><p className="text-xs font-semibold uppercase text-slate-500">Resultados de aprendizaje</p><ul className="mt-2 list-disc space-y-1 pl-5 text-sm">{plan.learning_outcomes.map((item,index)=><li key={index}>{item}</li>)}</ul></div>}
+        {plan.opening_activity&&<div className="rounded-xl border border-slate-100 p-4"><p className="text-xs font-semibold uppercase text-slate-500">Apertura</p><p className="mt-1 whitespace-pre-wrap text-sm">{plan.opening_activity}</p></div>}
+        {plan.lesson_development&&<div className="rounded-xl border border-slate-100 p-4"><p className="text-xs font-semibold uppercase text-slate-500">Desarrollo</p><p className="mt-1 whitespace-pre-wrap text-sm">{plan.lesson_development}</p></div>}
+        {plan.closing_activity&&<div className="rounded-xl border border-slate-100 p-4"><p className="text-xs font-semibold uppercase text-slate-500">Cierre</p><p className="mt-1 whitespace-pre-wrap text-sm">{plan.closing_activity}</p></div>}
+        {plan.assessment_strategy&&<div className="rounded-xl border border-slate-100 p-4"><p className="text-xs font-semibold uppercase text-slate-500">Evaluación</p><p className="mt-1 whitespace-pre-wrap text-sm">{plan.assessment_strategy}</p></div>}
+        {plan.homework&&<div className="rounded-xl border border-slate-100 p-4 sm:col-span-2"><p className="text-xs font-semibold uppercase text-slate-500">Tarea / actividad posterior</p><p className="mt-1 whitespace-pre-wrap text-sm">{plan.homework}</p></div>}
+      </div>
+      <div className="mt-5 rounded-xl border border-slate-200 p-4"><h3 className="font-bold">Materiales adjuntos</h3>
+        {materials.filter(item=>item.lesson_id===plan.lesson_id).length?<div className="mt-3 space-y-2">{materials.filter(item=>item.lesson_id===plan.lesson_id).map(item=><div key={item.id} className="flex flex-wrap items-start justify-between gap-3 rounded-lg bg-slate-50 p-3"><div><p className="text-sm font-semibold">{item.title}</p><p className="mt-1 text-xs text-slate-500">{item.material_type} · {item.status==="published"?"Publicado":"Borrador"}</p>{item.description&&<p className="mt-1 text-sm text-slate-600">{item.description}</p>}{item.content&&<p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">{item.content}</p>}</div>{(item.storage_path||item.external_url)&&<button onClick={()=>void openMaterial(item).catch(e=>setError(e.message))} className="rounded-lg bg-[#087DB5] px-3 py-2 text-xs font-semibold text-white">Abrir recurso</button>}</div>)}</div>:<p className="mt-2 text-sm text-slate-500">No hay materiales adjuntos a esta lección.</p>}
+      </div>
       <div className="mt-4 flex flex-wrap gap-4 text-xs text-slate-500"><span>{plan.planned_for?new Date(plan.planned_for+"T12:00:00").toLocaleDateString("es-CO"):"Sin fecha programada"}</span><span>{plan.estimated_minutes??"—"} minutos</span></div>
       <label className="mt-5 block text-sm font-semibold">Observaciones de revisión<textarea value={feedback[plan.id]??""} onChange={e=>setFeedback(current=>({...current,[plan.id]:e.target.value}))} rows={3} placeholder="Indica qué debe corregir el tutor o deja una recomendación..." className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm font-normal"/></label>
       <div className="mt-4 flex flex-wrap justify-end gap-3"><button disabled={busyId===plan.id} onClick={()=>void decide(plan,"changes_requested")} className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800 disabled:opacity-50">Solicitar ajustes</button><button disabled={busyId===plan.id} onClick={()=>void decide(plan,"approved")} className="rounded-xl bg-[#19A7A0] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50">{busyId===plan.id?"Guardando...":"Aprobar planificación"}</button></div>
