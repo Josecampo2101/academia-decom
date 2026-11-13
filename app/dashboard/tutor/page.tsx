@@ -23,7 +23,7 @@ type ReviewItem = {
   course: string;
   submittedAt: string | null;
   dueAt: string | null;
-  status: "submitted" | "changes_requested";
+  status: "submitted";
 };
 
 function formatDate(value: string | null) {
@@ -134,7 +134,7 @@ export default function TutorDashboardPage() {
       const { data: submissionRows, error: submissionError } = await supabase
         .from("academic_activity_submissions")
         .select("id,activity_id,user_id,status,submitted_at,academic_activities!inner(title,course_id,due_at,courses(title))")
-        .in("status", ["submitted", "changes_requested"])
+        .eq("status", "submitted")
         .in("academic_activities.course_id", courseIds)
         .order("submitted_at", { ascending: true });
       if (submissionError) throw submissionError;
@@ -143,7 +143,7 @@ export default function TutorDashboardPage() {
         id: string;
         activity_id: string;
         user_id: string;
-        status: "submitted" | "changes_requested";
+        status: "submitted";
         submitted_at: string | null;
         academic_activities: { title: string; course_id: string; due_at: string | null; courses: { title: string } | null };
       }>;
@@ -240,7 +240,7 @@ export default function TutorDashboardPage() {
           {[
             { label: "Cursos asignados", value: courses.length, detail: "Asignaciones activas" },
             { label: "Estudiantes activos", value: studentCount, detail: "En tus cursos asignados" },
-            { label: "Entregas por revisar", value: reviews.length, detail: `${pendingCount} pendientes · ${changesCount} nuevas entregas` },
+            { label: "Entregas por revisar", value: reviews.length, detail: "Esperando tu revisión" },
             { label: "Revisadas esta semana", value: reviewedThisWeek, detail: "Por tu cuenta de tutor" },
           ].map((item) => (
             <article key={item.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -264,7 +264,7 @@ export default function TutorDashboardPage() {
 
           <article className="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-              <div><p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Bandeja de trabajo</p><h2 className="mt-1 text-lg font-bold">Entregas para revisar</h2><p className="mt-1 text-xs text-slate-400">{changesCount} nuevas entregas después de solicitar ajustes</p></div>
+              <div><p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Bandeja de trabajo</p><h2 className="mt-1 text-lg font-bold">Entregas para revisar</h2><p className="mt-1 text-xs text-slate-400">Entregas enviadas por tus estudiantes</p></div>
               <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar estudiante o actividad..." aria-label="Buscar entregas" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm sm:max-w-xs" />
             </div>
             <div className="mt-5 space-y-3">
@@ -273,7 +273,7 @@ export default function TutorDashboardPage() {
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0"><p className="text-sm font-bold">{item.activity}</p><p className="mt-1 text-xs font-semibold text-slate-600">{item.student}</p><p className="mt-1 text-xs text-slate-400">{item.course}</p><p className="mt-2 text-[11px] text-slate-400">Recibida: {formatDate(item.submittedAt)}</p>
                     {item.dueAt && <p className="mt-1 text-[11px] text-slate-400">Fecha límite: {formatDate(item.dueAt)}</p>}</div>
-                    <span className={"rounded-full px-2.5 py-1 text-[10px] font-semibold " + (item.status === "submitted" ? "bg-amber-50 text-amber-700" : "bg-sky-50 text-sky-700")}>{item.status === "submitted" ? "Pendiente" : "Nueva entrega"}</span>
+                    <span className={"rounded-full px-2.5 py-1 text-[10px] font-semibold " + (item.status === "submitted" ? "bg-amber-50 text-amber-700" : "bg-sky-50 text-sky-700")}>{"Pendiente"}</span>
                   </div>
                 </article>
               ))}
