@@ -94,6 +94,7 @@ export default function DashboardPage() {
   );
   const canManageLibrary = isNationalAdmin || roleKeys.includes("academic_editor");
   const canManageAcademicCatalog = canManageLibrary;
+  const canManageTutorAssignments = roleKeys.some((role) => ["national_admin", "academic_editor", "district_coordinator", "area_coordinator"].includes(role));
 
   function openAcademicModule(moduleName: string) {
     const isStudent = roleKeys.includes("member");
@@ -625,6 +626,16 @@ export default function DashboardPage() {
             >
               <span>⚙</span> Administración
             </div>
+
+            {canManageTutorAssignments && (
+              <a
+                href="/dashboard/administracion/tutores"
+                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
+              >
+                <span className="text-lg">♙</span>
+                <span>Asignación de tutores</span>
+              </a>
+            )}
 
             {canManageAcademicCatalog && (
               <a
