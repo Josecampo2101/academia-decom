@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 type Row = { id:string; title:string; status:string; district_id:string; program_id?:string; course_id?:string; module_id?:string; lesson_id?:string; description?:string; instructions?:string; response_type?:"text"|"file"|"link"|"mixed"; total_points?:number; max_attempts?:number; due_at?:string|null };
-type RubricCriterion = { id?:string; activity_id?:string; title:string; description:string; max_points:number; sort_order:number };
-type Activity = Row & { course_id:string; module_id:string; lesson_id:string; instructions:string; response_type:"text"|"file"|"link"|"mixed"; total_points:number; max_attempts:number; due_at:string|null; criteria: RubricCriterion[]; courseTitle:string; moduleTitle:string; lessonTitle:string; assigned:number };
+type RubricCriterion = { id?:string; activity_id?:string; title:string; description:string|null; max_points:number; sort_order:number };
+type ActivityRow = Row & { course_id:string; module_id:string; lesson_id:string; instructions:string; response_type:"text"|"file"|"link"|"mixed"; total_points:number; max_attempts:number; due_at:string|null };
+type Activity = ActivityRow & { criteria: RubricCriterion[]; courseTitle:string; moduleTitle:string; lessonTitle:string; assigned:number };
 const blank = { title:"", description:"", instructions:"", program_id:"", course_id:"", module_id:"", lesson_id:"", response_type:"text" as "text"|"file"|"link"|"mixed", total_points:100, max_attempts:2, due_at:"" };
 const label = (s:string) => s==="published"?"Publicado":s==="archived"?"Archivado":"Borrador";
 export default function AcademicActivitiesAdminPage() {
@@ -25,7 +26,7 @@ export default function AcademicActivitiesAdminPage() {
     supabase.from("academic_activities").select("*").order("updated_at",{ascending:false})
    ]);
    for(const r of [p,c,m,l,a]) if(r.error) throw r.error;
-   const ps=(p.data??[]) as Row[], cs=(c.data??[]) as Row[], ms=(m.data??[]) as Row[], ls=(l.data??[]) as Row[], acts=(a.data??[]) as Activity[];
+   const ps=(p.data??[]) as Row[], cs=(c.data??[]) as Row[], ms=(m.data??[]) as Row[], ls=(l.data??[]) as Row[], acts=(a.data??[]) as ActivityRow[];
    setPrograms(ps);setCourses(cs);setModules(ms);setLessons(ls);
    let rub:RubricCriterion[]=[];let ass:{activity_id:string}[]=[];
    if(acts.length){const ids=acts.map(x=>x.id);const [r,s]=await Promise.all([supabase.from("academic_activity_rubric_criteria").select("id,activity_id,title,description,max_points,sort_order").in("activity_id",ids).order("sort_order"),supabase.from("academic_activity_assignments").select("activity_id").in("activity_id",ids).eq("status","active")]);if(r.error)throw r.error;if(s.error)throw s.error;rub=r.data??[];ass=s.data??[];}
