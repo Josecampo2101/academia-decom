@@ -72,3 +72,12 @@ La migración `20261113100442_scope_assessment_permissions_to_assigned_courses.s
 La migración fue aplicada en Supabase y verificada mediante lectura de las funciones y políticas resultantes. El asesor de seguridad sigue reportando hallazgos generales de funciones `SECURITY DEFINER` y tablas privadas sin políticas explícitas; no se han cambiado indiscriminadamente porque varias rutas usan RPC controladas.
 
 **Validación pendiente:** aún no hay asignaciones tutor–curso, matrículas, evaluaciones ni intentos reales para una prueba con usuarios separados. Tampoco se han ejecutado typecheck, lint o build. Vercel permanece sin despliegues.
+
+
+## Calificación de actividades: autorización por curso (13 de noviembre de 2026)
+
+La revisión del RPC de calificación encontró que `private.review_academic_activity_submission` todavía comprobaba `private.can_manage_lesson_resources(district_id)`, un permiso distrital amplio. Aunque la bandeja y sus políticas de lectura ya estaban limitadas por curso, esa validación interna podía permitir calificar una entrega de otro curso del mismo distrito.
+
+La migración `20261113100616_scope_activity_submission_reviews_to_course_assignments.sql` cambia la autorización del RPC: primero valida que la actividad corresponda al distrito de la entrega y después exige `private.can_manage_course_resources(course_id)`. Se mantienen las validaciones de rúbrica, puntajes, retroalimentación, estado de entrega y prevención de autoevaluación.
+
+**Validación pendiente:** no hay asignaciones tutor–curso ni entregas de estudiantes activas para probar el flujo con cuentas reales. No se ejecutaron pruebas de navegador ni compilación.
