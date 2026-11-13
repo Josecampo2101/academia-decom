@@ -66,6 +66,8 @@ export default function CourseTutorAssignmentsPage() {
   const candidates = selectedCourse ? tutors[selectedCourse.district_id] ?? [] : [];
   const activeAssignments = assignments.filter((x) => x.status === "active");
   const assignedForCourse = assignments.filter((x) => x.course_id === courseId);
+  const assignedTutorIds = new Set(assignedForCourse.filter((x) => x.status === "active").map((x) => x.tutor_user_id));
+  const availableCandidates = candidates.filter((x) => !assignedTutorIds.has(x.user_id));
 
   async function assignTutor() {
     if (!selectedCourse || !tutorId) return;
@@ -122,12 +124,12 @@ export default function CourseTutorAssignmentsPage() {
               <label className="mt-4 block text-xs font-bold text-slate-600">Tutor disponible en el distrito</label>
               <select value={tutorId} onChange={(e) => setTutorId(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm">
                 <option value="">Seleccionar tutor</option>
-                {candidates.map((x) => <option key={x.user_id} value={x.user_id}>{x.full_name}{x.phone ? " · "+x.phone : ""}</option>)}
+                {availableCandidates.map((x) => <option key={x.user_id} value={x.user_id}>{x.full_name}{x.phone ? " · "+x.phone : ""}</option>)}
               </select>
               <label className="mt-4 block text-xs font-bold text-slate-600">Observaciones (opcional)</label>
               <textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={1000} rows={3} className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Responsabilidades o alcance de la tutoría" />
               <button disabled={!courseId || !tutorId || saving} onClick={() => void assignTutor()} className="mt-5 w-full rounded-xl bg-[#087DB5] px-4 py-3 text-sm font-bold text-white disabled:opacity-50">{saving ? "Guardando…" : "Asignar tutor al curso"}</button>
-              {!candidates.length && <p className="mt-3 text-xs text-amber-700">No hay tutores activos disponibles en el distrito seleccionado.</p>}
+              {!availableCandidates.length && <p className="mt-3 text-xs text-amber-700">{candidates.length ? "Todos los tutores activos ya están asignados a este curso." : "No hay tutores activos disponibles en el distrito seleccionado."}</p>}
             </section>
             <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-lg font-bold">Asignaciones del curso</h2><span className="text-xs text-slate-500">{activeAssignments.length} activas en total</span></div>
