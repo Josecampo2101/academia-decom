@@ -2258,6 +2258,18 @@ export type Database = {
             }
           }
       get_course_tutor_candidates: { Args: { p_district_id: string }; Returns: { user_id: string; full_name: string; phone: string | null }[] }
+      get_tutor_course_roster: {
+        Args: never
+        Returns: {
+          course_id: string
+          course_title: string
+          student_id: string
+          student_name: string
+          enrollment_id: string
+          enrollment_status: string
+          enrolled_at: string
+        }[]
+      }
       get_invitation_requests: {
         Args: { p_status?: string }
         Returns: {
