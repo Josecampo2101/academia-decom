@@ -22,14 +22,15 @@ export default function StudentActivityClient({activityId:assignmentId}:{activit
    const {data:{user},error:authError}=await supabase.auth.getUser();if(authError||!user){router.replace("/conexion");return;}
    const {data:a,error:ae}=await supabase.from("academic_activity_assignments").select("id,district_id,due_at,academic_activities!inner(id,title,description,instructions,response_type,total_points,max_attempts,due_at,status,courses(title),course_modules(title))").eq("id",assignmentId).eq("status","active").single();
    if(ae)throw ae;const current=a as unknown as Assignment;if(current.academic_activities.status!=="published")throw new Error("La actividad ya no está publicada.");setAssignment(current);
-   const {data:s,error:se}=await supabase.from("academic_activity_submissions").select("id,attempt_number,response_text,external_url,status,awarded_points,feedback,submitted_at").eq("assignment_id",assignmentId).order("attempt_number",{ascending:false}).limit(1).maybeSingle();
-   if(se)throw se;let currentSubmission=s as Submission|null;
+   const {data:submissionRows,error:se}=await supabase.from("academic_activity_submissions").select("id,attempt_number,response_text,external_url,status,awarded_points,feedback,submitted_at").eq("assignment_id",assignmentId).order("attempt_number",{ascending:false});
+   if(se)throw se;const allSubmissions=(submissionRows??[]) as Submission[];let currentSubmission=allSubmissions[0]??null;
    if(!currentSubmission){const {data:id,error:startError}=await supabase.rpc("start_academic_activity_submission",{p_assignment_id:assignmentId});if(startError)throw startError;
-    const {data:created,error:createdError}=await supabase.from("academic_activity_submissions").select("id,attempt_number,response_text,external_url,status,awarded_points,feedback,submitted_at").eq("id",id).single();if(createdError)throw createdError;currentSubmission=created as Submission;}
+    const {data:created,error:createdError}=await supabase.from("academic_activity_submissions").select("id,attempt_number,response_text,external_url,status,awarded_points,feedback,submitted_at").eq("id",id).single();if(createdError)throw createdError;currentSubmission=created as Submission;allSubmissions.push(currentSubmission);}
    setSubmission(currentSubmission);setAnswer(currentSubmission.response_text??"");setLink(currentSubmission.external_url??"");
+   const submissionIds=[...new Set(allSubmissions.map(row=>row.id))];
    const [filesResult,historyResult]=await Promise.all([
     supabase.from("academic_activity_submission_files").select("id,storage_path,file_name,mime_type,size_bytes").eq("submission_id",currentSubmission.id).order("created_at"),
-    supabase.from("academic_activity_submission_reviews").select("id,attempt_number,status,awarded_points,feedback,reviewed_at").eq("submission_id",currentSubmission.id).order("reviewed_at",{ascending:false})
+    supabase.from("academic_activity_submission_reviews").select("id,attempt_number,status,awarded_points,feedback,reviewed_at").in("submission_id",submissionIds).order("reviewed_at",{ascending:false})
    ]);
    if(filesResult.error)throw filesResult.error;if(historyResult.error)throw historyResult.error;
    setAttachments((filesResult.data??[]) as Attachment[]);setReviews((historyResult.data??[]) as Review[]);setAccess("allowed");
