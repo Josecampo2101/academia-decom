@@ -14,6 +14,17 @@ export type Database = {
   }
   public: {
     Tables: {
+      academic_course_tutor_assignments: {
+        Row: { id: string; district_id: string; course_id: string; tutor_user_id: string; assigned_by: string; status: string; assigned_at: string; revoked_at: string | null; revoked_by: string | null; notes: string | null }
+        Insert: { id?: string; district_id: string; course_id: string; tutor_user_id: string; assigned_by: string; status?: string; assigned_at?: string; revoked_at?: string | null; revoked_by?: string | null; notes?: string | null }
+        Update: { id?: string; district_id?: string; course_id?: string; tutor_user_id?: string; assigned_by?: string; status?: string; assigned_at?: string; revoked_at?: string | null; revoked_by?: string | null; notes?: string | null }
+        Relationships: [
+          { foreignKeyName: "academic_course_tutor_assignments_course_district_fk"; columns: ["course_id", "district_id"]; isOneToOne: false; referencedRelation: "courses"; referencedColumns: ["id", "district_id"] },
+          { foreignKeyName: "academic_course_tutor_assignments_tutor_user_id_fkey"; columns: ["tutor_user_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+          { foreignKeyName: "academic_course_tutor_assignments_assigned_by_fkey"; columns: ["assigned_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+          { foreignKeyName: "academic_course_tutor_assignments_revoked_by_fkey"; columns: ["revoked_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] }
+        ]
+      }
       academic_activities: {
         Row: {
           activity_type: string
@@ -2246,6 +2257,7 @@ export type Database = {
               isSetofReturn: false
             }
           }
+      get_course_tutor_candidates: { Args: { p_district_id: string }; Returns: { user_id: string; full_name: string; phone: string | null }[] }
       get_invitation_requests: {
         Args: { p_status?: string }
         Returns: {
