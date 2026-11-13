@@ -66,7 +66,7 @@ La migración `20261113100442_scope_assessment_permissions_to_assigned_courses.s
 - El permiso de gestión de evaluaciones ahora distingue administración académica del acceso del tutor.
 - Se incorpora `private.can_manage_assessment_course(course_id, district_id)`, que valida el curso y reutiliza el permiso de recursos por curso.
 - Las políticas RLS de evaluaciones, preguntas, intentos y respuestas aplican el mismo alcance.
-- Las RPC de guardar preguntas, publicar evaluaciones y revisar respuestas validan el curso antes de modificar datos.
+- Las RPC de guardar preguntas, publicar evaluaciones y revisar respuestas validan el curso antes de modificar datos. La pantalla de creación también filtra el selector de cursos a las asignaciones activas del tutor; editores académicos y administración nacional conservan el filtro por su ámbito autorizado.
 - Los estudiantes mantienen acceso a evaluaciones publicadas y a sus propios intentos/respuestas; los editores académicos y administración nacional conservan su ámbito de catálogo.
 
 La migración fue aplicada en Supabase y verificada mediante lectura de las funciones y políticas resultantes. El asesor de seguridad sigue reportando hallazgos generales de funciones `SECURITY DEFINER` y tablas privadas sin políticas explícitas; no se han cambiado indiscriminadamente porque varias rutas usan RPC controladas.
