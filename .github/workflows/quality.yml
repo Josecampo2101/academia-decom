@@ -3,6 +3,7 @@ name: Verificación de calidad
 on:
   push:
     branches:
+      - "main"
       - "fix/**"
       - "feature/**"
   pull_request:
@@ -16,7 +17,7 @@ concurrency:
 
 jobs:
   quality:
-    name: Lint y compilación
+    name: Lint, tipos y compilación
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
