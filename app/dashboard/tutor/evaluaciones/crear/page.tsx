@@ -85,7 +85,7 @@ export default function CreateAssessmentPage() {
         );
         const districtIds = [...new Set((assignments ?? [])
           .filter((item) => item.district_id && item.congregation_id === null &&
-            roleMap.get(item.role_id) === "academic_editor")
+            ["academic_editor", "national_admin"].includes(roleMap.get(item.role_id) ?? ""))
           .map((item) => item.district_id as string))];
 
         let assignedCourseIds: string[] | null = null;
