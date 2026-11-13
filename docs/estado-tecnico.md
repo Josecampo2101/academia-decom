@@ -55,3 +55,20 @@ Se aplicaron dos migraciones para cerrar permisos académicos que todavía depen
 El panel `app/dashboard/tutor/page.tsx` se sustituyó para consultar asignaciones activas, matrículas, entregas pendientes y revisiones reales. Ya no incluye nombres, entregas ni estadísticas de demostración. Los nombres de estudiantes usan un fallback neutro cuando la política de perfiles no permite leerlos.
 
 **Validación pendiente:** no se ejecutaron lint, TypeScript, build ni pruebas de navegador en esta sesión. Tampoco hay asignaciones activas, matrículas o entregas de prueba en la base de datos, por lo que el flujo visual necesita una prueba manual con un tutor asignado.
+
+
+## Evaluaciones: alcance de tutor por curso (13 de noviembre de 2026)
+
+Se detectó que el permiso anterior `private.can_manage_assessment(district_id)` incluía a cualquier tutor activo del distrito. Eso permitía que un tutor consultara intentos y revisara respuestas de cursos sin asignación, aunque otros recursos académicos ya estaban limitados por curso.
+
+La migración `20261113100442_scope_assessment_permissions_to_assigned_courses.sql` corrige el alcance:
+
+- El permiso de gestión de evaluaciones ahora distingue administración académica del acceso del tutor.
+- Se incorpora `private.can_manage_assessment_course(course_id, district_id)`, que valida el curso y reutiliza el permiso de recursos por curso.
+- Las políticas RLS de evaluaciones, preguntas, intentos y respuestas aplican el mismo alcance.
+- Las RPC de guardar preguntas, publicar evaluaciones y revisar respuestas validan el curso antes de modificar datos.
+- Los estudiantes mantienen acceso a evaluaciones publicadas y a sus propios intentos/respuestas; los editores académicos y administración nacional conservan su ámbito de catálogo.
+
+La migración fue aplicada en Supabase y verificada mediante lectura de las funciones y políticas resultantes. El asesor de seguridad sigue reportando hallazgos generales de funciones `SECURITY DEFINER` y tablas privadas sin políticas explícitas; no se han cambiado indiscriminadamente porque varias rutas usan RPC controladas.
+
+**Validación pendiente:** aún no hay asignaciones tutor–curso, matrículas, evaluaciones ni intentos reales para una prueba con usuarios separados. Tampoco se han ejecutado typecheck, lint o build. Vercel permanece sin despliegues.
