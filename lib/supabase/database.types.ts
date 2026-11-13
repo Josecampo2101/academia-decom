@@ -2331,6 +2331,10 @@ export type Database = {
         Args: { target_district: string }
         Returns: boolean
       }
+      publish_academic_activity: {
+        Args: { p_activity_id: string }
+        Returns: number
+      }
       publish_academic_assessment: {
         Args: { p_assessment_id: string }
         Returns: string
