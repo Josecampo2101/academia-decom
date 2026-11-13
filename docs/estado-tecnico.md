@@ -43,3 +43,15 @@ Referencias de revisión:
 ## Política de despliegue
 
 No se ha realizado ningún despliegue a Vercel como parte de esta revisión. Mantener los despliegues en pausa hasta la sesión manual de publicación.
+
+
+## Ajustes de alcance por curso (13 de noviembre de 2026)
+
+Se aplicaron dos migraciones para cerrar permisos académicos que todavía dependían del alcance distrital genérico:
+
+- `20261113024500_enforce_course_scoped_activity_permissions.sql`: las lecturas de matrículas y las operaciones de actividades y asignaciones se limitan al curso cuando el actor es tutor. Los administradores académicos conservan su ámbito autorizado y los estudiantes conservan el acceso a sus propias actividades publicadas/asignadas.
+- `20261113024700_avoid_activity_assignment_rls_recursion.sql`: centraliza la comprobación de alcance de una asignación en una función interna `SECURITY DEFINER` con `search_path` vacío, evitando referencias recursivas entre políticas de actividades y asignaciones.
+
+El panel `app/dashboard/tutor/page.tsx` se sustituyó para consultar asignaciones activas, matrículas, entregas pendientes y revisiones reales. Ya no incluye nombres, entregas ni estadísticas de demostración. Los nombres de estudiantes usan un fallback neutro cuando la política de perfiles no permite leerlos.
+
+**Validación pendiente:** no se ejecutaron lint, TypeScript, build ni pruebas de navegador en esta sesión. Tampoco hay asignaciones activas, matrículas o entregas de prueba en la base de datos, por lo que el flujo visual necesita una prueba manual con un tutor asignado.
