@@ -205,7 +205,6 @@ export default function TutorDashboardPage() {
   }
 
   const pendingCount = reviews.filter((item) => item.status === "submitted").length;
-  const changesCount = reviews.filter((item) => item.status === "changes_requested").length;
 
   return (
     <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
