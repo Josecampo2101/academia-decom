@@ -249,6 +249,62 @@ export type Database = {
           },
         ]
       }
+      academic_activity_submission_reviews: {
+        Row: {
+          id: string
+          submission_id: string
+          activity_id: string
+          district_id: string
+          user_id: string
+          attempt_number: number
+          status: string
+          awarded_points: number | null
+          feedback: string | null
+          rubric_scores: Json
+          reviewed_by: string
+          reviewed_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          submission_id: string
+          activity_id: string
+          district_id: string
+          user_id: string
+          attempt_number: number
+          status: string
+          awarded_points?: number | null
+          feedback?: string | null
+          rubric_scores?: Json
+          reviewed_by: string
+          reviewed_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          submission_id?: string
+          activity_id?: string
+          district_id?: string
+          user_id?: string
+          attempt_number?: number
+          status?: string
+          awarded_points?: number | null
+          feedback?: string | null
+          rubric_scores?: Json
+          reviewed_by?: string
+          reviewed_at?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academic_activity_submission_reviews_submission_fk"
+            columns: ["submission_id", "activity_id", "district_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "academic_activity_submissions"
+            referencedColumns: ["id", "activity_id", "district_id", "user_id"]
+          },
+        ]
+      }
       academic_activity_submissions: {
         Row: {
           activity_id: string
@@ -2299,6 +2355,10 @@ export type Database = {
           p_status?: string
           p_submission_id: string
         }
+        Returns: undefined
+      }
+      reopen_academic_activity_submission: {
+        Args: { p_submission_id: string }
         Returns: undefined
       }
       review_academic_assessment_response: {
