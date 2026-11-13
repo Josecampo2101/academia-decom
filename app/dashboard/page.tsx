@@ -95,6 +95,7 @@ export default function DashboardPage() {
   const canManageLibrary = isNationalAdmin || roleKeys.includes("academic_editor");
   const canManageAcademicCatalog = canManageLibrary;
   const canManageTutorAssignments = roleKeys.some((role) => ["national_admin", "academic_editor", "district_coordinator", "area_coordinator"].includes(role));
+  const canOpenAdminModule = isNationalAdmin || roleKeys.includes("academic_editor");
 
   function openAcademicModule(moduleName: string) {
     const isStudent = roleKeys.includes("member");
@@ -105,9 +106,6 @@ export default function DashboardPage() {
         : moduleName === "Biblioteca"
           ? "/dashboard/biblioteca"
           : null;
-    const canOpenAdminModule =
-      isNationalAdmin || roleKeys.includes("academic_editor");
-
     if (adminDestination && canOpenAdminModule) {
       router.push(adminDestination);
       return;

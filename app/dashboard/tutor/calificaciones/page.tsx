@@ -70,7 +70,7 @@ export default function TutorAssessmentWorkflowPage(){
   setBusy(true);setError("");setNotice("");
   try{
    const rubricScores=decision==="graded"&&selectedCriteria.length?selectedCriteria.map(c=>({criterion_id:c.id,awarded_points:scores[c.id]??0})):[];
-   const {error:e}=await supabase.rpc("review_academic_activity_submission",{p_submission_id:selected.id,p_awarded_points:decision==="graded"?total:null,p_feedback:feedback.trim()||null,p_status:decision,p_rubric_scores:rubricScores});
+   const {error:e}=await supabase.rpc("review_academic_activity_submission",{p_submission_id:selected.id,p_awarded_points:decision==="graded"?total:undefined,p_feedback:feedback.trim()||undefined,p_status:decision,p_rubric_scores:rubricScores});
    if(e)throw e;
    setNotice(decision==="graded"?"Calificación guardada y registrada en el historial.":"Se solicitaron ajustes y la entrega quedó habilitada para corrección.");
    await load();
