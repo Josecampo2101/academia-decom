@@ -165,7 +165,21 @@ export default function AcademicPlannerPage() {
 
   async function savePlan(event: FormEvent) {
     event.preventDefault();
+    if (readOnlyApproved) { setError("La planificación aprobada está protegida contra cambios desde el planner del tutor."); return; }
     if (!lessonId || !districtId || !plan.session_title.trim() || !plan.topic.trim()) { setError("Selecciona una lección e indica el título de la sesión y el tema."); return; }
+    const minutes = plan.estimated_minutes.trim() ? Number(plan.estimated_minutes) : null;
+    if (minutes !== null && (!Number.isInteger(minutes) || minutes < 1 || minutes > 600)) { setError("La duración debe ser un número entero entre 1 y 600 minutos."); return; }
+    if (plan.status === "review") {
+      const missing = [
+        !plan.learning_outcomes.length && "al menos un resultado de aprendizaje",
+        !plan.teaching_method && "la metodología",
+        !plan.opening_activity.trim() && "la apertura",
+        !plan.lesson_development.trim() && "el desarrollo",
+        !plan.closing_activity.trim() && "el cierre",
+        !plan.assessment_strategy.trim() && "la estrategia de evaluación",
+      ].filter(Boolean);
+      if (missing.length) { setError("Para enviar a revisión completa: " + missing.join(", ") + "."); return; }
+    }
     setSaving(true); setError(""); setNotice("");
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -175,7 +189,7 @@ export default function AcademicPlannerPage() {
         opening_activity:plan.opening_activity || null, lesson_development:plan.lesson_development || null,
         closing_activity:plan.closing_activity || null, assessment_strategy:plan.assessment_strategy || null,
         homework:plan.homework || null, planned_for:plan.planned_for || null,
-        estimated_minutes:plan.estimated_minutes ? Number(plan.estimated_minutes) : null,
+        estimated_minutes:minutes,
         status:plan.status, updated_by:user?.id ?? null };
       const saved = plan.id
         ? await supabase.from("academic_lesson_plans").update(payload).eq("id",plan.id).select("id").single()
