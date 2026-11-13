@@ -49,6 +49,7 @@ export default function AcademicPlannerPage() {
   const [notice, setNotice] = useState("");
   const [districts, setDistricts] = useState<District[]>([]);
   const [districtId, setDistrictId] = useState("");
+  const [catalogEditorScope, setCatalogEditorScope] = useState<{global:boolean;districtIds:string[]}>({global:false,districtIds:[]});
   const [programs, setPrograms] = useState<Program[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
@@ -79,7 +80,12 @@ export default function AcademicPlannerPage() {
         const { data: roles, error: rolesError } = ids.length ? await supabase.from("roles").select("id,role_key").in("id", ids) : { data: [], error: null };
         if (rolesError) throw rolesError;
         const roleMap = new Map((roles ?? []).map(r => [r.id, r.role_key]));
-        const allowed = (assignments ?? []).filter(a => ["national_admin","academic_editor","tutor","district_coordinator","area_coordinator"].includes(roleMap.get(a.role_id)));
+        const scopedAssignments = assignments ?? [];
+        setCatalogEditorScope({
+          global: scopedAssignments.some(a => roleMap.get(a.role_id) === "national_admin" && !a.district_id && !a.congregation_id),
+          districtIds: [...new Set(scopedAssignments.filter(a => roleMap.get(a.role_id) === "academic_editor" && a.district_id && !a.congregation_id).map(a => a.district_id as string))],
+        });
+        const allowed = scopedAssignments.filter(a => ["national_admin","academic_editor","tutor","district_coordinator","area_coordinator"].includes(roleMap.get(a.role_id)));
         if (!allowed.length) { router.replace("/acceso-denegado"); return; }
         const national = allowed.some(a => roleMap.get(a.role_id) === "national_admin" && !a.district_id && !a.congregation_id);
         const districtIds = [...new Set(allowed.map(a => a.district_id).filter(Boolean))] as string[];
@@ -131,6 +137,7 @@ export default function AcademicPlannerPage() {
   const visibleModules = modules.filter(m => m.course_id === courseId);
   const visibleLessons = lessons.filter(l => l.module_id === moduleId);
   const selectedLesson = lessons.find(l => l.id === lessonId);
+  const readOnlyApproved = plan.status === "approved" && !catalogEditorScope.global && !catalogEditorScope.districtIds.includes(districtId);
 
   const loadLesson = useCallback(async (id: string) => {
     if (!id) { setPlan(emptyPlan); setMaterials([]); return; }
@@ -262,9 +269,12 @@ export default function AcademicPlannerPage() {
       </section>
 
       {selectedLesson && <form onSubmit={savePlan} className="mt-6 grid gap-6 xl:grid-cols-[1.15fr_.85fr]">
+        <fieldset disabled={readOnlyApproved} className="contents">
+        {readOnlyApproved && <div className="xl:col-span-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"><b>Planificación aprobada · Solo lectura.</b> Los cambios requieren intervención de un editor académico autorizado. La aprobación también está protegida en Supabase.</div>}
         <div className="space-y-6">
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
             <h2 className="text-lg font-bold">2. Diseña la sesión de clase</h2><p className="mt-1 text-sm text-slate-500">Define el asunto, propósito y enfoque pedagógico de la lección seleccionada.</p>
+            {(selectedLesson.summary || selectedLesson.objectives.length > 0) && <div className="mt-4 rounded-xl border border-sky-100 bg-sky-50 p-4"><p className="text-xs font-bold uppercase tracking-wide text-sky-800">Referencia curricular de la lección</p>{selectedLesson.summary && <p className="mt-2 text-sm leading-6 text-sky-950">{selectedLesson.summary}</p>}{selectedLesson.objectives.length > 0 && <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-sky-900">{selectedLesson.objectives.map((objective,index)=><li key={index}>{objective}</li>)}</ul>}</div>}
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <Field label="Título de la clase"><input required className={inputClass} value={plan.session_title} onChange={e=>updatePlan("session_title",e.target.value)} placeholder="Ej. Principios de comunicación cristiana"/></Field>
               <Field label="Tema o asunto central"><input required className={inputClass} value={plan.topic} onChange={e=>updatePlan("topic",e.target.value)} placeholder="¿Qué se va a estudiar?"/></Field>
@@ -317,6 +327,7 @@ export default function AcademicPlannerPage() {
             </div>
           </section>
         </aside>
+        </fieldset>
       </form>}
       <footer className="py-9 text-center text-xs text-slate-400">Academia DECOM · Planificación pedagógica y recursos de aprendizaje.</footer>
     </div>
