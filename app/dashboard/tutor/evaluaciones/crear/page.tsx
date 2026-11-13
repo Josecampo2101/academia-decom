@@ -72,19 +72,44 @@ export default function CreateAssessmentPage() {
         const { data: roles, error: roleError } = await supabase.from("roles").select("id,role_key").in("id", roleIds);
         if (roleError) throw roleError;
         const roleMap = new Map((roles ?? []).map((role) => [role.id, role.role_key]));
-        const canManage = (assignments ?? []).some((item) =>
-          item.congregation_id === null &&
-          ["tutor", "academic_editor", "national_admin"].includes(roleMap.get(item.role_id) ?? ""),
+        const hasTutorRole = (assignments ?? []).some((item) =>
+          item.congregation_id === null && roleMap.get(item.role_id) === "tutor",
         );
-        if (!canManage) { if (active) setAccess("denied"); return; }
-        const isNational = (assignments ?? []).some((item) => roleMap.get(item.role_id) === "national_admin" && !item.district_id);
+        const hasCatalogRole = (assignments ?? []).some((item) =>
+          item.congregation_id === null && ["academic_editor", "national_admin"].includes(roleMap.get(item.role_id) ?? ""),
+        );
+        if (!hasTutorRole && !hasCatalogRole) { if (active) setAccess("denied"); return; }
+
+        const isNational = (assignments ?? []).some((item) =>
+          roleMap.get(item.role_id) === "national_admin" && !item.district_id,
+        );
         const districtIds = [...new Set((assignments ?? [])
           .filter((item) => item.district_id && item.congregation_id === null &&
-            ["tutor", "academic_editor"].includes(roleMap.get(item.role_id) ?? ""))
+            roleMap.get(item.role_id) === "academic_editor")
           .map((item) => item.district_id as string))];
+
+        let assignedCourseIds: string[] | null = null;
+        if (!isNational && !hasCatalogRole && hasTutorRole) {
+          const { data: tutorCourseRows, error: tutorCourseError } = await supabase
+            .from("academic_course_tutor_assignments")
+            .select("course_id")
+            .eq("tutor_user_id", user.id)
+            .eq("status", "active");
+          if (tutorCourseError) throw tutorCourseError;
+          assignedCourseIds = [...new Set((tutorCourseRows ?? []).map((row) => row.course_id))];
+        }
+
         let courseQuery = supabase.from("courses").select("id,district_id,title,sort_order")
           .eq("status", "published").order("sort_order");
-        if (!isNational) courseQuery = courseQuery.in("district_id", districtIds);
+        if (!isNational && !hasCatalogRole) {
+          if (!assignedCourseIds?.length) {
+            if (active) { setUserId(user.id); setCourses([]); setSelectedCourseId(""); setAccess("allowed"); }
+            return;
+          }
+          courseQuery = courseQuery.in("id", assignedCourseIds);
+        } else if (!isNational) {
+          courseQuery = courseQuery.in("district_id", districtIds);
+        }
         const { data: courseRows, error: courseError } = await courseQuery;
         if (courseError) throw courseError;
         if (!active) return;
