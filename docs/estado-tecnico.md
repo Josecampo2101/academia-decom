@@ -49,8 +49,8 @@ No se ha realizado ningún despliegue a Vercel como parte de esta revisión. Man
 
 Se aplicaron dos migraciones para cerrar permisos académicos que todavía dependían del alcance distrital genérico:
 
-- `20261113024500_enforce_course_scoped_activity_permissions.sql`: las lecturas de matrículas y las operaciones de actividades y asignaciones se limitan al curso cuando el actor es tutor. Los administradores académicos conservan su ámbito autorizado y los estudiantes conservan el acceso a sus propias actividades publicadas/asignadas.
-- `20261113024700_avoid_activity_assignment_rls_recursion.sql`: centraliza la comprobación de alcance de una asignación en una función interna `SECURITY DEFINER` con `search_path` vacío, evitando referencias recursivas entre políticas de actividades y asignaciones.
+- `20261113023454_enforce_course_scoped_activity_permissions.sql` (versión aplicada en Supabase: `20261113023454`): las lecturas de matrículas y las operaciones de actividades y asignaciones se limitan al curso cuando el actor es tutor. Los administradores académicos conservan su ámbito autorizado y los estudiantes conservan el acceso a sus propias actividades publicadas/asignadas.
+- `20261113023517_avoid_activity_assignment_rls_recursion.sql` (versión aplicada en Supabase: `20261113023517`): centraliza la comprobación de alcance de una asignación en una función interna `SECURITY DEFINER` con `search_path` vacío, evitando referencias recursivas entre políticas de actividades y asignaciones.
 
 El panel `app/dashboard/tutor/page.tsx` se sustituyó para consultar asignaciones activas, matrículas, entregas pendientes y revisiones reales. Ya no incluye nombres, entregas ni estadísticas de demostración. Los nombres de estudiantes usan un fallback neutro cuando la política de perfiles no permite leerlos.
 
