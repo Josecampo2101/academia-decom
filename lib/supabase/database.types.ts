@@ -2270,6 +2270,10 @@ export type Database = {
           enrolled_at: string
         }[]
       }
+      get_tutor_student_academic_detail: {
+        Args: { p_student_id: string }
+        Returns: Json
+      }
       get_invitation_requests: {
         Args: { p_status?: string }
         Returns: {

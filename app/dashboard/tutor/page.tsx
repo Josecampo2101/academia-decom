@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 
 type AccessState = "checking" | "allowed" | "denied" | "error";
 type Course = { id: string; title: string; status: string; district_id: string };
+type TutorStudent = { id: string; name: string; courses: string[]; enrollmentStatus: string };
 type ReviewItem = {
   id: string;
   student: string;
@@ -29,6 +30,7 @@ export default function TutorDashboardPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [studentCount, setStudentCount] = useState(0);
+  const [students, setStudents] = useState<TutorStudent[]>([]);
   const [reviewedThisWeek, setReviewedThisWeek] = useState(0);
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
@@ -87,6 +89,7 @@ export default function TutorDashboardPage() {
         setCourses([]);
         setReviews([]);
         setStudentCount(0);
+        setStudents([]);
         setReviewedThisWeek(0);
         setAccess("allowed");
         return;
@@ -97,6 +100,20 @@ export default function TutorDashboardPage() {
         .in("course_id", courseIds).eq("status", "active");
       if (enrollmentError) throw enrollmentError;
       setStudentCount(new Set((enrollmentRows ?? []).map((row) => row.user_id)).size);
+
+      const { data: rosterRows, error: rosterError } = await supabase.rpc("get_tutor_course_roster");
+      if (rosterError) throw rosterError;
+      const studentMap = new Map<string, TutorStudent>();
+      for (const row of rosterRows ?? []) {
+        const existing = studentMap.get(row.student_id);
+        if (existing) {
+          if (!existing.courses.includes(row.course_title)) existing.courses.push(row.course_title);
+          if (row.enrollment_status === "active") existing.enrollmentStatus = "active";
+        } else {
+          studentMap.set(row.student_id, { id: row.student_id, name: row.student_name, courses: [row.course_title], enrollmentStatus: row.enrollment_status });
+        }
+      }
+      setStudents([...studentMap.values()].sort((a, b) => a.name.localeCompare(b.name, "es")));
 
       const { data: submissionRows, error: submissionError } = await supabase
         .from("academic_activity_submissions")
@@ -225,6 +242,17 @@ export default function TutorDashboardPage() {
               <p className="text-xs font-semibold text-slate-400">{item.label}</p><p className="mt-3 text-3xl font-extrabold tabular-nums">{item.value}</p><p className="mt-1 text-xs text-slate-400">{item.detail}</p>
             </article>
           ))}
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+          <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Acompañamiento</p><h2 className="mt-1 text-lg font-bold">Estudiantes de mis cursos</h2><p className="mt-1 text-xs text-slate-400">Solo matrículas de cursos que tienes asignados.</p></div><span className="text-xs font-semibold text-slate-500">{students.length} estudiantes</span></div>
+          {students.length ? <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">{students.map((student) => (
+            <button key={student.id} type="button" onClick={() => router.push("/dashboard/tutor/estudiantes/" + student.id)} className="rounded-2xl border border-slate-200 p-4 text-left transition hover:border-[#087DB5] hover:bg-sky-50/40">
+              <span className="block text-sm font-bold text-[#102D4D]">{student.name}</span><span className="mt-2 block text-xs leading-5 text-slate-500">{student.courses.join(" · ")}</span>
+              <span className="mt-3 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600">{student.enrollmentStatus === "completed" ? "Curso completado" : "Matrícula activa"}</span>
+              <span className="mt-3 block text-xs font-bold text-[#087DB5]">Ver ficha académica →</span>
+            </button>
+          ))}</div> : <p className="mt-4 rounded-2xl border border-dashed border-slate-200 p-7 text-center text-xs leading-5 text-slate-500">No hay estudiantes matriculados en tus cursos asignados.</p>}
         </section>
 
         <section className="grid gap-5 xl:grid-cols-[1fr_1.4fr]">

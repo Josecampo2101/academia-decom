@@ -1,115 +1,92 @@
 "use client";
-
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-type AccessState = "checking" | "allowed" | "denied" | "error";
+type AccessState = "checking" | "allowed" | "not_found" | "denied" | "error";
+type CourseRow = { enrollment_id: string; course_id: string; title: string; status: string; enrolled_at: string; total_lessons: number; completed_lessons: number; progress: number };
+type ActivityRow = { id: string; title: string; course_title: string; due_at: string | null; status: string; attempt_number: number | null; awarded_points: number | null; total_points: number; feedback: string | null; submitted_at: string | null; reviewed_at: string | null };
+type AssessmentRow = { id: string; assessment_id: string; title: string; course_title: string; type: string; attempt_number: number; status: string; score_percent: number | null; passed: boolean | null; manual_pending: number; submitted_at: string; graded_at: string | null };
+type StudentDetail = { student: { id: string; name: string; status: string }; courses: CourseRow[]; activities: ActivityRow[]; assessments: AssessmentRow[] };
 
-const demoStudents: Record<string, {
-  name: string; email: string; group: string; progress: number; lessonsDone: number;
-  lessonsTotal: number; completed: number; pending: number; lastActivity: string;
-  courses: { name: string; progress: number; detail: string }[];
-  history: { date: string; title: string; detail: string; status: string }[];
-  alerts: string[];
-}> = {
-  "maria-rios": {
-    name: "María Fernanda Ríos", email: "maria.rios@ejemplo.test", group: "Grupo de tutoría 01",
-    progress: 72, lessonsDone: 18, lessonsTotal: 25, completed: 4, pending: 1, lastActivity: "Hoy · 8:42 a. m.",
-    courses: [
-      { name: "Identidad corporativa DECOM", progress: 72, detail: "18 de 25 lecciones" },
-      { name: "Medios escritos", progress: 0, detail: "Aún no iniciado" },
-    ],
-    history: [
-      { date: "Hoy · 8:42 a. m.", title: "Aplicación de la identidad visual", detail: "Entrega recibida · pendiente de revisión", status: "Pendiente" },
-      { date: "8 nov 2026", title: "Principios de identidad DECOM", detail: "Actividad revisada por tutoría", status: "Aprobada" },
-      { date: "5 nov 2026", title: "Lección: propósito institucional", detail: "Contenido marcado como completado", status: "Completada" },
-    ],
-    alerts: ["Tiene una entrega pendiente de revisión.", "Mantiene actividad reciente en el curso principal."],
-  },
-  "andres-gomez": {
-    name: "Andrés Felipe Gómez", email: "andres.gomez@ejemplo.test", group: "Grupo de tutoría 01",
-    progress: 48, lessonsDone: 12, lessonsTotal: 25, completed: 2, pending: 2, lastActivity: "Ayer · 4:15 p. m.",
-    courses: [
-      { name: "Identidad corporativa DECOM", progress: 48, detail: "12 de 25 lecciones" },
-      { name: "Medios escritos", progress: 0, detail: "Aún no iniciado" },
-    ],
-    history: [
-      { date: "Ayer · 4:15 p. m.", title: "Análisis de comunicación institucional", detail: "Entrega recibida · pendiente de revisión", status: "Pendiente" },
-      { date: "7 nov 2026", title: "Elementos de identidad", detail: "Entrega devuelta para ajustes", status: "Requiere ajustes" },
-      { date: "3 nov 2026", title: "Lección: comunicación con propósito", detail: "Contenido marcado como completado", status: "Completada" },
-    ],
-    alerts: ["Dos actividades requieren seguimiento.", "El avance del curso está por debajo del promedio del grupo de demostración."],
-  },
-  "daniela-perez": {
-    name: "Daniela Pérez", email: "daniela.perez@ejemplo.test", group: "Grupo de tutoría 01",
-    progress: 86, lessonsDone: 22, lessonsTotal: 25, completed: 5, pending: 0, lastActivity: "Ayer · 11:20 a. m.",
-    courses: [
-      { name: "Identidad corporativa DECOM", progress: 86, detail: "22 de 25 lecciones" },
-      { name: "Medios escritos", progress: 0, detail: "Aún no iniciado" },
-    ],
-    history: [
-      { date: "Ayer · 11:20 a. m.", title: "Principios de identidad DECOM", detail: "Entrega revisada por tutoría", status: "Aprobada" },
-      { date: "9 nov 2026", title: "Reconocimiento de elementos gráficos", detail: "Actividad completada", status: "Completada" },
-      { date: "6 nov 2026", title: "Lección: lenguaje visual", detail: "Contenido marcado como completado", status: "Completada" },
-    ],
-    alerts: ["No tiene entregas pendientes en este momento.", "Avance constante en el curso principal."],
-  },
-};
+function formatDate(value: string | null | undefined) {
+  if (!value) return "Sin fecha";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "Sin fecha" : new Intl.DateTimeFormat("es-CO", { dateStyle: "medium", timeStyle: "short" }).format(date);
+}
+function activityStatus(status: string) {
+  const labels: Record<string, string> = { not_started: "Sin entregar", draft: "Borrador", submitted: "En revisión", changes_requested: "Requiere ajustes", approved: "Aprobada", rejected: "No aprobada" };
+  return labels[status] ?? status;
+}
+function assessmentStatus(row: AssessmentRow) {
+  if (row.status === "in_progress") return "En curso";
+  if (row.status === "expired") return "Tiempo agotado";
+  if (row.status === "review_pending" || row.manual_pending > 0) return "Pendiente de revisión";
+  if (row.status === "graded") return row.passed ? "Aprobada" : "No aprobada";
+  return row.status;
+}
 
 export default function TutorStudentDetailClient({ studentId }: { studentId: string }) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const [access, setAccess] = useState<AccessState>("checking");
-  const [note, setNote] = useState("");
-  const [notes, setNotes] = useState<string[]>([]);
-  const student = demoStudents[studentId];
+  const [detail, setDetail] = useState<StudentDetail | null>(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
-    async function verifyAccess() {
+    async function load() {
       try {
         const { data: { user }, error: authError } = await supabase.auth.getUser();
-        if (!active) return;
         if (authError || !user) { router.replace("/conexion"); return; }
-        const { data: assignments, error: assignmentError } = await supabase.from("user_role_assignments").select("role_id").eq("user_id", user.id);
-        if (assignmentError) throw assignmentError;
+        const { data, error: detailError } = await supabase.rpc("get_tutor_student_academic_detail", { p_student_id: studentId });
+        if (detailError) {
+          if (active) { setError(detailError.message); setAccess(detailError.message.toLowerCase().includes("access") ? "denied" : "error"); }
+          return;
+        }
         if (!active) return;
-        const roleIds = [...new Set((assignments ?? []).map((item) => item.role_id))];
-        const { data: roles, error: rolesError } = await supabase.from("roles").select("role_key").in("id", roleIds);
-        if (rolesError) throw rolesError;
-        if (!active) return;
-        const keys = (roles ?? []).map((role) => role.role_key);
-        setAccess(keys.includes("tutor") || keys.includes("national_admin") ? "allowed" : "denied");
-      } catch (error) {
-        console.error("No fue posible validar el acceso a la ficha:", error);
-        if (active) setAccess("error");
+        if (!data) { setAccess("not_found"); return; }
+        setDetail(data as unknown as StudentDetail);
+        setAccess("allowed");
+      } catch (cause) {
+        if (active) { setError(cause instanceof Error ? cause.message : "No fue posible consultar la ficha académica."); setAccess("error"); }
       }
     }
-    void Promise.resolve().then(verifyAccess);
+    void load();
     return () => { active = false; };
-  }, [router, supabase]);
+  }, [router, studentId, supabase]);
 
-  if (access === "checking") return <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]"><p className="text-sm text-slate-500">Verificando tu acceso...</p></main>;
-  if (access !== "allowed") return <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6"><section className="max-w-md rounded-3xl border bg-white p-8 text-center"><h1 className="text-xl font-bold text-[#102D4D]">{access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}</h1><p className="mt-2 text-sm text-slate-500">Esta ficha está habilitada para tutores autorizados.</p><button type="button" onClick={() => router.push("/dashboard")} className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white">Volver al panel</button></section></main>;
-  if (!student) return <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6"><section className="max-w-md rounded-3xl border bg-white p-8 text-center"><h1 className="text-xl font-bold text-[#102D4D]">Estudiante no encontrado</h1><p className="mt-2 text-sm text-slate-500">No existe una ficha de demostración para este registro.</p><button type="button" onClick={() => router.push("/dashboard/tutor")} className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white">Volver al panel del tutor</button></section></main>;
+  if (access === "checking") return <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]"><p className="text-sm text-slate-500">Consultando ficha académica...</p></main>;
+  if (access !== "allowed" || !detail) {
+    const title = access === "not_found" ? "Estudiante no encontrado" : access === "denied" ? "Acceso restringido" : "No fue posible cargar la ficha";
+    const description = access === "not_found" ? "No hay una matrícula activa o completada de este estudiante en tus cursos asignados." : access === "denied" ? "La ficha solo está disponible para el tutor asignado al curso o para administración nacional." : error || "Intenta nuevamente en unos momentos.";
+    return <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6"><section className="max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center"><h1 className="text-xl font-bold text-[#102D4D]">{title}</h1><p className="mt-2 text-sm leading-6 text-slate-500">{description}</p><button type="button" onClick={() => router.push("/dashboard/tutor")} className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white">Volver al panel del tutor</button></section></main>;
+  }
 
-  return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
-      <header className="border-b border-slate-200 bg-white"><div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 md:px-8"><div><p className="text-xs font-extrabold tracking-[0.14em] text-[#087DB5]">ACADEMIA DECOM</p><p className="mt-1 text-xs text-slate-400">Seguimiento tutorial individual</p></div><button type="button" onClick={() => router.push("/dashboard/tutor")} className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600">← Panel del tutor</button></div></header>
-      <div className="mx-auto max-w-6xl space-y-6 px-5 py-7 md:px-8 md:py-9">
-        <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-wider text-[#19A7A0]">Ficha académica</p><h1 className="mt-2 text-2xl font-extrabold">{student.name}</h1><p className="mt-1 text-sm text-slate-500">{student.email} · {student.group}</p></div><span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800">Datos de demostración</span></div>
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[{label:"Avance general",value:student.progress+"%"},{label:"Lecciones completadas",value:student.lessonsDone+"/"+student.lessonsTotal},{label:"Actividades aprobadas",value:String(student.completed)},{label:"Pendientes",value:String(student.pending)}].map((item)=><article key={item.label} className="rounded-2xl border border-slate-200 bg-white p-5"><p className="text-xs font-semibold text-slate-400">{item.label}</p><p className="mt-2 text-2xl font-extrabold tabular-nums">{item.value}</p></article>)}
-        </section>
-        <section className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-          <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6"><h2 className="text-lg font-bold">Progreso por curso</h2><div className="mt-5 space-y-6">{student.courses.map((course)=><div key={course.name}><div className="flex flex-wrap justify-between gap-2"><p className="text-sm font-bold">{course.name}</p><span className="text-xs font-bold text-[#087DB5]">{course.progress}%</span></div><p className="mt-1 text-xs text-slate-400">{course.detail}</p><div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#19A7A0]" style={{width:course.progress+"%"}} /></div></div>)}</div></article>
-          <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6"><h2 className="text-lg font-bold">Alertas y acompañamiento</h2><p className="mt-1 text-xs text-slate-400">Última actividad: {student.lastActivity}</p><div className="mt-4 space-y-3">{student.alerts.map((alert)=><p key={alert} className="rounded-xl bg-[#F4F7FA] p-3 text-xs leading-5 text-slate-600">{alert}</p>)}</div><p className="mt-4 text-[11px] leading-5 text-slate-400">Las alertas son ilustrativas. Las reglas de riesgo y seguimiento se definirán en el servicio académico.</p></article>
-        </section>
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6"><h2 className="text-lg font-bold">Historial de actividad</h2><div className="mt-5 divide-y divide-slate-100">{student.history.map((item)=><article key={item.date+item.title} className="flex flex-col gap-2 py-4 sm:flex-row sm:items-start sm:justify-between"><div><p className="text-sm font-bold">{item.title}</p><p className="mt-1 text-xs leading-5 text-slate-500">{item.detail}</p><p className="mt-1 text-[11px] text-slate-400">{item.date}</p></div><span className="w-fit rounded-full bg-slate-100 px-3 py-1 text-[10px] font-semibold text-slate-600">{item.status}</span></article>)}</div></section>
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6"><div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-lg font-bold">Observaciones tutoriales</h2><p className="mt-1 text-xs text-slate-400">Notas temporales de esta sesión de demostración.</p></div><span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">No se guardan</span></div><textarea value={note} onChange={(event)=>setNote(event.target.value)} rows={3} maxLength={1000} placeholder="Escribe una observación para probar el flujo de seguimiento..." className="mt-4 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm leading-6 outline-none focus:border-[#087DB5]" /><div className="mt-3 flex justify-end"><button type="button" disabled={!note.trim()} onClick={()=>{setNotes((current)=>[note.trim(),...current]);setNote("");}} className="rounded-xl bg-[#087DB5] px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-40">Añadir nota temporal</button></div>{notes.length>0&&<div className="mt-5 space-y-2">{notes.map((item,index)=><p key={index} className="rounded-xl bg-[#F4F7FA] p-3 text-xs leading-5 text-slate-600">{item}</p>)}</div>}</section>
-        <p className="text-[11px] leading-5 text-slate-400">Prototipo de interfaz: estudiantes, cursos, alertas e historial son ficticios. Las notas solo viven en el estado del navegador y desaparecen al salir. No se consulta información académica real.</p>
-      </div>
-    </main>
-  );
+  const { student, courses, activities, assessments } = detail;
+  const lessonsDone = courses.reduce((sum, course) => sum + course.completed_lessons, 0);
+  const lessonsTotal = courses.reduce((sum, course) => sum + course.total_lessons, 0);
+  const progress = lessonsTotal ? Math.round(lessonsDone / lessonsTotal * 100) : 0;
+  const pendingActivities = activities.filter((item) => ["not_started", "draft", "submitted", "changes_requested"].includes(item.status)).length;
+  const gradedAssessments = assessments.filter((item) => item.status === "graded");
+  const latestActivity = [...activities.map((item) => item.submitted_at ?? item.reviewed_at ?? item.due_at), ...assessments.map((item) => item.graded_at ?? item.submitted_at)].filter((v): v is string => Boolean(v)).sort((a,b) => new Date(b).getTime()-new Date(a).getTime())[0];
+
+  return <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
+    <header className="border-b border-slate-200 bg-white"><div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 md:px-8"><div><p className="text-xs font-extrabold tracking-[0.14em] text-[#087DB5]">ACADEMIA DECOM</p><p className="mt-1 text-xs text-slate-400">Seguimiento tutorial individual</p></div><button type="button" onClick={() => router.push("/dashboard/tutor")} className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600">← Panel del tutor</button></div></header>
+    <div className="mx-auto max-w-6xl space-y-6 px-5 py-7 md:px-8 md:py-9">
+      <section className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-wider text-[#19A7A0]">Ficha académica</p><h1 className="mt-2 text-2xl font-extrabold">{student.name}</h1><p className="mt-1 text-sm text-slate-500">Registro académico · Estado de perfil: {student.status === "active" ? "Activo" : student.status}</p></div><span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600">Información de Supabase</span></section>
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[{label:"Avance de lecciones",value:progress+"%"},{label:"Lecciones completadas",value:lessonsDone+" / "+lessonsTotal},{label:"Actividades por atender",value:String(pendingActivities)},{label:"Evaluaciones calificadas",value:String(gradedAssessments.length)}].map(item=><article key={item.label} className="rounded-2xl border border-slate-200 bg-white p-5"><p className="text-xs font-semibold text-slate-400">{item.label}</p><p className="mt-2 text-2xl font-extrabold tabular-nums">{item.value}</p></article>)}</section>
+      <section className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
+        <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6"><h2 className="text-lg font-bold">Progreso por curso</h2>{courses.length?<div className="mt-5 space-y-6">{courses.map(course=><div key={course.enrollment_id}><div className="flex flex-wrap justify-between gap-2"><p className="text-sm font-bold">{course.title}</p><span className="text-xs font-bold text-[#087DB5]">{course.progress}%</span></div><p className="mt-1 text-xs text-slate-400">{course.completed_lessons} de {course.total_lessons} lecciones · {course.status==="completed"?"Curso completado":"Matrícula activa"}</p><div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#19A7A0]" style={{width:course.progress+"%"}}/></div></div>)}</div>:<p className="mt-4 text-sm text-slate-500">No hay cursos disponibles para mostrar.</p>}</article>
+        <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6"><h2 className="text-lg font-bold">Resumen tutorial</h2><p className="mt-3 text-xs leading-5 text-slate-500">Último movimiento académico: {formatDate(latestActivity)}</p><p className="mt-3 text-xs leading-5 text-slate-500">Las cifras se calculan con las lecciones publicadas, entregas y evaluaciones registradas en los cursos asignados.</p><p className="mt-4 rounded-xl bg-[#F4F7FA] p-3 text-xs leading-5 text-slate-600">Ficha de consulta. Las observaciones tutoriales aún no están habilitadas como registros persistentes.</p></article>
+      </section>
+      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6"><div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-lg font-bold">Actividades asignadas</h2><p className="mt-1 text-xs text-slate-400">Estado de la última entrega de cada actividad asignada.</p></div><span className="text-xs font-semibold text-slate-500">{activities.length} actividades</span></div>
+        {activities.length?<div className="mt-4 divide-y divide-slate-100">{activities.map(item=><article key={item.id} className="flex flex-col gap-2 py-4 sm:flex-row sm:items-start sm:justify-between"><div><p className="text-sm font-bold">{item.title}</p><p className="mt-1 text-xs text-slate-500">{item.course_title}</p><p className="mt-1 text-[11px] text-slate-400">Entrega: {formatDate(item.due_at)} · Envío: {formatDate(item.submitted_at)}</p>{item.feedback&&<p className="mt-2 rounded-lg bg-[#F4F7FA] p-3 text-xs leading-5 text-slate-600">Retroalimentación: {item.feedback}</p>}</div><div className="text-left sm:text-right"><span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-semibold text-slate-600">{activityStatus(item.status)}</span><p className="mt-2 text-xs font-semibold text-slate-500">{item.awarded_points===null?"Sin calificar":item.awarded_points+" / "+item.total_points+" puntos"}</p></div></article>)}</div>:<p className="mt-4 rounded-2xl border border-dashed border-slate-200 p-7 text-center text-sm text-slate-500">No hay actividades asignadas en estos cursos.</p>}
+      </section>
+      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6"><div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-lg font-bold">Historial de evaluaciones</h2><p className="mt-1 text-xs text-slate-400">Intentos, resultados y revisiones manuales.</p></div><span className="text-xs font-semibold text-slate-500">{assessments.length} intentos</span></div>
+        {assessments.length?<div className="mt-4 divide-y divide-slate-100">{assessments.map(item=><article key={item.id} className="flex flex-col gap-2 py-4 sm:flex-row sm:items-start sm:justify-between"><div><p className="text-sm font-bold">{item.title}</p><p className="mt-1 text-xs text-slate-500">{item.course_title} · Intento {item.attempt_number} · {item.type==="final"?"Evaluación final":"Evaluación de lección"}</p><p className="mt-1 text-[11px] text-slate-400">Enviada: {formatDate(item.submitted_at)} · Calificada: {formatDate(item.graded_at)}</p></div><div className="text-left sm:text-right"><span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-semibold text-slate-600">{assessmentStatus(item)}</span><p className="mt-2 text-xs font-semibold text-slate-500">{item.score_percent===null?"Calificación pendiente":item.score_percent+"%"}</p></div></article>)}</div>:<p className="mt-4 rounded-2xl border border-dashed border-slate-200 p-7 text-center text-sm text-slate-500">Todavía no hay intentos de evaluación registrados.</p>}
+      </section>
+      <p className="text-[11px] leading-5 text-slate-400">La consulta está limitada en el servidor a los cursos con asignación activa del tutor. No se muestran datos de otros cursos ni observaciones ficticias.</p>
+    </div>
+  </main>;
 }
