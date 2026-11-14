@@ -2274,6 +2274,14 @@ export type Database = {
         Args: { p_student_id: string }
         Returns: Json
       }
+      get_tutor_student_notes: {
+        Args: { p_student_id: string }
+        Returns: Json
+      }
+      add_tutor_student_note: {
+        Args: { p_enrollment_id: string; p_note: string }
+        Returns: string
+      }
       get_invitation_requests: {
         Args: { p_status?: string }
         Returns: {
