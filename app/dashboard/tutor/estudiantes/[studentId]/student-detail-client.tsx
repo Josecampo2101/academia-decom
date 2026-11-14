@@ -87,13 +87,29 @@ export default function TutorStudentDetailClient({ studentId }: { studentId: str
     if (!noteDraft.trim() || !selectedEnrollmentId || savingNote) return;
     setSavingNote(true);
     setNoteError("");
-    const { error: saveError } = await supabase.rpc("add_tutor_student_note", { p_enrollment_id: selectedEnrollmentId, p_note: noteDraft.trim() });
-    if (saveError) { setNoteError(saveError.message); setSavingNote(false); return; }
-    setNoteDraft("");
-    const { data: noteRows, error: refreshError } = await supabase.rpc("get_tutor_student_notes", { p_student_id: studentId });
-    if (refreshError) setNoteError("La observación se guardó, pero no se pudo actualizar la lista: " + refreshError.message);
-    else setNotes((noteRows ?? []) as unknown as TutorNote[]);
-    setSavingNote(false);
+    try {
+      const { error: saveError } = await supabase.rpc("add_tutor_student_note", {
+        p_enrollment_id: selectedEnrollmentId,
+        p_note: noteDraft.trim(),
+      });
+      if (saveError) {
+        setNoteError(saveError.message);
+        return;
+      }
+      setNoteDraft("");
+      const { data: noteRows, error: refreshError } = await supabase.rpc("get_tutor_student_notes", {
+        p_student_id: studentId,
+      });
+      if (refreshError) {
+        setNoteError("La observación se guardó, pero no se pudo actualizar la lista: " + refreshError.message);
+      } else {
+        setNotes((noteRows ?? []) as unknown as TutorNote[]);
+      }
+    } catch (cause) {
+      setNoteError(cause instanceof Error ? cause.message : "Ocurrió un error inesperado al guardar la observación.");
+    } finally {
+      setSavingNote(false);
+    }
   }
 
   return <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
