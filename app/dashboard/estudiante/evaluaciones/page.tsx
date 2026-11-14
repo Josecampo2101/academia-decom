@@ -41,7 +41,7 @@ export default function StudentAssessmentsPage() {
           return;
         }
         const { data: enrollments, error: enrollmentError } = await supabase.from("course_enrollments")
-          .select("id,course_id,district_id,status").eq("user_id", user.id).neq("status", "withdrawn");
+          .select("id,course_id,district_id,status").eq("user_id", user.id).eq("status", "active");
         if (enrollmentError) throw enrollmentError;
         const courseIds = [...new Set((enrollments ?? []).map((item) => item.course_id))];
         if (!courseIds.length) { if (active) { setItems([]); setAccess("allowed"); } return; }
@@ -106,7 +106,7 @@ export default function StudentAssessmentsPage() {
           <p className="mt-2 text-xs leading-5 text-slate-500">{item.instructions || "Lee cuidadosamente cada pregunta y revisa tus respuestas antes de enviarlas."}</p>
           <div className="mt-4 flex flex-wrap gap-3 text-[11px] text-slate-400"><span>{item.kind === "final" ? "Examen final" : item.kind === "practice" ? "Práctica" : "Evaluación de lección"}</span><span>Aprobación: {item.passingScore}%</span>{item.timeLimit && <span>{item.timeLimit} min</span>}{item.maxAttempts && <span>Máx. {item.maxAttempts} intentos</span>}</div>
           {item.latestAttempt && <p className="mt-4 rounded-xl bg-[#F4F7FA] p-3 text-xs text-slate-600">{item.latestAttempt.status === "review_pending" ? "En revisión manual" : item.latestAttempt.passed ? "Aprobada" : "Intento calificado"} · {item.latestAttempt.score_percent === null ? "Calificación pendiente" : `${item.latestAttempt.score_percent}%`} · intento {item.latestAttempt.attempt_number}</p>}
-          <button onClick={() => router.push(`/dashboard/estudiante/evaluaciones/${item.id}`)} className="mt-4 w-full rounded-xl bg-[#087DB5] px-4 py-3 text-xs font-bold text-white">Abrir evaluación →</button>
+          <button disabled={Boolean(item.maxAttempts && item.latestAttempt && item.latestAttempt.attempt_number >= item.maxAttempts)} onClick={() => router.push(`/dashboard/estudiante/evaluaciones/${item.id}`)} className="mt-4 w-full rounded-xl bg-[#087DB5] px-4 py-3 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-40">{item.maxAttempts && item.latestAttempt && item.latestAttempt.attempt_number >= item.maxAttempts ? "Intentos agotados" : "Abrir evaluación →"}</button>
         </article>)}</div> : <section className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center"><h2 className="text-base font-bold">No tienes evaluaciones publicadas</h2><p className="mt-2 text-sm text-slate-500">Cuando el tutor o el editor publique una evaluación para tus cursos, aparecerá aquí.</p></section>}
       </div>
     </main>
