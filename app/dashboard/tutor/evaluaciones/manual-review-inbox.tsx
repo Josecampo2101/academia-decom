@@ -37,7 +37,7 @@ export default function ManualAssessmentReviewInbox() {
     setLoading(true);
     try {
       const { data: attemptRows, error: attemptError } = await supabase.from("academic_assessment_attempts")
-        .select("id,assessment_id,enrollment_id,district_id,user_id,attempt_number,submitted_at,objective_earned,total_possible,manual_pending,status")
+        .select("id,assessment_id,enrollment_id,district_id,user_id,attempt_number,submitted_at,objective_earned,total_possible,manual_pending,status,score_percent,passed,graded_at")
         .order("submitted_at", { ascending: false });
       if (attemptError) throw attemptError;
       const attempts = (attemptRows ?? []) as AttemptRow[];
