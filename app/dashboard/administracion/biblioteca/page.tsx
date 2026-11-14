@@ -119,6 +119,8 @@ export default function AcademicLibraryAdminPage() {
   async function createResource() {
     if (!userId || !districtId || saving) return;
     setSaving(true); setError(""); setNotice("");
+    let createdResourceId: string | null = null;
+    let uploadedStoragePath: string | null = null;
     try {
       if (title.trim().length < 3) throw new Error("El título debe tener al menos 3 caracteres.");
       if (description.trim().length < 12) throw new Error("La descripción debe tener al menos 12 caracteres.");
@@ -136,20 +138,43 @@ export default function AcademicLibraryAdminPage() {
         created_by: userId, status: "draft",
       }).select("id").single();
       if (createError) throw createError;
+      createdResourceId = created.id;
 
       if (file) {
         const path = districtId + "/" + created.id + "/" + Date.now() + "-" + safeName(file.name);
         const { error: uploadError } = await supabase.storage.from("academic-library-resources").upload(path, file, { contentType: file.type, upsert: false });
         if (uploadError) throw uploadError;
+        uploadedStoragePath = path;
         const { error: updateError } = await supabase.from("academic_library_resources").update({
           storage_path: path, uploaded_by: userId, mime_type: file.type || "application/octet-stream", size_bytes: file.size, content: null,
         }).eq("id", created.id).eq("status", "draft");
         if (updateError) throw updateError;
       }
+      // La creación queda confirmada; los fallos posteriores de refresco no deben borrar el recurso.
+      createdResourceId = null;
+      uploadedStoragePath = null;
       setTitle(""); setDescription(""); setExternalUrl(""); setContent(""); setVersionLabel("1.0"); setVersionParentId(null); setFile(null);
       setNotice("Recurso creado como borrador. Revísalo antes de publicarlo.");
       await loadData();
-    } catch (cause) { setError(messageOf(cause)); }
+    } catch (cause) {
+      const cleanupIssues: string[] = [];
+      if (uploadedStoragePath) {
+        const { error: storageCleanupError } = await supabase.storage
+          .from("academic-library-resources")
+          .remove([uploadedStoragePath]);
+        if (storageCleanupError) cleanupIssues.push("No se pudo retirar el archivo cargado.");
+      }
+      if (createdResourceId) {
+        const { error: rowCleanupError } = await supabase
+          .from("academic_library_resources")
+          .delete()
+          .eq("id", createdResourceId)
+          .eq("status", "draft");
+        if (rowCleanupError) cleanupIssues.push("No se pudo retirar el borrador incompleto.");
+      }
+      const baseMessage = messageOf(cause);
+      setError(cleanupIssues.length ? baseMessage + " " + cleanupIssues.join(" ") : baseMessage);
+    }
     finally { setSaving(false); }
   }
 
