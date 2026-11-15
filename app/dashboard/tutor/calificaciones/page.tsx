@@ -62,7 +62,7 @@ export default function TutorAssessmentWorkflowPage(){
   }catch(cause){console.error("No fue posible cargar la bandeja de tutoría:",cause);setError(cause instanceof Error?cause.message:"No fue posible consultar las entregas.");setAccess("error");}
   finally{setLoading(false);}
  },[router,supabase]);
- useEffect(()=>{void load();},[load]);
+ useEffect(()=>{void Promise.resolve().then(load);},[load]);
  const selected=items.find(x=>x.id===selectedId)??null;
  const selectedCriteria=criteria.filter(x=>x.activity_id===selected?.activity_id);
  const visible=items.filter(x=>(filter==="Todas"||(filter==="Pendientes"&&x.status==="submitted")||false)&&(!search.trim()||[x.studentName,x.academic_activities.title,x.academic_activities.courses?.title??""].some(v=>v.toLocaleLowerCase("es").includes(search.trim().toLocaleLowerCase("es")))));
