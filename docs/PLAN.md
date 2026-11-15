@@ -84,6 +84,8 @@
 
 ## Fase 2 — Login institucional
 
+**Estado:** en curso. PR #57 abierta como Draft: https://github.com/Josecampo2101/academia-decom/pull/57. Se incorporó una ilustración vectorial original porque el repositorio no tenía activos gráficos institucionales disponibles.
+
 **Objetivo:** aplicar la referencia visual solicitada con marca propia, preservando la lógica actual.
 
 **Qué se modifica**
