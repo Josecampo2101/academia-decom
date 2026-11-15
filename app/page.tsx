@@ -35,12 +35,20 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    const savedTheme = localStorage.getItem("academia-theme");
+    const activeTheme: Theme =
+      savedTheme === "light" || savedTheme === "dark" || savedTheme === "system"
+        ? savedTheme
+        : theme;
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const updateTheme = () => {
-      const dark = theme === "dark" || (theme === "system" && mediaQuery.matches);
+      const dark =
+        activeTheme === "dark" ||
+        (activeTheme === "system" && mediaQuery.matches);
       setResolvedTheme(dark ? "dark" : "light");
       document.documentElement.classList.toggle("dark", dark);
     };
+
     updateTheme();
     mediaQuery.addEventListener("change", updateTheme);
     return () => mediaQuery.removeEventListener("change", updateTheme);
