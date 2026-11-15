@@ -168,9 +168,9 @@ export default function DashboardPage() {
     const media = window.matchMedia("(prefers-color-scheme: dark)");
 
     function updateTheme() {
-      setResolvedTheme(
-        theme === "system" ? (media.matches ? "dark" : "light") : theme
-      );
+      const nextTheme = theme === "system" ? (media.matches ? "dark" : "light") : theme;
+      setResolvedTheme(nextTheme);
+      document.documentElement.classList.toggle("dark", nextTheme === "dark");
     }
 
     updateTheme();
@@ -229,7 +229,7 @@ export default function DashboardPage() {
       setEmail(data.user.email ?? "");
       const metadataName = data.user.user_metadata?.full_name ?? data.user.user_metadata?.name;
       if (typeof metadataName === "string" && metadataName.trim()) {
-        setDisplayName(metadataName.trim().split(/\\s+/)[0]);
+        setDisplayName(metadataName.trim().split(/\s+/)[0]);
       }
 
       const { data: permissionTest, error: permissionError } =
@@ -556,22 +556,25 @@ export default function DashboardPage() {
       <div className="flex min-h-screen">
         {/* MENÚ LATERAL */}
         <aside
-          className={`hidden shrink-0 flex-col border-r transition-[width] duration-200 lg:flex ${sidebarCollapsed ? "w-20" : "w-64"} ${borderColor} ${surface} lg:flex`}
+          data-collapsed={sidebarCollapsed}
+          className={`hidden shrink-0 flex-col border-r transition-[width] duration-200 lg:flex ${sidebarCollapsed ? "w-20" : "w-64"} ${borderColor} ${surface}`}
         >
-          <div className="border-b border-inherit p-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#087DB5] text-2xl text-white">
-                ✦
+          <div className="border-b border-inherit p-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0B3970] text-sm font-black text-white">
+                  D34
+                </div>
+                {!sidebarCollapsed && <div className="min-w-0">
+                  <h1 className="text-xs font-bold tracking-wide">
+                    ESCUELA DE COMUNICACIONES
+                  </h1>
+                  <p className={`text-xs ${secondaryText}`}>Distrito 34 · IPUC</p>
+                </div>}
               </div>
-
-              <div>
-                <h1 className="text-sm font-bold tracking-wide">
-                  ESCUELA DE COMUNICACIONES D34
-                </h1>
-                <p className={`text-xs ${secondaryText}`}>
-                  Plataforma de formación
-                </p>
-              </div>
+              <button type="button" onClick={() => setSidebarCollapsed((value) => !value)} aria-label={sidebarCollapsed ? "Expandir menú" : "Contraer menú"} title={sidebarCollapsed ? "Expandir menú" : "Contraer menú"} className={`rounded-lg p-2 transition hover:bg-[#087DB5]/10 ${secondaryText}`}>
+                {sidebarCollapsed ? "›" : "‹"}
+              </button>
             </div>
           </div>
 
@@ -786,8 +789,14 @@ export default function DashboardPage() {
                   Formación institucional
                 </p>
 
-                <h2 className="mt-4 text-3xl font-bold md:text-4xl">
-                  Bienvenido a la Escuela de Comunicaciones D34
+                <p className="mt-4 text-sm font-semibold text-[#9BDCF5]">
+                  {(() => {
+                    const hour = Number(new Intl.DateTimeFormat("en-US", { hour: "2-digit", hourCycle: "h23", timeZone: "America/Bogota" }).format(new Date()));
+                    return hour >= 5 && hour < 12 ? "Buenos días" : hour >= 12 && hour < 18 ? "Buenas tardes" : "Buenas noches";
+                  })()}
+                </p>
+                <h2 className="mt-2 text-3xl font-bold md:text-4xl">
+                  {displayName === "Bienvenido" ? "Bienvenido a tu escuela" : `Bienvenido, ${displayName}`}
                 </h2>
 
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-100">
@@ -801,6 +810,20 @@ export default function DashboardPage() {
                   Formación para comunicar con propósito.
                 </p>
               </div>
+            </section>
+
+            <section className={`mt-6 rounded-2xl border ${borderColor} ${surface} p-5 shadow-sm md:p-6`}>
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#FFBD00]/15 text-[#B78100]">✦</div>
+                <div>
+                  <p className="text-sm font-bold">Versículo del día</p>
+                  <p className={`text-xs ${secondaryText}`}>Una palabra para acompañar tu servicio</p>
+                </div>
+              </div>
+              <blockquote className="mt-4 text-base font-semibold leading-7">
+                «Todo lo que hagáis, hacedlo de corazón, como para el Señor y no para los hombres».
+              </blockquote>
+              <p className="mt-2 text-sm font-bold text-[#087DB5]">Colosenses 3:23</p>
             </section>
 
             {/* PERFIL */}
