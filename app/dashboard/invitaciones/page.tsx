@@ -549,12 +549,12 @@ export default function InvitationsPage() {
                       <dd className="mt-1">{request.congregation_name || "No especificada"}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Tipo</dt>
-                      <dd className="mt-1">{request.invitation_type === "decom_member" ? "Miembro DECOM" : "Invitado"}</dd>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Tipo de ingreso</dt>
+                      <dd className="mt-1">{request.invitation_type === "guest" ? "Solicitud general" : "Invitación anterior"}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Rol solicitado</dt>
-                      <dd className="mt-1">{request.requested_role_name || "Integrante"}</dd>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Rol inicial</dt>
+                      <dd className="mt-1">Estudiante</dd>
                     </div>
                     <div>
                       <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Fecha de nacimiento</dt>
