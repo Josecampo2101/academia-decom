@@ -142,7 +142,11 @@ export default function Home() {
                 <span className="h-px w-10 bg-[#ffbd00]" />
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#ffda72]">Comunicación · Formación · Servicio</p>
               </div>
-              <p className="mb-5 text-[clamp(3.5rem,8vw,6.5rem)] font-black leading-[0.88] tracking-[-0.075em] text-white">D34<span className="text-[#ffbd00]">.</span></p>
+              <div className="mb-5">
+                <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.34em] text-[#ffda72]">Escuela de</p>
+                <p className="mt-1 text-[clamp(2.7rem,6vw,5.1rem)] font-black leading-[0.92] tracking-[-0.065em] text-white">Comunicaciones<span className="text-[#ffbd00]">.</span></p>
+                <p className="mt-3 text-sm font-bold uppercase tracking-[0.25em] text-white/70">Distrito 34 · IPUC</p>
+              </div>
               <h1 className="max-w-[520px] text-3xl font-bold leading-[1.13] tracking-[-0.035em] sm:text-4xl lg:text-[2.8rem]">Formación para comunicar con propósito.</h1>
               <p className="mt-5 max-w-md text-lg font-medium tracking-wide text-[#bfe7fb]">Comunicar. Formar. Servir.</p>
               <p className="mt-7 max-w-md text-sm leading-7 text-white/75 sm:text-base">Un espacio de aprendizaje y desarrollo de habilidades para fortalecer la comunicación y el servicio institucional.</p>
@@ -176,12 +180,21 @@ export default function Home() {
 
             <div className="mx-auto w-full max-w-[390px] pt-10 sm:pt-6">
               <div className="mb-9">
+                <div className="mb-6 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0b5b9a] text-white shadow-md shadow-[#0b5b9a]/20">
+                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 10v4m4-7v10m4-13v16m4-13v10m4-7v4"/></svg>
+                  </div>
+                  <div>
+                    <p className="text-[0.65rem] font-extrabold uppercase tracking-[0.2em] text-[#0b83b7]">IPUC · Distrito 34</p>
+                    <p className={`mt-0.5 text-xs font-semibold ${isDark ? "text-slate-400" : "text-slate-500"}`}>Escuela de Comunicaciones</p>
+                  </div>
+                </div>
                 <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-[#eaf5fc] px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#07568f]">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#13a6a0]" />Acceso institucional
                 </div>
-                <p className={`mb-2 text-xs font-bold uppercase tracking-[0.24em] ${isDark ? "text-[#67c5e5]" : "text-[#0b83b7]"}`}>Bienvenido</p>
+                <p className={`mb-2 text-xs font-bold uppercase tracking-[0.24em] ${isDark ? "text-[#67c5e5]" : "text-[#0b83b7]"}`}>Bienvenido de nuevo</p>
                 <h2 className="text-[2.15rem] font-bold leading-tight tracking-[-0.045em]">Inicia sesión</h2>
-                <p className={`mt-3 text-sm leading-6 ${isDark ? "text-slate-300" : "text-slate-500"}`}>Accede a tu espacio de formación institucional.</p>
+                <p className={`mt-3 text-sm leading-6 ${isDark ? "text-slate-300" : "text-slate-500"}`}>Ingresa con tus credenciales para continuar tu formación y servicio.</p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
