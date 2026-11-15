@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -9,27 +8,21 @@ type Theme = "light" | "dark" | "system";
 
 export default function Home() {
   const router = useRouter();
+  const supabase = createClient();
 
   const [theme, setTheme] = useState<Theme>("system");
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"error" | "success" | "info">("info");
   const [isLoading, setIsLoading] = useState(false);
   const [isRecovering, setIsRecovering] = useState(false);
 
-  const supabase = createClient();
-
-  // Configuración del tema
   useEffect(() => {
     const savedTheme = localStorage.getItem("academia-theme") as Theme | null;
-
     if (savedTheme === "light" || savedTheme === "dark" || savedTheme === "system") {
-      // Leer localStorage tras montar evita discrepancias entre SSR e hidratación.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme(savedTheme);
     }
@@ -37,22 +30,83 @@ export default function Home() {
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
     const updateTheme = () => {
-      const isDark = theme === "dark" ||
-        (theme === "system" && mediaQuery.matches);
-
-      const newTheme = isDark ? "dark" : "light";
-
-      setResolvedTheme(newTheme);
-      document.documentElement.classList.toggle("dark", isDark);
+      const dark = theme === "dark" || (theme === "system" && mediaQuery.matches);
+      setResolvedTheme(dark ? "dark" : "light");
+      document.documentElement.classList.toggle("dark", dark);
     };
 
     updateTheme();
-
     mediaQuery.addEventListener("change", updateTheme);
+    return () => mediaQuery.removeEventListener("change", updateTheme);
+  }, [theme]);
 
-    return (
+  const changeTheme = (newTheme: Theme) => {
+    setTheme(newTheme);
+    localStorage.setItem("academia-theme", newTheme);
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setMessage("");
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (error) {
+        setMessage("No fue posible iniciar sesión. Verifica tu correo y contraseña.");
+        setMessageType("error");
+        return;
+      }
+
+      setMessage("Inicio de sesión exitoso. Redirigiendo...");
+      setMessageType("success");
+      router.replace("/dashboard");
+      router.refresh();
+    } catch {
+      setMessage("Ocurrió un error de conexión. Inténtalo nuevamente.");
+      setMessageType("error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRecovery = async () => {
+    if (!email.trim()) {
+      setMessage("Escribe tu correo electrónico para recuperar tu contraseña.");
+      setMessageType("info");
+      return;
+    }
+
+    setIsRecovering(true);
+    setMessage("");
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/actualizar-contrasena`,
+      });
+
+      if (error) {
+        setMessage("No fue posible enviar el correo de recuperación. Verifica la dirección.");
+        setMessageType("error");
+      } else {
+        setMessage("Si el correo está registrado, recibirás instrucciones para recuperar tu contraseña.");
+        setMessageType("success");
+      }
+    } catch {
+      setMessage("Ocurrió un error al solicitar la recuperación.");
+      setMessageType("error");
+    } finally {
+      setIsRecovering(false);
+    }
+  };
+
+  const isDark = resolvedTheme === "dark";
+
+  return (
     <main className={`relative min-h-screen overflow-hidden transition-colors duration-300 ${isDark ? "bg-[#071629]" : "bg-[#eef3f8]"}`}>
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         <div className="absolute -left-40 -top-40 h-[34rem] w-[34rem] rounded-full bg-[#0b5b9a]/10 blur-3xl" />
@@ -61,8 +115,6 @@ export default function Home() {
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-[1440px] items-center justify-center p-4 sm:p-8 lg:p-12">
         <div className={`grid w-full max-w-[1240px] overflow-hidden rounded-[2rem] border shadow-[0_32px_100px_-35px_rgba(4,28,54,0.38)] lg:min-h-[740px] lg:grid-cols-[1.08fr_0.92fr] ${isDark ? "border-white/10 bg-[#0d2035]" : "border-white/80 bg-white"}`}>
-
-          {/* Identidad institucional */}
           <section className="relative isolate flex min-h-[560px] flex-col justify-between overflow-hidden bg-[linear-gradient(145deg,#082b50_0%,#0b4778_54%,#087db5_100%)] px-7 py-8 text-white sm:px-12 sm:py-11 lg:min-h-full lg:px-14 lg:py-12">
             <div className="pointer-events-none absolute inset-0 -z-10 opacity-30" aria-hidden="true">
               <div className="absolute -right-24 top-16 h-[28rem] w-[28rem] rounded-full border border-white/30" />
@@ -90,18 +142,10 @@ export default function Home() {
                 <span className="h-px w-10 bg-[#ffbd00]" />
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#ffda72]">Comunicación · Formación · Servicio</p>
               </div>
-              <p className="mb-5 text-[clamp(3.5rem,8vw,6.5rem)] font-black leading-[0.88] tracking-[-0.075em] text-white">
-                D34<span className="text-[#ffbd00]">.</span>
-              </p>
-              <h1 className="max-w-[520px] text-3xl font-bold leading-[1.13] tracking-[-0.035em] sm:text-4xl lg:text-[2.8rem]">
-                Formación para comunicar con propósito.
-              </h1>
-              <p className="mt-5 max-w-md text-lg font-medium tracking-wide text-[#bfe7fb]">
-                Comunicar. Formar. Servir.
-              </p>
-              <p className="mt-7 max-w-md text-sm leading-7 text-white/75 sm:text-base">
-                Un espacio de aprendizaje y desarrollo de habilidades para fortalecer la comunicación y el servicio institucional.
-              </p>
+              <p className="mb-5 text-[clamp(3.5rem,8vw,6.5rem)] font-black leading-[0.88] tracking-[-0.075em] text-white">D34<span className="text-[#ffbd00]">.</span></p>
+              <h1 className="max-w-[520px] text-3xl font-bold leading-[1.13] tracking-[-0.035em] sm:text-4xl lg:text-[2.8rem]">Formación para comunicar con propósito.</h1>
+              <p className="mt-5 max-w-md text-lg font-medium tracking-wide text-[#bfe7fb]">Comunicar. Formar. Servir.</p>
+              <p className="mt-7 max-w-md text-sm leading-7 text-white/75 sm:text-base">Un espacio de aprendizaje y desarrollo de habilidades para fortalecer la comunicación y el servicio institucional.</p>
             </div>
 
             <div className="relative z-10 flex items-end justify-between gap-5 border-t border-white/20 pt-6">
@@ -115,7 +159,6 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Acceso */}
           <section className={`relative flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-[4.5rem] ${isDark ? "bg-[#0d2035] text-white" : "bg-white text-[#102d4d]"}`}>
             <div className="absolute right-6 top-6 sm:right-9 sm:top-8">
               <div className={`flex items-center gap-1 rounded-full border p-1 ${isDark ? "border-white/10 bg-white/5" : "border-slate-200 bg-slate-50"}`} aria-label="Preferencia de apariencia">
@@ -134,8 +177,7 @@ export default function Home() {
             <div className="mx-auto w-full max-w-[390px] pt-10 sm:pt-6">
               <div className="mb-9">
                 <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-[#eaf5fc] px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#07568f]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#13a6a0]" />
-                  Acceso institucional
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#13a6a0]" />Acceso institucional
                 </div>
                 <p className={`mb-2 text-xs font-bold uppercase tracking-[0.24em] ${isDark ? "text-[#67c5e5]" : "text-[#0b83b7]"}`}>Bienvenido</p>
                 <h2 className="text-[2.15rem] font-bold leading-tight tracking-[-0.045em]">Inicia sesión</h2>
@@ -160,11 +202,7 @@ export default function Home() {
                   <button type="button" onClick={handleRecovery} disabled={isRecovering} className="text-sm font-semibold text-[#0b83b7] transition hover:text-[#13a6a0] disabled:opacity-50">{isRecovering ? "Enviando..." : "¿Olvidaste tu contraseña?"}</button>
                 </div>
 
-                {message && (
-                  <div role="status" className={`rounded-xl border p-3 text-sm ${messageType === "error" ? "border-red-300 bg-red-50 text-red-700" : messageType === "success" ? "border-emerald-300 bg-emerald-50 text-emerald-700" : "border-blue-300 bg-blue-50 text-blue-700"}`}>
-                    {message}
-                  </div>
-                )}
+                {message && <div role="status" className={`rounded-xl border p-3 text-sm ${messageType === "error" ? "border-red-300 bg-red-50 text-red-700" : messageType === "success" ? "border-emerald-300 bg-emerald-50 text-emerald-700" : "border-blue-300 bg-blue-50 text-blue-700"}`}>{message}</div>}
 
                 <button type="submit" disabled={isLoading} className="group flex w-full items-center justify-center gap-3 rounded-xl bg-[linear-gradient(100deg,#07568f,#087db5)] px-5 py-4 text-sm font-bold text-white shadow-lg shadow-[#07568f]/20 transition hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60">
                   {isLoading ? "Verificando acceso..." : "Ingresar"}
@@ -185,5 +223,4 @@ export default function Home() {
       </div>
     </main>
   );
-
 }
