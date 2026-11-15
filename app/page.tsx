@@ -116,9 +116,6 @@ export default function Home() {
       <div className="relative z-10 flex min-h-screen flex-col items-center px-4 pb-8 pt-[78px] sm:pt-[82px]">
         <header className="w-full text-center text-white">
           <div className="mx-auto flex max-w-2xl flex-col items-center">
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl border border-white/20 bg-white/10 shadow-sm backdrop-blur">
-              <span className="text-lg font-black tracking-[-0.08em]">D<span className="text-[#ffbd00]">34</span></span>
-            </div>
             <p className="text-[1.75rem] font-semibold leading-tight tracking-[-0.035em] sm:text-[2rem]">Bienvenido</p>
             <p className="mt-2 max-w-[340px] text-[11px] leading-[1.55] text-white/85 sm:text-xs">
               Formación para comunicar con propósito.
