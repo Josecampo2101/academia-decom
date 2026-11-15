@@ -59,7 +59,7 @@ export default function InvitationsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [userId, setUserId] = useState("");
-  const [memberRoleId, setMemberRoleId] = useState("");
+  const [studentRoleId, setStudentRoleId] = useState("");
   const [districts, setDistricts] = useState<District[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [requests, setRequests] = useState<InvitationRequest[]>([]);
@@ -110,19 +110,19 @@ export default function InvitationsPage() {
         return;
       }
 
-      const memberRole = (roles ?? []).find((role) => role.role_key === "member");
-      let baseMemberRoleId = memberRole?.id ?? "";
+      const studentRole = (roles ?? []).find((role) => role.role_key === "student");
+      let baseStudentRoleId = studentRole?.id ?? "";
 
-      if (!baseMemberRoleId) {
-        const { data: memberRoleRow, error: memberRoleError } = await supabase
+      if (!baseStudentRoleId) {
+        const { data: studentRoleRow, error: studentRoleError } = await supabase
           .from("roles")
           .select("id")
-          .eq("role_key", "member")
+          .eq("role_key", "student")
           .single();
-        if (memberRoleError) throw memberRoleError;
-        baseMemberRoleId = memberRoleRow.id;
+        if (studentRoleError) throw studentRoleError;
+        baseStudentRoleId = studentRoleRow.id;
       }
-      setMemberRoleId(baseMemberRoleId);
+      setStudentRoleId(baseStudentRoleId);
 
       const { data: districtRows, error: districtError } = await supabase
         .from("districts")
@@ -194,7 +194,7 @@ export default function InvitationsPage() {
   }, [loadData]);
 
   async function createInvitation() {
-    if (!userId || !memberRoleId || !selectedDistrict || saving) return;
+    if (!userId || !studentRoleId || !selectedDistrict || saving) return;
 
     setSaving(true);
     setMessage("");
@@ -211,7 +211,7 @@ export default function InvitationsPage() {
       const { error } = await supabase.from("invitations").insert({
         district_id: selectedDistrict,
         invitation_type: "guest",
-        role_id: memberRoleId,
+        role_id: studentRoleId,
         token_hash: tokenHash,
         expires_at: expiresAt,
         invited_by: userId,
@@ -385,7 +385,7 @@ export default function InvitationsPage() {
                 <button
                   type="button"
                   onClick={createInvitation}
-                  disabled={saving || !selectedDistrict || !memberRoleId}
+                  disabled={saving || !selectedDistrict || !studentRoleId}
                   className="w-full rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-bold text-white hover:bg-[#066a9b] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {saving ? "Generando enlace..." : "Generar invitación"}
