@@ -153,10 +153,10 @@ export default function Home() {
 
               <div>
                 <p className="text-lg font-bold tracking-[0.18em]">
-                  ACADEMIA DECOM
+                  ESCUELA DE COMUNICACIONES
                 </p>
                 <p className="text-xs tracking-wider text-blue-200">
-                  DISTRITO 34
+                  DISTRITO 34 · IPUC
                 </p>
               </div>
             </div>
@@ -167,9 +167,9 @@ export default function Home() {
               </span>
 
               <h1 className="mb-6 text-4xl font-bold leading-tight sm:text-5xl">
-                Comunicar con propósito.
+                Formación para comunicar con propósito.
                 <span className="block text-[#19A7A0]">
-                  Formar para servir.
+                  Comunicar. Formar. Servir.
                 </span>
               </h1>
 
@@ -185,7 +185,7 @@ export default function Home() {
               Formación para comunicar con propósito
             </p>
             <p className="mt-2 text-xs text-blue-200">
-              Academia DECOM · Distrito 34
+              Escuela de Comunicaciones D34 · Distrito 34
             </p>
           </div>
         </section>
@@ -364,11 +364,11 @@ export default function Home() {
                 isDark ? "text-gray-400" : "text-gray-500"
               }`}>
                 El acceso está habilitado únicamente para integrantes
-                autorizados de la Academia DECOM.
+                autorizados de la Escuela de Comunicaciones D34.
               </p>
 
               <p className="mt-4 text-xs font-semibold tracking-wide text-[#087DB5]">
-                ACADEMIA DECOM
+                ESCUELA DE COMUNICACIONES
               </p>
 
               <p className={`mt-1 text-xs ${
