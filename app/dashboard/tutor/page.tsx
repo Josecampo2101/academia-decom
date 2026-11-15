@@ -178,7 +178,7 @@ export default function TutorDashboardPage() {
     }
   }, [router, supabase]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => { void Promise.resolve().then(load); }, [load]);
 
   const visibleReviews = reviews.filter((item) => {
     const query = search.trim().toLocaleLowerCase("es");
@@ -204,7 +204,6 @@ export default function TutorDashboardPage() {
     );
   }
 
-  const pendingCount = reviews.filter((item) => item.status === "submitted").length;
 
   return (
     <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
