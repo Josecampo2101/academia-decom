@@ -52,334 +52,138 @@ export default function Home() {
 
     mediaQuery.addEventListener("change", updateTheme);
 
-    return () => {
-      mediaQuery.removeEventListener("change", updateTheme);
-    };
-  }, [theme]);
+    return (
+    <main className={`relative min-h-screen overflow-hidden transition-colors duration-300 ${isDark ? "bg-[#071629]" : "bg-[#eef3f8]"}`}>
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        <div className="absolute -left-40 -top-40 h-[34rem] w-[34rem] rounded-full bg-[#0b5b9a]/10 blur-3xl" />
+        <div className="absolute -bottom-48 right-[-8rem] h-[38rem] w-[38rem] rounded-full bg-[#18a5c0]/10 blur-3xl" />
+      </div>
 
-  const changeTheme = (newTheme: Theme) => {
-    setTheme(newTheme);
-    localStorage.setItem("academia-theme", newTheme);
-  };
+      <div className="relative mx-auto flex min-h-screen w-full max-w-[1440px] items-center justify-center p-4 sm:p-8 lg:p-12">
+        <div className={`grid w-full max-w-[1240px] overflow-hidden rounded-[2rem] border shadow-[0_32px_100px_-35px_rgba(4,28,54,0.38)] lg:min-h-[740px] lg:grid-cols-[1.08fr_0.92fr] ${isDark ? "border-white/10 bg-[#0d2035]" : "border-white/80 bg-white"}`}>
 
-  // Inicio de sesión
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    setMessage("");
-    setIsLoading(true);
-
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-
-      if (error) {
-        setMessage("No fue posible iniciar sesión. Verifica tu correo y contraseña.");
-        setMessageType("error");
-        return;
-      }
-
-      setMessageType("success");
-      setMessage("Inicio de sesión exitoso. Redirigiendo...");
-
-      router.replace("/dashboard");
-      router.refresh();
-    } catch {
-      setMessage("Ocurrió un error de conexión. Inténtalo nuevamente.");
-      setMessageType("error");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Recuperación de contraseña
-  const handleRecovery = async () => {
-    if (!email.trim()) {
-      setMessage("Escribe tu correo electrónico para recuperar tu contraseña.");
-      setMessageType("info");
-      return;
-    }
-
-    setIsRecovering(true);
-    setMessage("");
-
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(
-        email.trim(),
-        {
-          redirectTo: `${window.location.origin}/actualizar-contrasena`,
-        }
-      );
-
-      if (error) {
-        setMessage("No fue posible enviar el correo de recuperación. Verifica la dirección.");
-        setMessageType("error");
-      } else {
-        setMessage("Si el correo está registrado, recibirás instrucciones para recuperar tu contraseña.");
-        setMessageType("success");
-      }
-    } catch {
-      setMessage("Ocurrió un error al solicitar la recuperación.");
-      setMessageType("error");
-    } finally {
-      setIsRecovering(false);
-    }
-  };
-
-  const isDark = resolvedTheme === "dark";
-
-  return (
-    <main
-      className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-300 ${
-        isDark ? "bg-[#101B2A]" : "bg-[#F4F7FA]"
-      }`}
-    >
-      <div className="w-full max-w-6xl min-h-[650px] grid grid-cols-1 lg:grid-cols-2 overflow-hidden rounded-3xl shadow-2xl">
-
-        {/* PANEL INSTITUCIONAL */}
-        <section className="relative flex flex-col justify-between overflow-hidden bg-[#102D4D] p-8 text-white sm:p-12 lg:p-14">
-
-          <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full border border-white/10" />
-          <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full border border-white/10" />
-          <div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-[#087DB5]/20 blur-3xl" />
-
-          <div className="relative z-10">
-            <div className="mb-12 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-xl font-bold">
-                D
-              </div>
-
-              <div>
-                <p className="text-lg font-bold tracking-[0.18em]">
-                  ESCUELA DE COMUNICACIONES
-                </p>
-                <p className="text-xs tracking-wider text-blue-200">
-                  DISTRITO 34 · IPUC
-                </p>
-              </div>
+          {/* Identidad institucional */}
+          <section className="relative isolate flex min-h-[560px] flex-col justify-between overflow-hidden bg-[linear-gradient(145deg,#082b50_0%,#0b4778_54%,#087db5_100%)] px-7 py-8 text-white sm:px-12 sm:py-11 lg:min-h-full lg:px-14 lg:py-12">
+            <div className="pointer-events-none absolute inset-0 -z-10 opacity-30" aria-hidden="true">
+              <div className="absolute -right-24 top-16 h-[28rem] w-[28rem] rounded-full border border-white/30" />
+              <div className="absolute -right-12 top-28 h-[25rem] w-[25rem] rounded-full border border-white/20" />
+              <div className="absolute right-10 top-44 h-[20rem] w-[20rem] rounded-full border border-white/15" />
+              <div className="absolute -bottom-32 -left-20 h-[28rem] w-[28rem] rounded-full bg-[#39a9dc]/30 blur-3xl" />
+              <div className="absolute inset-0 bg-[linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.04)_48%,transparent_49%)]" />
             </div>
 
-            <div className="mt-10 max-w-lg sm:mt-16">
-              <span className="mb-5 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold tracking-widest text-blue-100">
-                FORMACIÓN INSTITUCIONAL
-              </span>
+            <div className="relative z-10 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/25 bg-white/10 shadow-lg shadow-black/10 backdrop-blur-sm">
+                  <span className="text-[1.65rem] font-black tracking-[-0.09em]">D<span className="text-[#ffbd00]">34</span></span>
+                </div>
+                <div>
+                  <p className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-white/65">Distrito 34 · IPUC</p>
+                  <p className="mt-1 text-sm font-bold tracking-[0.08em]">ESCUELA DE COMUNICACIONES</p>
+                </div>
+              </div>
+              <span className="hidden rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-white/80 sm:inline-flex">Formación institucional</span>
+            </div>
 
-              <h1 className="mb-6 text-4xl font-bold leading-tight sm:text-5xl">
+            <div className="relative z-10 my-14 max-w-[560px] lg:my-0 lg:pb-10">
+              <div className="mb-7 flex items-center gap-3">
+                <span className="h-px w-10 bg-[#ffbd00]" />
+                <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#ffda72]">Comunicación · Formación · Servicio</p>
+              </div>
+              <p className="mb-5 text-[clamp(3.5rem,8vw,6.5rem)] font-black leading-[0.88] tracking-[-0.075em] text-white">
+                D34<span className="text-[#ffbd00]">.</span>
+              </p>
+              <h1 className="max-w-[520px] text-3xl font-bold leading-[1.13] tracking-[-0.035em] sm:text-4xl lg:text-[2.8rem]">
                 Formación para comunicar con propósito.
-                <span className="block text-[#19A7A0]">
-                  Comunicar. Formar. Servir.
-                </span>
               </h1>
-
-              <p className="max-w-md text-base leading-8 text-blue-100/90">
-                Un espacio de aprendizaje y desarrollo de habilidades para
-                fortalecer la comunicación y el servicio institucional.
+              <p className="mt-5 max-w-md text-lg font-medium tracking-wide text-[#bfe7fb]">
+                Comunicar. Formar. Servir.
               </p>
-            </div>
-          </div>
-
-          <div className="relative z-10 mt-16 border-t border-white/15 pt-6">
-            <p className="text-sm font-medium text-white/90">
-              Formación para comunicar con propósito
-            </p>
-            <p className="mt-2 text-xs text-blue-200">
-              Escuela de Comunicaciones D34 · Distrito 34
-            </p>
-          </div>
-        </section>
-
-        {/* PANEL DE ACCESO */}
-        <section
-          className={`relative flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16 ${
-            isDark ? "bg-[#1C2B3D] text-white" : "bg-white text-[#102D4D]"
-          }`}
-        >
-
-          {/* SELECTOR DE TEMA */}
-          <div className="absolute right-6 top-6 flex items-center gap-1 rounded-full border border-gray-500/20 p-1">
-            <button
-              type="button"
-              onClick={() => changeTheme("light")}
-              title="Tema claro"
-              aria-label="Tema claro"
-              className={`rounded-full px-3 py-2 text-sm transition ${
-                theme === "light" ? "bg-[#087DB5] text-white" : "opacity-60 hover:opacity-100"
-              }`}
-            >
-              ☀
-            </button>
-
-            <button
-              type="button"
-              onClick={() => changeTheme("dark")}
-              title="Tema oscuro"
-              aria-label="Tema oscuro"
-              className={`rounded-full px-3 py-2 text-sm transition ${
-                theme === "dark" ? "bg-[#087DB5] text-white" : "opacity-60 hover:opacity-100"
-              }`}
-            >
-              ☾
-            </button>
-
-            <button
-              type="button"
-              onClick={() => changeTheme("system")}
-              title="Tema automático"
-              aria-label="Tema automático"
-              className={`rounded-full px-3 py-2 text-sm transition ${
-                theme === "system" ? "bg-[#087DB5] text-white" : "opacity-60 hover:opacity-100"
-              }`}
-            >
-              ◐
-            </button>
-          </div>
-
-          <div className="mx-auto w-full max-w-md">
-
-            <div className="mb-10">
-              <p className="mb-3 text-xs font-bold tracking-[0.25em] text-[#19A7A0]">
-                BIENVENIDO
-              </p>
-
-              <h2 className="mb-3 text-3xl font-bold">
-                Inicia sesión
-              </h2>
-
-              <p className={`text-sm leading-6 ${
-                isDark ? "text-gray-300" : "text-gray-500"
-              }`}>
-                Accede a tu espacio de formación institucional.
+              <p className="mt-7 max-w-md text-sm leading-7 text-white/75 sm:text-base">
+                Un espacio de aprendizaje y desarrollo de habilidades para fortalecer la comunicación y el servicio institucional.
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-
-              {/* CORREO */}
+            <div className="relative z-10 flex items-end justify-between gap-5 border-t border-white/20 pt-6">
               <div>
-                <label
-                  htmlFor="email"
-                  className="mb-2 block text-sm font-semibold"
-                >
-                  Correo electrónico
-                </label>
-
-                <input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="nombre@correo.com"
-                  className={`w-full rounded-xl border px-4 py-3.5 text-sm outline-none transition focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/20 ${
-                    isDark
-                      ? "border-gray-600 bg-[#101B2A] text-white placeholder:text-gray-500"
-                      : "border-gray-200 bg-[#F8FAFC] text-[#102D4D] placeholder:text-gray-400"
-                  }`}
-                />
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/55">Escuela de Comunicaciones D34</p>
+                <p className="mt-2 text-sm font-medium text-white/90">Distrito 34 · Iglesia Pentecostal Unida de Colombia</p>
               </div>
-
-              {/* CONTRASEÑA */}
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <label
-                    htmlFor="password"
-                    className="text-sm font-semibold"
-                  >
-                    Contraseña
-                  </label>
-                </div>
-
-                <div className="relative">
-                  <input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="current-password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Ingresa tu contraseña"
-                    className={`w-full rounded-xl border px-4 py-3.5 pr-20 text-sm outline-none transition focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/20 ${
-                      isDark
-                        ? "border-gray-600 bg-[#101B2A] text-white placeholder:text-gray-500"
-                        : "border-gray-200 bg-[#F8FAFC] text-[#102D4D] placeholder:text-gray-400"
-                    }`}
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#087DB5] hover:text-[#19A7A0]"
-                  >
-                    {showPassword ? "Ocultar" : "Mostrar"}
-                  </button>
-                </div>
+              <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#ffbd00]/60 text-[#ffcf4d] sm:flex" aria-hidden="true">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
               </div>
+            </div>
+          </section>
 
-              {/* RECUPERACIÓN */}
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={handleRecovery}
-                  disabled={isRecovering}
-                  className="text-sm font-semibold text-[#087DB5] transition hover:text-[#19A7A0] disabled:opacity-50"
-                >
-                  {isRecovering ? "Enviando..." : "¿Olvidaste tu contraseña?"}
+          {/* Acceso */}
+          <section className={`relative flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-[4.5rem] ${isDark ? "bg-[#0d2035] text-white" : "bg-white text-[#102d4d]"}`}>
+            <div className="absolute right-6 top-6 sm:right-9 sm:top-8">
+              <div className={`flex items-center gap-1 rounded-full border p-1 ${isDark ? "border-white/10 bg-white/5" : "border-slate-200 bg-slate-50"}`} aria-label="Preferencia de apariencia">
+                <button type="button" onClick={() => changeTheme("light")} title="Tema claro" aria-label="Tema claro" className={`flex h-9 w-9 items-center justify-center rounded-full transition ${theme === "light" ? "bg-[#0b5b9a] text-white shadow" : "text-slate-400 hover:text-[#0b5b9a]"}`}>
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+                </button>
+                <button type="button" onClick={() => changeTheme("dark")} title="Tema oscuro" aria-label="Tema oscuro" className={`flex h-9 w-9 items-center justify-center rounded-full transition ${theme === "dark" ? "bg-[#0b5b9a] text-white shadow" : "text-slate-400 hover:text-[#0b5b9a]"}`}>
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg>
+                </button>
+                <button type="button" onClick={() => changeTheme("system")} title="Tema automático" aria-label="Tema automático" className={`flex h-9 w-9 items-center justify-center rounded-full transition ${theme === "system" ? "bg-[#0b5b9a] text-white shadow" : "text-slate-400 hover:text-[#0b5b9a]"}`}>
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
                 </button>
               </div>
-
-              {/* MENSAJES */}
-              {message && (
-                <div
-                  role="status"
-                  className={`rounded-xl border p-3 text-sm ${
-                    messageType === "error"
-                      ? "border-red-300 bg-red-50 text-red-700"
-                      : messageType === "success"
-                      ? "border-green-300 bg-green-50 text-green-700"
-                      : "border-blue-300 bg-blue-50 text-blue-700"
-                  }`}
-                >
-                  {message}
-                </div>
-              )}
-
-              {/* BOTÓN */}
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#087DB5] px-5 py-4 text-sm font-bold text-white shadow-lg shadow-[#087DB5]/20 transition hover:bg-[#066A9B] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isLoading ? "Verificando acceso..." : "Ingresar"}
-                {!isLoading && <span aria-hidden="true">→</span>}
-              </button>
-            </form>
-
-            <div className={`mt-10 border-t pt-6 text-center ${
-              isDark ? "border-gray-600" : "border-gray-100"
-            }`}>
-              <p className={`text-xs leading-6 ${
-                isDark ? "text-gray-400" : "text-gray-500"
-              }`}>
-                El acceso está habilitado únicamente para integrantes
-                autorizados de la Escuela de Comunicaciones D34.
-              </p>
-
-              <p className="mt-4 text-xs font-semibold tracking-wide text-[#087DB5]">
-                ESCUELA DE COMUNICACIONES
-              </p>
-
-              <p className={`mt-1 text-xs ${
-                isDark ? "text-gray-500" : "text-gray-400"
-              }`}>
-                Formación institucional
-              </p>
             </div>
-          </div>
-        </section>
+
+            <div className="mx-auto w-full max-w-[390px] pt-10 sm:pt-6">
+              <div className="mb-9">
+                <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-[#eaf5fc] px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#07568f]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#13a6a0]" />
+                  Acceso institucional
+                </div>
+                <p className={`mb-2 text-xs font-bold uppercase tracking-[0.24em] ${isDark ? "text-[#67c5e5]" : "text-[#0b83b7]"}`}>Bienvenido</p>
+                <h2 className="text-[2.15rem] font-bold leading-tight tracking-[-0.045em]">Inicia sesión</h2>
+                <p className={`mt-3 text-sm leading-6 ${isDark ? "text-slate-300" : "text-slate-500"}`}>Accede a tu espacio de formación institucional.</p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <label htmlFor="email" className="mb-2 block text-sm font-semibold">Correo electrónico</label>
+                  <input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="nombre@correo.com" className={`w-full rounded-xl border px-4 py-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#1689bd] focus:ring-4 focus:ring-[#1689bd]/10 ${isDark ? "border-white/15 bg-[#08182a] text-white" : "border-slate-200 bg-[#f7f9fc] text-[#102d4d]"}`} />
+                </div>
+
+                <div>
+                  <label htmlFor="password" className="mb-2 block text-sm font-semibold">Contraseña</label>
+                  <div className="relative">
+                    <input id="password" type={showPassword ? "text" : "password"} autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Ingresa tu contraseña" className={`w-full rounded-xl border px-4 py-3.5 pr-20 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#1689bd] focus:ring-4 focus:ring-[#1689bd]/10 ${isDark ? "border-white/15 bg-[#08182a] text-white" : "border-slate-200 bg-[#f7f9fc] text-[#102d4d]"}`} />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[#0b83b7] transition hover:text-[#13a6a0]">{showPassword ? "Ocultar" : "Mostrar"}</button>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-0.5">
+                  <button type="button" onClick={handleRecovery} disabled={isRecovering} className="text-sm font-semibold text-[#0b83b7] transition hover:text-[#13a6a0] disabled:opacity-50">{isRecovering ? "Enviando..." : "¿Olvidaste tu contraseña?"}</button>
+                </div>
+
+                {message && (
+                  <div role="status" className={`rounded-xl border p-3 text-sm ${messageType === "error" ? "border-red-300 bg-red-50 text-red-700" : messageType === "success" ? "border-emerald-300 bg-emerald-50 text-emerald-700" : "border-blue-300 bg-blue-50 text-blue-700"}`}>
+                    {message}
+                  </div>
+                )}
+
+                <button type="submit" disabled={isLoading} className="group flex w-full items-center justify-center gap-3 rounded-xl bg-[linear-gradient(100deg,#07568f,#087db5)] px-5 py-4 text-sm font-bold text-white shadow-lg shadow-[#07568f]/20 transition hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60">
+                  {isLoading ? "Verificando acceso..." : "Ingresar"}
+                  {!isLoading && <svg viewBox="0 0 24 24" className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>}
+                </button>
+              </form>
+
+              <div className={`mt-9 border-t pt-6 ${isDark ? "border-white/10" : "border-slate-100"}`}>
+                <div className="flex gap-3">
+                  <svg viewBox="0 0 24 24" className={`mt-0.5 h-5 w-5 shrink-0 ${isDark ? "text-[#67c5e5]" : "text-[#0b83b7]"}`} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg>
+                  <p className={`text-xs leading-5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>El acceso está habilitado únicamente para integrantes autorizados de la Escuela de Comunicaciones D34.</p>
+                </div>
+                <p className={`mt-6 text-center text-[0.65rem] font-bold uppercase tracking-[0.2em] ${isDark ? "text-slate-500" : "text-slate-400"}`}>Escuela de Comunicaciones D34 · Formación institucional</p>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </main>
   );
+
 }
