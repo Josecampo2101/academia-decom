@@ -70,7 +70,6 @@ export default function InvitationsPage() {
   const [requestError, setRequestError] = useState("");
   const [districtNames, setDistrictNames] = useState<Record<string, string>>({});
   const [selectedDistrict, setSelectedDistrict] = useState("");
-  const [invitationType, setInvitationType] = useState<"guest" | "decom_member">("guest");
   const [validityDays, setValidityDays] = useState("14");
   const [createdLink, setCreatedLink] = useState("");
   const [message, setMessage] = useState("");
@@ -211,7 +210,7 @@ export default function InvitationsPage() {
 
       const { error } = await supabase.from("invitations").insert({
         district_id: selectedDistrict,
-        invitation_type: invitationType,
+        invitation_type: "guest",
         role_id: memberRoleId,
         token_hash: tokenHash,
         expires_at: expiresAt,
@@ -347,7 +346,7 @@ export default function InvitationsPage() {
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <h2 className="text-lg font-bold">Crear enlace de invitación</h2>
           <p className="mt-1 text-sm text-slate-500">
-            El enlace permite solicitar el ingreso. No concede acceso automáticamente: la administración debe aprobar la solicitud.
+            Comparte un único enlace general. Todas las personas ingresan inicialmente como estudiantes; después, la administración podrá asignarles un rol institucional según corresponda. El acceso requiere aprobación.
           </p>
 
           {districts.length === 0 ? (
@@ -366,18 +365,6 @@ export default function InvitationsPage() {
                   {districts.map((district) => (
                     <option key={district.id} value={district.id}>{district.name}</option>
                   ))}
-                </select>
-              </label>
-
-              <label className="text-sm font-semibold">
-                Tipo de invitación
-                <select
-                  value={invitationType}
-                  onChange={(event) => setInvitationType(event.target.value as "guest" | "decom_member")}
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 font-normal"
-                >
-                  <option value="guest">Invitado</option>
-                  <option value="decom_member">Miembro de DECOM</option>
                 </select>
               </label>
 
@@ -463,7 +450,7 @@ export default function InvitationsPage() {
                     return (
                       <tr key={invitation.id} className="border-t border-slate-100">
                         <td className="px-6 py-4 font-medium">{districtNames[invitation.district_id] ?? "Distrito"}</td>
-                        <td className="px-6 py-4">{invitation.invitation_type === "decom_member" ? "Miembro DECOM" : invitation.invitation_type === "guest" ? "Invitado" : "Legada"}</td>
+                        <td className="px-6 py-4">{invitation.invitation_type === "guest" ? "General" : invitation.invitation_type === "decom_member" ? "Anterior: DECOM" : "Legada"}</td>
                         <td className="px-6 py-4 text-slate-600">{new Date(invitation.created_at).toLocaleDateString("es-CO")}</td>
                         <td className="px-6 py-4 text-slate-600">{new Date(invitation.expires_at).toLocaleDateString("es-CO")}</td>
                         <td className="px-6 py-4">
@@ -630,7 +617,7 @@ export default function InvitationsPage() {
         </section>
 
         <p className="mt-6 text-xs leading-5 text-slate-500">
-          Los enlaces nuevos se generan para el distrito seleccionado. La congregación la elige la persona durante su solicitud y cualquier rol institucional queda sujeto a aprobación.
+          Los enlaces generales se generan para el distrito seleccionado. Todas las solicitudes comienzan con el rol de estudiante. La congregación la elige la persona durante el registro; los roles institucionales solo los asigna posteriormente la administración.
         </p>
       </div>
     </main>
