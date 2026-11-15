@@ -2,11 +2,11 @@
 
 ## Cambio propuesto
 
-La política actual `academic_materials_storage_select` permite leer archivos publicados cuando el usuario puede ver el catálogo académico del distrito. A diferencia de la política de `public.lesson_materials`, la política del objeto en Storage no exige matrícula en el curso.
+Las políticas actuales de `public.lesson_materials` y `storage.objects` permiten consultar metadatos y descargar archivos publicados cuando el usuario puede ver el catálogo académico del distrito, sin exigir matrícula en el curso. Esto deja los controles de metadatos y del archivo desalineados con el alcance académico esperado.
 
-La migración `20261115103000_restrict_lesson_material_storage_to_enrolled_students.sql` alinea el acceso al archivo con el registro académico y exige:
+La migración `20261115103000_restrict_lesson_material_storage_to_enrolled_students.sql` alinea el acceso a metadatos y al archivo y exige:
 
-- Bucket `academic-lesson-materials`.
+- Para metadatos: registro `lesson_materials` dentro del ámbito autorizado.\n- Para descargas: bucket `academic-lesson-materials` y ruta exacta del objeto.
 - Registro de material publicado y ruta exacta coincidente.
 - Lección, módulo, curso y programa publicados y dentro del mismo distrito.
 - Una de estas dos condiciones:
