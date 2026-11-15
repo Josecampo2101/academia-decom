@@ -69,6 +69,8 @@ export default function DashboardPage() {
   const [theme, setTheme] = useState<Theme>("system");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [displayName, setDisplayName] = useState("Bienvenido");
+  const [greeting, setGreeting] = useState("Bienvenido");
+  const [dailyVerseIndex, setDailyVerseIndex] = useState(0);
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
 
   const [email, setEmail] = useState("");
@@ -160,6 +162,28 @@ export default function DashboardPage() {
     roleKeys.includes("area_coordinator");
 
   // Cargar preferencia de tema.
+  useEffect(() => {
+    const updateDailyContent = () => {
+      const now = new Date();
+      const hour = Number(new Intl.DateTimeFormat("en-US", {
+        hour: "2-digit",
+        hourCycle: "h23",
+        timeZone: "America/Bogota",
+      }).format(now));
+      setGreeting(hour >= 5 && hour < 12 ? "Buenos días" : hour >= 12 && hour < 18 ? "Buenas tardes" : "Buenas noches");
+
+      const localDay = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Bogota",
+      }).format(now);
+      const dayNumber = Math.floor(Date.parse(`${localDay}T00:00:00Z`) / 86_400_000);
+      setDailyVerseIndex(((dayNumber % dailyVerses.length) + dailyVerses.length) % dailyVerses.length);
+    };
+
+    updateDailyContent();
+    const interval = window.setInterval(updateDailyContent, 60_000);
+    return () => window.clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     const savedTheme = localStorage.getItem("academia-theme") as Theme | null;
 
@@ -520,9 +544,7 @@ export default function DashboardPage() {
     router.refresh();
   }
 
-  const localDay = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Bogota" }).format(new Date());
-  const dayNumber = Math.floor(Date.parse(`${localDay}T00:00:00`) / 86_400_000);
-  const dailyVerse = dailyVerses[((dayNumber % dailyVerses.length) + dailyVerses.length) % dailyVerses.length];
+  const dailyVerse = dailyVerses[dailyVerseIndex];
 
   const dark = resolvedTheme === "dark";
 
@@ -804,10 +826,7 @@ export default function DashboardPage() {
                 </p>
 
                 <p className="mt-4 text-sm font-semibold text-[#9BDCF5]">
-                  {(() => {
-                    const hour = Number(new Intl.DateTimeFormat("en-US", { hour: "2-digit", hourCycle: "h23", timeZone: "America/Bogota" }).format(new Date()));
-                    return hour >= 5 && hour < 12 ? "Buenos días" : hour >= 12 && hour < 18 ? "Buenas tardes" : "Buenas noches";
-                  })()}
+                  {greeting}
                 </p>
                 <h2 className="mt-2 text-3xl font-bold md:text-4xl">
                   {displayName === "Bienvenido" ? "Bienvenido a tu escuela" : `Bienvenido, ${displayName}`}
