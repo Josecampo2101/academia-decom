@@ -24,7 +24,7 @@ La migración `20261115113000_harden_academic_assessment_actor_scope.sql`:
 | Perfil inactivo con sesión aún válida | No puede iniciar ni enviar intento |
 | Perfil activo sin matrícula activa | No puede iniciar ni enviar intento |
 | Estudiante activo y matriculado | Puede iniciar y enviar conforme a reglas de evaluación |
-| Intento expirado | Se marca como expirado, sin calificación |
+| Intento expirado | Se marca como expirado, sin calificación |\n| Respuesta nula o de tipo incorrecto | Rechazada por el validador de servidor |
 | Tutor asignado que revisa a otro estudiante | Permitido si conserva el alcance del curso |
 | Tutor/administrador que intenta revisar su propio intento | Denegado |
 | Tutor sin asignación del curso | Denegado |
