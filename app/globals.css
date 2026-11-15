@@ -135,3 +135,36 @@ body {
     max-width: 100%;
   }
 }
+
+
+/* Accesibilidad adicional para navegación por teclado y modos de alto contraste. */
+:where([id]) {
+  scroll-margin-block: 6rem;
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 3px;
+  }
+
+  :where(button, a, input, select, textarea) {
+    border-color: ButtonText;
+  }
+
+  :where(button:disabled, input:disabled, select:disabled, textarea:disabled) {
+    color: GrayText;
+    border-color: GrayText;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :focus-visible {
+    outline-width: 4px;
+    outline-offset: 4px;
+  }
+
+  :where(button, a[href], input, select, textarea) {
+    text-decoration-thickness: 2px;
+  }
+}
