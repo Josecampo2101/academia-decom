@@ -37,6 +37,12 @@ jobs:
       - name: Revisar estilo y errores estáticos
         run: npm run lint
 
+      - name: Ejecutar pruebas automatizadas
+        run: npm test
+
+      - name: Auditar vulnerabilidades de dependencias
+        run: npm audit --audit-level=high
+
       - name: Verificar tipos TypeScript
         run: npm run typecheck
 

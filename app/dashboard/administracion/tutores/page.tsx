@@ -23,9 +23,9 @@ export default function CourseTutorAssignmentsPage() {
   const [notes, setNotes] = useState("");
 
   const load = useCallback(async () => {
-    setLoading(true); setError("");
     try {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
+      setLoading(true); setError("");
       if (authError || !user) { router.replace("/conexion"); return; }
       const { data: roleAssignments, error: roleError } = await supabase.from("user_role_assignments").select("role_id,district_id").eq("user_id", user.id);
       if (roleError) throw roleError;
@@ -61,7 +61,7 @@ export default function CourseTutorAssignmentsPage() {
     } finally { setLoading(false); }
   }, [router, supabase]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => { let active = true; void Promise.resolve().then(() => { if (active) return load(); }); return () => { active = false; }; }, [load]);
   const selectedCourse = courses.find((x) => x.id === courseId);
   const candidates = selectedCourse ? tutors[selectedCourse.district_id] ?? [] : [];
   const activeAssignments = assignments.filter((x) => x.status === "active");

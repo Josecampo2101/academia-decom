@@ -46,10 +46,10 @@ export default function TutorDashboardPage() {
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
-    setLoading(true);
-    setError("");
     try {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
+      setLoading(true);
+      setError("");
       if (authError || !user) {
         router.replace("/conexion");
         return;
@@ -178,7 +178,7 @@ export default function TutorDashboardPage() {
     }
   }, [router, supabase]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => { let active = true; void Promise.resolve().then(() => { if (active) return load(); }); return () => { active = false; }; }, [load]);
 
   const visibleReviews = reviews.filter((item) => {
     const query = search.trim().toLocaleLowerCase("es");
@@ -203,8 +203,6 @@ export default function TutorDashboardPage() {
       </main>
     );
   }
-
-  const pendingCount = reviews.filter((item) => item.status === "submitted").length;
 
   return (
     <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
