@@ -68,6 +68,7 @@ export default function DashboardPage() {
 
   const [theme, setTheme] = useState<Theme>("system");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [displayName, setDisplayName] = useState("Bienvenido");
   const [greeting, setGreeting] = useState("Bienvenido");
   const [dailyVerseIndex, setDailyVerseIndex] = useState(0);
@@ -161,7 +162,7 @@ export default function DashboardPage() {
     roleKeys.includes("district_coordinator") ||
     roleKeys.includes("area_coordinator");
 
-  // Cargar preferencia de tema.
+  // Restaurar preferencia visual del menú lateral.\n  useEffect(() => {\n    const saved = localStorage.getItem("academia-sidebar-collapsed");\n    if (saved === "true" || saved === "false") {\n      setSidebarCollapsed(saved === "true");\n    }\n  }, []);\n\n  // Persistir el estado del menú lateral.\n  useEffect(() => {\n    localStorage.setItem("academia-sidebar-collapsed", String(sidebarCollapsed));\n  }, [sidebarCollapsed]);\n\n  // Cargar preferencia de tema.
   useEffect(() => {
     const updateDailyContent = () => {
       const now = new Date();
@@ -608,7 +609,7 @@ export default function DashboardPage() {
                   <p className={`text-xs ${secondaryText}`}>Distrito 34 · IPUC</p>
                 </div>}
               </div>
-              <button type="button" onClick={() => setSidebarCollapsed((value) => !value)} aria-label={sidebarCollapsed ? "Expandir menú" : "Contraer menú"} title={sidebarCollapsed ? "Expandir menú" : "Contraer menú"} className={`rounded-lg p-2 transition hover:bg-[#087DB5]/10 ${secondaryText}`}>
+              <button type="button" onClick={() => setSidebarCollapsed((value) => !value)} aria-label={sidebarCollapsed ? "Expandir menú" : "Contraer menú"} title={sidebarCollapsed ? "Expandir menú" : "Contraer menú"} className={`hidden rounded-lg p-2 transition hover:bg-[#087DB5]/10 lg:inline-flex ${secondaryText}`}>
                 {sidebarCollapsed ? "›" : "‹"}
               </button>
             </div>
