@@ -3,6 +3,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeftRight, Award, BookOpen, ChevronLeft, ChevronRight, ClipboardCheck, Clock3, Home, Library, LogOut, Mail, Menu, Monitor, Moon, Settings, Sun, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 type Theme = "light" | "dark" | "system";
@@ -24,31 +25,31 @@ const modules = [
   {
     name: "Mi formación",
     description: "Continúa tus procesos de aprendizaje.",
-    icon: "▤",
+    icon: BookOpen,
     color: "#087DB5",
   },
   {
     name: "Biblioteca",
     description: "Consulta documentos y recursos académicos.",
-    icon: "▣",
+    icon: Library,
     color: "#19A7A0",
   },
   {
     name: "Evaluaciones",
     description: "Desarrolla actividades y pruebas.",
-    icon: "✓",
+    icon: ClipboardCheck,
     color: "#D99A24",
   },
   {
     name: "Seguimiento",
     description: "Consulta tu progreso académico.",
-    icon: "◷",
+    icon: Clock3,
     color: "#8064B5",
   },
   {
     name: "Reconocimientos",
     description: "Consulta tus logros institucionales.",
-    icon: "✧",
+    icon: Award,
     color: "#D18A43",
   },
 ];
@@ -626,7 +627,7 @@ export default function DashboardPage() {
                 </div>}
               </div>
               <button type="button" onClick={() => setSidebarCollapsed((value) => !value)} aria-label={sidebarCollapsed ? "Expandir menú" : "Contraer menú"} title={sidebarCollapsed ? "Expandir menú" : "Contraer menú"} className={`hidden rounded-lg p-2 transition hover:bg-[#087DB5]/10 lg:inline-flex ${secondaryText}`}>
-                {sidebarCollapsed ? "›" : "‹"}
+                {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
               </button>
             </div>
           </div>
@@ -643,7 +644,7 @@ export default function DashboardPage() {
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-3 rounded-xl bg-[#087DB5]/10 px-4 py-3 text-sm font-semibold text-[#087DB5]"
             >
-              <span aria-hidden="true">⌂</span>{!sidebarCollapsed && <span>Inicio</span>}
+              <Home className="h-5 w-5 shrink-0" aria-hidden="true" />{!sidebarCollapsed && <span>Inicio</span>}
             </a>
 
             {modules.map((module) => (
@@ -665,7 +666,7 @@ export default function DashboardPage() {
                 }
                 className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] disabled:cursor-not-allowed disabled:opacity-50 ${secondaryText}`}
               >
-                <span aria-hidden="true">{module.icon}</span>
+                <module.icon className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>{module.name}</span>}
               </button>
             ))}
@@ -685,7 +686,7 @@ export default function DashboardPage() {
                   : `${secondaryText} opacity-50`
               }`}
             >
-              <span aria-hidden="true">⚙</span>{!sidebarCollapsed && <span>Administración</span>}
+              <Settings className="h-5 w-5 shrink-0" aria-hidden="true" />{!sidebarCollapsed && <span>Administración</span>}
             </div>
 
             {canManageTutorAssignments && (
@@ -694,7 +695,7 @@ export default function DashboardPage() {
               onClick={() => setMobileMenuOpen(false)}
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
-                <span className="text-lg">♙</span>
+                <Users className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>Asignación de tutores</span>}
               </a>
             )}
@@ -705,7 +706,7 @@ export default function DashboardPage() {
               onClick={() => setMobileMenuOpen(false)}
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
-                <span className="text-lg">✓</span>
+                <ClipboardCheck className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>Actividades y evaluaciones</span>}
               </a>
             )}
@@ -716,7 +717,7 @@ export default function DashboardPage() {
               onClick={() => setMobileMenuOpen(false)}
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
-                <span className="text-lg">▤</span>
+                <BookOpen className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>Catálogo académico</span>}
               </a>
             )}
@@ -727,7 +728,7 @@ export default function DashboardPage() {
               onClick={() => setMobileMenuOpen(false)}
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
-                <span className="text-lg">▣</span>
+                <Library className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>Administrar biblioteca</span>}
               </a>
             )}
@@ -738,7 +739,7 @@ export default function DashboardPage() {
               onClick={() => setMobileMenuOpen(false)}
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
-                <span className="text-lg">✉</span>
+                <Mail className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>Invitaciones</span>}
               </a>
             )}
@@ -750,7 +751,7 @@ export default function DashboardPage() {
               onClick={() => setMobileMenuOpen(false)}
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
-                <span className="text-lg">⇄</span>
+                <ArrowLeftRight className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>Reubicación de creyentes</span>}
               </a>
             )}
@@ -771,7 +772,7 @@ export default function DashboardPage() {
               disabled={loggingOut}
               className="mt-4 w-full rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 disabled:opacity-50"
             >
-              {loggingOut ? "Cerrando..." : sidebarCollapsed ? "↪" : "Cerrar sesión"}
+              {loggingOut ? "Cerrando..." : sidebarCollapsed ? <LogOut className="mx-auto h-4 w-4" /> : "Cerrar sesión"}
             </button>
           </div>
         </aside>
@@ -784,7 +785,7 @@ export default function DashboardPage() {
           >
             <div className="flex min-w-0 items-center gap-3">
               <button type="button" onClick={() => setMobileMenuOpen(true)} aria-label="Abrir menú de navegación" aria-expanded={mobileMenuOpen} className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${borderColor} lg:hidden`}>
-                <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+                <Menu className="h-5 w-5" aria-hidden="true" />
               </button>
               <div>
                 <p className={`text-xs font-medium ${secondaryText}`}>ACADEMIA DECOM</p>
@@ -814,11 +815,7 @@ export default function DashboardPage() {
                         : secondaryText
                     }`}
                   >
-                    {item === "light"
-                      ? "☀"
-                      : item === "dark"
-                      ? "☾"
-                      : "◐"}
+                    {item === "light" ? <Sun className="h-4 w-4" /> : item === "dark" ? <Moon className="h-4 w-4" /> : <Monitor className="h-4 w-4" />}
                   </button>
                 ))}
               </div>
@@ -1313,7 +1310,7 @@ export default function DashboardPage() {
                         color: module.color,
                       }}
                     >
-                      {module.icon}
+                      <module.icon className="h-6 w-6" aria-hidden="true" />
                     </div>
 
                     <h4 className="mt-5 font-bold">{module.name}</h4>
