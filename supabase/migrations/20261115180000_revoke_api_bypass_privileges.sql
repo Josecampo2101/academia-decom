@@ -19,6 +19,14 @@ BEGIN
 END;
 $migration$;
 
+-- Prevent future public tables created by either migration owner from
+-- reintroducing structural privileges that bypass RLS.
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
+REVOKE TRUNCATE, TRIGGER, REFERENCES ON TABLES FROM anon, authenticated;
+
+ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public
+REVOKE TRUNCATE, TRIGGER, REFERENCES ON TABLES FROM anon, authenticated;
+
 -- The role catalogue is read-only to API clients.
 REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER, REFERENCES
 ON TABLE public.roles
