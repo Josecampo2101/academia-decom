@@ -53,6 +53,16 @@ const modules = [
   },
 ];
 
+const dailyVerses = [
+  { text: "Todo lo que hagáis, hacedlo de corazón, como para el Señor y no para los hombres.", reference: "Colosenses 3:23" },
+  { text: "Hágase todo decentemente y con orden.", reference: "1 Corintios 14:40" },
+  { text: "La respuesta suave quita la ira.", reference: "Proverbios 15:1" },
+  { text: "Encomienda a Jehová tus obras, y tus pensamientos serán afirmados.", reference: "Proverbios 16:3" },
+  { text: "El que es fiel en lo muy poco, también en lo más es fiel.", reference: "Lucas 16:10" },
+  { text: "La blanda respuesta quita la ira; mas la palabra áspera hace subir el furor.", reference: "Proverbios 15:1" },
+  { text: "Todo lo puedo en Cristo que me fortalece.", reference: "Filipenses 4:13" },
+];
+
 export default function DashboardPage() {
   const router = useRouter();
 
@@ -510,6 +520,10 @@ export default function DashboardPage() {
     router.refresh();
   }
 
+  const localDay = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Bogota" }).format(new Date());
+  const dayNumber = Math.floor(Date.parse(`${localDay}T00:00:00`) / 86_400_000);
+  const dailyVerse = dailyVerses[((dayNumber % dailyVerses.length) + dailyVerses.length) % dailyVerses.length];
+
   const dark = resolvedTheme === "dark";
 
   const surface = dark ? "bg-[#1C2B3D]" : "bg-white";
@@ -821,9 +835,9 @@ export default function DashboardPage() {
                 </div>
               </div>
               <blockquote className="mt-4 text-base font-semibold leading-7">
-                «Todo lo que hagáis, hacedlo de corazón, como para el Señor y no para los hombres».
+                «{dailyVerse.text}»
               </blockquote>
-              <p className="mt-2 text-sm font-bold text-[#087DB5]">Colosenses 3:23</p>
+              <p className="mt-2 text-sm font-bold text-[#087DB5]">{dailyVerse.reference}</p>
             </section>
 
             {/* PERFIL */}
