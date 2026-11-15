@@ -158,6 +158,20 @@ export default function DashboardPage() {
     if (destination) router.push(destination);
   }
 
+  // Mantener la disponibilidad visual alineada con las rutas que abre openAcademicModule.
+  function canOpenAcademicModule(moduleName: string) {
+    const isStudent = roleKeys.includes("member");
+    const isTutor = roleKeys.includes("tutor");
+    const hasManagementRole = roleKeys.some((role) =>
+      ["national_admin", "district_coordinator", "area_coordinator", "academic_editor", "local_responsible"].includes(role)
+    );
+
+    if (canOpenAdminModule && (moduleName === "Mi formación" || moduleName === "Biblioteca")) return true;
+    if (moduleName === "Seguimiento" && isTutor) return true;
+    if ((moduleName === "Seguimiento" || moduleName === "Mi formación") && hasManagementRole && !(moduleName === "Mi formación" && isStudent)) return true;
+    return isStudent;
+  }
+
   // Permisos del módulo de reubicaciones.
   const canManageTransfers =
     roleKeys.includes("national_admin") ||
@@ -679,15 +693,9 @@ export default function DashboardPage() {
                 key={module.name}
                 type="button"
                 onClick={() => { openAcademicModule(module.name); setMobileMenuOpen(false); }}
-                disabled={
-                  !roleKeys.includes("member") &&
-                  !(module.name === "Seguimiento" && roleKeys.includes("tutor")) &&
-                  !(canOpenAdminModule && (module.name === "Mi formación" || module.name === "Biblioteca"))
-                }
+                disabled={!canOpenAcademicModule(module.name)}
                 title={
-                  roleKeys.includes("member") ||
-                  (module.name === "Seguimiento" && roleKeys.includes("tutor")) ||
-                  (canOpenAdminModule && (module.name === "Mi formación" || module.name === "Biblioteca"))
+                  canOpenAcademicModule(module.name)
                     ? module.description
                     : "No tienes un perfil académico habilitado para este módulo"
                 }
@@ -888,8 +896,8 @@ export default function DashboardPage() {
                 <p className="mt-4 text-sm font-semibold text-[#9BDCF5]">
                   {greeting}
                 </p>
-                <h2 className="mt-2 text-3xl font-bold md:text-4xl">
-                  {displayName === "Bienvenido" ? "Bienvenido a tu escuela" : `Bienvenido, ${displayName}`}
+                <h2 className="mt-2 max-w-3xl text-3xl font-bold leading-tight md:text-4xl">
+                  {displayName === "Bienvenido" ? "Bienvenido a tu escuela" : `${greeting}, ${displayName}`}
                 </h2>
 
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-100">
@@ -1360,9 +1368,22 @@ export default function DashboardPage() {
                       {module.description}
                     </p>
 
-                    <p className="mt-5 text-xs font-semibold text-[#087DB5]">
-                      Próximamente
-                    </p>
+                    <div className="mt-5 flex items-center justify-between gap-3">
+                      {canOpenAcademicModule(module.name) ? (
+                        <button
+                          type="button"
+                          onClick={() => openAcademicModule(module.name)}
+                          className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#087DB5] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#066895] focus-visible:outline-offset-4"
+                        >
+                          Abrir módulo
+                          <span aria-hidden="true">→</span>
+                        </button>
+                      ) : (
+                        <p className={`text-xs font-medium ${secondaryText}`} aria-label={`Acceso no habilitado: ${module.name}`}>
+                          No habilitado para tu perfil
+                        </p>
+                      )}
+                    </div>
                   </article>
                 ))}
               </div>
