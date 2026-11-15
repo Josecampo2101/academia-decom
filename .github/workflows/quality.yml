@@ -1,11 +1,10 @@
 name: Verificación de calidad
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - "main"
-      - "fix/**"
-      - "feature/**"
   pull_request:
 
 permissions:
