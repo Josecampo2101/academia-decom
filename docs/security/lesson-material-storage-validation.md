@@ -25,8 +25,8 @@ No se modifica la política de inserción, actualización o eliminación. No se 
 | Estudiante del mismo distrito sin matrícula | Material del curso | Denegado |
 | Estudiante matriculado en otro curso | Material del curso ajeno | Denegado |
 | Estudiante de otro distrito | Material del curso | Denegado |
-| Tutor asignado al curso | Material de su curso | Permitido, sujeto al helper existente |
-| Tutor sin asignación al curso | Material del curso | Denegado |
+| Tutor asignado al curso | Material de su curso, incluso borrador | Permitido, sujeto al helper existente |
+| Tutor sin asignación al curso | Material del curso | Denegado |\n| Gestor académico autorizado | Material borrador de su ámbito | Permitido |
 | Administrador nacional | Material publicado | Permitido, sujeto al helper existente |
 | Usuario autenticado sin rol académico | Material de curso | Denegado |
 
