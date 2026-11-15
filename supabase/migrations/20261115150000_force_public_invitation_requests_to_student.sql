@@ -645,6 +645,7 @@ DECLARE
     congregation_district uuid;
     target_area uuid;
     base_student_role_id uuid;
+    base_member_role_id uuid;
     national_admin_role_id uuid;
 BEGIN
     SELECT r.role_key
@@ -663,11 +664,17 @@ BEGIN
     WHERE r.role_key = 'student';
 
     SELECT r.id
+    INTO base_member_role_id
+    FROM public.roles r
+    WHERE r.role_key = 'member';
+
+    SELECT r.id
     INTO national_admin_role_id
     FROM public.roles r
     WHERE r.role_key = 'national_admin';
 
     IF base_student_role_id IS NULL
+       OR base_member_role_id IS NULL
        OR national_admin_role_id IS NULL THEN
         RAISE EXCEPTION
             'No se encontraron los roles base requeridos.';
@@ -683,7 +690,16 @@ BEGIN
                 'Las invitaciones generales requieren únicamente un distrito.';
         END IF;
 
-        IF NEW.role_id IS DISTINCT FROM base_student_role_id THEN
+        IF TG_OP = 'INSERT' THEN
+            IF NEW.role_id IS DISTINCT FROM base_student_role_id THEN
+                RAISE EXCEPTION
+                    'Las invitaciones generales nuevas deben utilizar el rol base student.';
+            END IF;
+        ELSIF NEW.role_id IS DISTINCT FROM base_student_role_id
+           AND NOT (
+               OLD.role_id IS NOT DISTINCT FROM base_member_role_id
+               AND NEW.role_id IS NOT DISTINCT FROM OLD.role_id
+           ) THEN
             RAISE EXCEPTION
                 'Las invitaciones generales deben utilizar el rol base student.';
         END IF;
