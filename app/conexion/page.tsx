@@ -36,12 +36,17 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    const savedTheme = localStorage.getItem("academia-theme");
+    const activeTheme: Theme =
+      savedTheme === "light" || savedTheme === "dark" || savedTheme === "system"
+        ? savedTheme
+        : theme;
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
     const updateTheme = () => {
-      const isDark = theme === "dark" ||
-        (theme === "system" && mediaQuery.matches);
-
+      const isDark =
+        activeTheme === "dark" ||
+        (activeTheme === "system" && mediaQuery.matches);
       const newTheme = isDark ? "dark" : "light";
 
       setResolvedTheme(newTheme);
@@ -49,7 +54,6 @@ export default function Home() {
     };
 
     updateTheme();
-
     mediaQuery.addEventListener("change", updateTheme);
 
     return () => {

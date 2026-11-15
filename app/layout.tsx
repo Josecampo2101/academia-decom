@@ -18,15 +18,17 @@ export const metadata: Metadata = {
 const themeInitializationScript = `
 (function () {
   try {
-    var saved = localStorage.getItem("academia-theme") || "system";
+    var saved = localStorage.getItem("academia-theme");
+    var preference =
+      saved === "light" || saved === "dark" || saved === "system"
+        ? saved
+        : "system";
     var dark =
-      saved === "dark" ||
-      (saved === "system" &&
+      preference === "dark" ||
+      (preference === "system" &&
         window.matchMedia("(prefers-color-scheme: dark)").matches);
-    var root = document.documentElement;
 
-    root.classList.toggle("dark", dark);
-    root.setAttribute("data-theme", dark ? "dark" : "light");
+    document.documentElement.classList.toggle("dark", dark);
   } catch (error) {
     // If browser storage is unavailable, the CSS default remains light.
   }
