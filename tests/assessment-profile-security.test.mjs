@@ -12,8 +12,7 @@ const migration = await readFile(
 
 test("assessment attempt creation checks active profile before reading or creating attempts", () => {
   const startFunction = migration.split(
-    "CREATE OR REPLACE FUNCTION public.submit_academic_assessment",
-    1
+    "CREATE OR REPLACE FUNCTION public.submit_academic_assessment"
   )[0];
 
   assert.match(
@@ -24,8 +23,7 @@ test("assessment attempt creation checks active profile before reading or creati
 
 test("assessment submission checks active profile before modifying responses or grades", () => {
   const submitFunction = migration.split(
-    "CREATE OR REPLACE FUNCTION public.submit_academic_assessment",
-    1
+    "CREATE OR REPLACE FUNCTION public.submit_academic_assessment"
   )[1];
 
   assert.match(
