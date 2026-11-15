@@ -299,7 +299,7 @@ export async function POST(request: NextRequest) {
     p_phone: phone,
     p_date_of_birth: dateOfBirth,
     p_requested_congregation_id: congregationId,
-    p_requested_role_id: undefined,
+    p_requested_role_id: null,
   });
 
   if (
