@@ -98,6 +98,7 @@ export default function DashboardPage() {
   const canManageTutorAssignments = roleKeys.some((role) => ["national_admin", "academic_editor", "district_coordinator", "area_coordinator"].includes(role));
   const canOpenAdminModule = isNationalAdmin || roleKeys.includes("academic_editor");
 
+  // Mantiene las tarjetas y el menú lateral alineados con los destinos reales.
   function canOpenAcademicModule(moduleName: string) {
     return canAccessAcademicModule(moduleName, roleKeys);
   }
