@@ -811,7 +811,7 @@ export default function DashboardPage() {
             className={`flex items-center justify-between border-b ${borderColor} ${surface} px-4 py-4 md:px-8`}
           >
             <div className="flex min-w-0 items-center gap-3">
-              <button type="button" onClick={() => setMobileMenuOpen(true)} aria-label="Abrir menú de navegación" aria-expanded={mobileMenuOpen} className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${borderColor} lg:hidden`}>
+              <button type="button" onClick={() => setMobileMenuOpen(true)} aria-label="Abrir menú de navegación" aria-controls="dashboard-sidebar" aria-expanded={mobileMenuOpen} className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${borderColor} lg:hidden`}>
                 <Menu className="h-5 w-5" aria-hidden="true" />
               </button>
               <div>
