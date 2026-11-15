@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ArrowLeftRight, Award, BookOpen, ChevronLeft, ChevronRight, ClipboardCheck, Clock3, Home, Library, LogOut, Mail, Menu, Monitor, Moon, Settings, Sun, UserRound, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { DashboardModuleCard } from "@/components/dashboard/dashboard-module-card";
 
 type Theme = "light" | "dark" | "system";
 
@@ -1346,45 +1347,18 @@ export default function DashboardPage() {
 
               <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 {modules.map((module) => (
-                  <article
+                  <DashboardModuleCard
                     key={module.name}
-                    className={`${surface} rounded-2xl border ${borderColor} p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md`}
-                  >
-                    <div
-                      className="flex h-12 w-12 items-center justify-center rounded-xl text-xl font-bold"
-                      style={{
-                        backgroundColor: `${module.color}18`,
-                        color: module.color,
-                      }}
-                    >
-                      <module.icon className="h-6 w-6" aria-hidden="true" />
-                    </div>
-
-                    <h4 className="mt-5 font-bold">{module.name}</h4>
-
-                    <p
-                      className={`mt-2 min-h-10 text-sm leading-6 ${secondaryText}`}
-                    >
-                      {module.description}
-                    </p>
-
-                    <div className="mt-5 flex items-center justify-between gap-3">
-                      {canOpenAcademicModule(module.name) ? (
-                        <button
-                          type="button"
-                          onClick={() => openAcademicModule(module.name)}
-                          className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#087DB5] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#066895] focus-visible:outline-offset-4"
-                        >
-                          Abrir módulo
-                          <span aria-hidden="true">→</span>
-                        </button>
-                      ) : (
-                        <p className={`text-xs font-medium ${secondaryText}`} aria-label={`Acceso no habilitado: ${module.name}`}>
-                          No habilitado para tu perfil
-                        </p>
-                      )}
-                    </div>
-                  </article>
+                    title={module.name}
+                    description={module.description}
+                    icon={module.icon}
+                    color={module.color}
+                    enabled={canOpenAcademicModule(module.name)}
+                    mutedTextClass={secondaryText}
+                    surfaceClass={surface}
+                    borderClass={borderColor}
+                    onOpen={() => openAcademicModule(module.name)}
+                  />
                 ))}
               </div>
             </section>
