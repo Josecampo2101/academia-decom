@@ -1184,6 +1184,7 @@ export default function DashboardPage() {
                   <div className="mt-5 grid gap-3 md:grid-cols-2">
                     <input
                       type="search"
+                      aria-label="Buscar área por nombre"
                       value={areaSearch}
                       onChange={(event) => setAreaSearch(event.target.value)}
                       placeholder="Buscar área por nombre..."
@@ -1191,6 +1192,7 @@ export default function DashboardPage() {
                     />
 
                     <select
+                      aria-label="Filtrar áreas por estado"
                       value={areaFilter}
                       onChange={(event) =>
                         setAreaFilter(
@@ -1235,6 +1237,7 @@ export default function DashboardPage() {
 
                       <div className={`overflow-x-auto rounded-xl border ${borderColor}`}>
                         <table className="w-full min-w-[850px] table-fixed text-left text-sm">
+                          <caption className="sr-only">Áreas de formación registradas y acciones disponibles para cada área</caption>
                           <colgroup>
                             <col className="w-[22%]" />
                             <col className="w-[34%]" />
@@ -1244,7 +1247,7 @@ export default function DashboardPage() {
 
                           <thead>
                             <tr className={`${background} ${secondaryText}`}>
-                              <th className="px-4 py-4 font-semibold">
+                              <th scope="col" className="px-4 py-4 font-semibold">
                                 Área
                               </th>
 
@@ -1297,6 +1300,7 @@ export default function DashboardPage() {
                                     <button
                                       type="button"
                                       onClick={() => handleEditArea(area)}
+                                      aria-label={`Editar área ${area.name}`}
                                       className="inline-flex items-center justify-center rounded-lg bg-[#087DB5]/10 px-3 py-2 text-xs font-semibold text-[#087DB5] transition hover:bg-[#087DB5]/20"
                                     >
                                       Editar
@@ -1307,6 +1311,7 @@ export default function DashboardPage() {
                                       onClick={() =>
                                         handleToggleAreaStatus(area)
                                       }
+                                      aria-label={`${area.status === "active" ? "Desactivar" : "Activar"} área ${area.name}`}
                                       className={`inline-flex items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold transition ${
                                         area.status === "active"
                                           ? "bg-amber-50 text-amber-700 hover:bg-amber-100"
