@@ -1,18 +1,11 @@
--- Separate the student role from the DECOM member role.
+-- Separate students from DECOM members; preserve existing member assignments.
 INSERT INTO public.roles (role_key, name, description)
-VALUES (
-    'student',
-    'Estudiante',
-    'Rol base para las personas que ingresan a Academia DECOM como estudiantes.'
-)
+VALUES ('student', 'Estudiante', 'Rol base para las personas que ingresan a Academia DECOM como estudiantes.')
 ON CONFLICT (role_key) DO UPDATE
-SET
-    name = EXCLUDED.name,
-    description = EXCLUDED.description;
+SET name = EXCLUDED.name, description = EXCLUDED.description;
 
 UPDATE public.roles
-SET
-    name = 'Miembro de DECOM',
+SET name = 'Miembro de DECOM',
     description = COALESCE(description, 'Rol institucional para integrantes de DECOM.')
 WHERE role_key = 'member';
 
@@ -882,8 +875,7 @@ END;
 $function$
 
 
-ALTER POLICY invitations_insert_admin_scope
-ON public.invitations
+ALTER POLICY invitations_insert_admin_scope ON public.invitations
 WITH CHECK (
     (has_role('national_admin'::text) OR can_manage_district(district_id))
     AND EXISTS (
@@ -901,8 +893,7 @@ WITH CHECK (
     )
 );
 
-ALTER POLICY invitations_delete_admin_scope
-ON public.invitations
+ALTER POLICY invitations_delete_admin_scope ON public.invitations
 USING (
     (has_role('national_admin'::text) OR can_manage_district(district_id))
     AND EXISTS (
@@ -920,8 +911,7 @@ USING (
     )
 );
 
-ALTER POLICY invitations_update_admin_scope
-ON public.invitations
+ALTER POLICY invitations_update_admin_scope ON public.invitations
 USING (has_role('national_admin'::text) OR can_manage_district(district_id))
 WITH CHECK (
     (has_role('national_admin'::text) OR can_manage_district(district_id))
