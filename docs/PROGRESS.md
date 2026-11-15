@@ -11,13 +11,13 @@
 
 | Fecha | Fase / tarea | Cambios realizados | Verificaciones ejecutadas | Estado |
 |---|---|---|---|---|
-| AAAA-MM-DD | Nombre de fase | Archivos y alcance | Comandos y resultado literal | Pendiente / En curso / Completado |
+| 2026-11-15 | Fase 0 — tokens y tema | Actualizados tokens DECOM, tema inicial y sincronización de preferencia en acceso/conexión/dashboard | CI de PR #55 en ejecución; pruebas locales y capturas pendientes | En curso |
 
 ## Fases frontend
 
 | Fase | Descripción | Estado | PR |
 |---|---|---|---|
-| 0 | Tokens y tema sin parpadeo | Pendiente de aprobación | — |
+| 0 | Tokens y tema sin parpadeo | En curso; PR #55 abierta como Draft | https://github.com/Josecampo2101/academia-decom/pull/55 |
 | 1 | Layout y sidebar | Pendiente | — |
 | 2 | Login institucional | Pendiente | — |
 | 3 | Dashboard | Pendiente | — |
