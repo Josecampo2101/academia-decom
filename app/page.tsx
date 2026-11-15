@@ -29,9 +29,7 @@ export default function Home() {
     if (savedTheme === "light" || savedTheme === "dark" || savedTheme === "system") setTheme(savedTheme);
     const savedEmail = localStorage.getItem("escuela-d34-remembered-email");
     if (savedEmail) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEmail(savedEmail);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRememberEmail(true);
     }
   }, []);
