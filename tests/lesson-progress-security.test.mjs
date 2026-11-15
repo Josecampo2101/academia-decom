@@ -46,3 +46,16 @@ test("student progress RPC changes position only and preserves completed records
   assert.match(migration, /grant execute on function public\.save_lesson_progress\(uuid, uuid, integer\)\s+to authenticated/i);
   assert.match(migration, /revoke all on function public\.save_lesson_progress\(uuid, uuid, integer\)\s+from public, anon/i);
 });
+
+const studentFormation = readFileSync(
+  new URL("../app/dashboard/estudiante/formacion/page.tsx", import.meta.url),
+  "utf8",
+);
+
+test("student interface uses the protected RPC instead of direct completion writes", () => {
+  assert.match(studentFormation, /supabase\.rpc\(["']save_lesson_progress["']/);
+  assert.match(studentFormation, /p_last_position_seconds:\s*0/);
+  assert.doesNotMatch(studentFormation, /from\(["']lesson_progress["']\)\.upsert/);
+  assert.doesNotMatch(studentFormation, /status:\s*["']completed["']/);
+  assert.match(studentFormation, /Guardar avance/);
+});
