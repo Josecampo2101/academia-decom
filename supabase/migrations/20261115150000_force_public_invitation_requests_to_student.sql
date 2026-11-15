@@ -6,7 +6,7 @@ SET name = EXCLUDED.name, description = EXCLUDED.description;
 
 UPDATE public.roles
 SET name = 'Miembro de DECOM',
-    description = COALESCE(description, 'Rol institucional para integrantes de DECOM.')
+    description = 'Rol institucional para miembros de DECOM.'
 WHERE role_key = 'member';
 
 CREATE OR REPLACE FUNCTION public.submit_invitation_request_v2(p_token_hash text, p_full_name text, p_email text, p_phone text, p_date_of_birth date, p_requested_congregation_id uuid, p_requested_role_id uuid DEFAULT NULL::uuid)
