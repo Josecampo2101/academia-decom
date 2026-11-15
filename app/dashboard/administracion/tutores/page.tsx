@@ -61,7 +61,7 @@ export default function CourseTutorAssignmentsPage() {
     } finally { setLoading(false); }
   }, [router, supabase]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => { void Promise.resolve().then(load); }, [load]);
   const selectedCourse = courses.find((x) => x.id === courseId);
   const candidates = selectedCourse ? tutors[selectedCourse.district_id] ?? [] : [];
   const activeAssignments = assignments.filter((x) => x.status === "active");
