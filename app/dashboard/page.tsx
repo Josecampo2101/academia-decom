@@ -3,6 +3,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { ArrowLeftRight, Award, BookOpen, ChevronLeft, ChevronRight, ClipboardCheck, Clock3, Home, Library, LogOut, Mail, Menu, Monitor, Moon, Settings, Sun, UserRound, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -76,7 +77,6 @@ export default function DashboardPage() {
   const [dailyVerseIndex, setDailyVerseIndex] = useState(0);
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
 
-  const [email, setEmail] = useState("");
   const [roleName, setRoleName] = useState("Consultando permisos...");
   const [roleKeys, setRoleKeys] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -276,7 +276,6 @@ export default function DashboardPage() {
         return;
       }
 
-      setEmail(data.user.email ?? "");
 
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
@@ -856,7 +855,7 @@ export default function DashboardPage() {
               >
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#087DB5]/15">
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+                    <Image src={avatarUrl} alt="" width={64} height={64} unoptimized className="h-full w-full object-cover" />
                   ) : (
                     <UserRound className="h-4 w-4" aria-hidden="true" />
                   )}
