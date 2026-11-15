@@ -3,7 +3,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeftRight, Award, BookOpen, ChevronLeft, ChevronRight, ClipboardCheck, Clock3, Home, Library, LogOut, Mail, Menu, Monitor, Moon, Settings, Sun, Users } from "lucide-react";
+import { ArrowLeftRight, Award, BookOpen, ChevronLeft, ChevronRight, ClipboardCheck, Clock3, Home, Library, LogOut, Mail, Menu, Monitor, Moon, Settings, Sun, UserRound, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 type Theme = "light" | "dark" | "system";
@@ -71,6 +71,7 @@ export default function DashboardPage() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [displayName, setDisplayName] = useState("Bienvenido");
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [greeting, setGreeting] = useState("Bienvenido");
   const [dailyVerseIndex, setDailyVerseIndex] = useState(0);
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
@@ -276,9 +277,36 @@ export default function DashboardPage() {
       }
 
       setEmail(data.user.email ?? "");
-      const metadataName = data.user.user_metadata?.full_name ?? data.user.user_metadata?.name;
-      if (typeof metadataName === "string" && metadataName.trim()) {
-        setDisplayName(metadataName.trim().split(/\s+/)[0]);
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("full_name, phone, avatar_path")
+        .eq("id", data.user.id)
+        .maybeSingle();
+
+      if (!active) return;
+
+      if (profileError) {
+        console.error("Error consultando el perfil institucional:", profileError);
+        router.replace("/dashboard/perfil");
+        return;
+      }
+
+      if (!profile || !profile.full_name?.trim() || !profile.phone?.trim()) {
+        router.replace("/dashboard/perfil");
+        return;
+      }
+
+      setDisplayName(profile.full_name.trim());
+
+      if (profile.avatar_path) {
+        const { data: avatar, error: avatarError } = await supabase.storage
+          .from("decom-profile-avatars")
+          .createSignedUrl(profile.avatar_path, 60 * 60);
+
+        if (active && !avatarError && avatar?.signedUrl) {
+          setAvatarUrl(avatar.signedUrl);
+        }
       }
 
       const { data: permissionTest, error: permissionError } =
@@ -820,9 +848,21 @@ export default function DashboardPage() {
                 ))}
               </div>
 
-              <div className="hidden rounded-xl bg-[#087DB5]/10 px-3 py-2 text-sm font-semibold text-[#087DB5] sm:block">
-                {displayName}
-              </div>
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/perfil")}
+                title="Editar perfil institucional"
+                className="inline-flex min-w-0 items-center gap-2 rounded-xl bg-[#087DB5]/10 px-2.5 py-2 text-sm font-semibold text-[#087DB5] transition hover:bg-[#087DB5]/15"
+              >
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#087DB5]/15">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <UserRound className="h-4 w-4" aria-hidden="true" />
+                  )}
+                </span>
+                <span className="hidden max-w-[160px] truncate sm:block">{displayName}</span>
+              </button>
 
               <button
                 onClick={handleLogout}
