@@ -177,6 +177,24 @@ export default function DashboardPage() {
     localStorage.setItem("academia-sidebar-collapsed", String(sidebarCollapsed));
   }, [sidebarCollapsed]);
 
+  // Cerrar el drawer móvil con Escape y evitar que el documento se desplace detrás.
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileMenuOpen(false);
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [mobileMenuOpen]);
+
   // Cargar preferencia de tema.
   useEffect(() => {
     const updateDailyContent = () => {
@@ -645,6 +663,22 @@ export default function DashboardPage() {
           id="dashboard-sidebar"
           data-collapsed={sidebarCollapsed}
           aria-label="Navegación principal"
+          onKeyDown={(event) => {
+            if (!mobileMenuOpen || event.key !== "Tab") return;
+            const focusable = event.currentTarget.querySelectorAll<HTMLElement>(
+              'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            );
+            if (focusable.length === 0) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+              event.preventDefault();
+              last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+              event.preventDefault();
+              first.focus();
+            }
+          }}
           className={`${mobileMenuOpen ? "fixed inset-y-0 left-0 z-50 flex w-[min(19rem,calc(100vw-2.5rem))] shadow-2xl" : "fixed inset-y-0 left-0 z-50 hidden w-72"} min-h-0 shrink-0 flex-col overflow-hidden border-r transition-[width,transform] duration-200 motion-reduce:transition-none lg:sticky lg:top-0 lg:z-20 lg:flex lg:h-screen lg:shadow-none ${sidebarCollapsed ? "lg:w-20" : "lg:w-64"} ${borderColor} ${surface}`}
         >
           <div className={`shrink-0 border-b ${borderColor} p-4`}>
