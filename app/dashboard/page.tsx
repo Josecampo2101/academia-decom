@@ -71,7 +71,7 @@ export default function DashboardPage() {
   const canOpenAdminModule = isNationalAdmin || roleKeys.includes("academic_editor");
 
   function openAcademicModule(moduleName: string) {
-    const isStudent = roleKeys.includes("member");
+    const isStudent = roleKeys.includes("student") || roleKeys.includes("member");
     const isTutor = roleKeys.includes("tutor");
     const adminDestination =
       moduleName === "Mi formación"
@@ -341,11 +341,13 @@ export default function DashboardPage() {
                 type="button"
                 onClick={() => openAcademicModule(module.name)}
                 disabled={
+                  !roleKeys.includes("student") &&
                   !roleKeys.includes("member") &&
                   !(module.name === "Seguimiento" && roleKeys.includes("tutor")) &&
                   !(canOpenAdminModule && (module.name === "Mi formación" || module.name === "Biblioteca"))
                 }
                 title={
+                  roleKeys.includes("student") ||
                   roleKeys.includes("member") ||
                   (module.name === "Seguimiento" && roleKeys.includes("tutor")) ||
                   (canOpenAdminModule && (module.name === "Mi formación" || module.name === "Biblioteca"))
