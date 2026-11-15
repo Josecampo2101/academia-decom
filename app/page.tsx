@@ -2,7 +2,8 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, LoaderCircle, Monitor, Moon, RadioTower, Sun } from "lucide-react";
+import Image from "next/image";
+import { Eye, EyeOff, LoaderCircle, Monitor, Moon, Sun } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 type Theme = "light" | "dark" | "system";
@@ -114,14 +115,16 @@ export default function Home() {
     <main className={`relative min-h-screen overflow-hidden transition-colors duration-300 ${isDark ? "bg-[#0C1724]" : "bg-[#F4F7FA]"}`}>
       <div className="absolute inset-x-0 top-0 h-[340px] px-3 pt-3 sm:h-[370px] sm:px-5 sm:pt-5" aria-hidden="true">
         <div className="relative h-full overflow-hidden rounded-[26px] bg-[#102D4D]">
-          <div className="absolute inset-y-0 right-0 hidden w-[46%] items-center justify-center opacity-70 sm:flex">
-            <div className="relative flex h-56 w-56 items-center justify-center rounded-full border border-white/10">
-              <div className="absolute h-40 w-40 rounded-full border border-[#19A7A0]/35" />
-              <div className="absolute h-24 w-24 rounded-full border border-white/15" />
-              <RadioTower className="h-16 w-16 text-[#75D6CF]" strokeWidth={1.1} />
-              <span className="absolute -right-5 top-8 h-2 w-2 rounded-full bg-[#75D6CF]" />
-              <span className="absolute bottom-5 -left-2 h-1.5 w-1.5 rounded-full bg-white/70" />
-            </div>
+          <div className="absolute inset-y-0 right-0 hidden w-[48%] items-center justify-center sm:flex">
+            <Image
+              src="/decom-login-illustration.svg"
+              alt=""
+              aria-hidden="true"
+              width={520}
+              height={390}
+              priority
+              className="h-auto max-h-[92%] w-auto max-w-full object-contain opacity-90"
+            />
           </div>
           <div className="absolute bottom-8 left-8 hidden h-12 items-end gap-1.5 sm:flex" aria-hidden="true">
             {Array.from({ length: 19 }, (_, index) => (
@@ -205,7 +208,7 @@ export default function Home() {
           </div>
 
           <button type="button" onClick={() => { setMessage("El registro en la Escuela se habilita mediante invitación de un administrador."); setMessageType("info"); }} className={`flex h-12 w-full items-center justify-center rounded-xl border px-4 text-sm font-semibold transition-colors hover:border-[#19A7A0] hover:bg-[#19A7A0]/5 focus-visible:outline-offset-2 ${isDark ? "border-slate-700 text-slate-200" : "border-slate-300 text-[#102D4D]"}`}>
-            Solicitar acceso
+            Registrarse
           </button>
 
           <footer className={`mt-7 border-t pt-5 text-center text-xs leading-5 ${isDark ? "border-slate-700 text-slate-400" : "border-slate-200 text-slate-500"}`}>
