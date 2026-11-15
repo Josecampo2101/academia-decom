@@ -95,13 +95,20 @@ export default function FormationPage() {
 
   useEffect(()=>{if(selectedLessonId)void Promise.resolve().then(()=>loadMaterials(selectedLessonId)).catch(e=>setError(e.message));},[selectedLessonId,loadMaterials]);
 
-  async function completeLesson(){
+  async function saveLessonProgress(){
     if(!enrollment||!selectedLesson)return;
     setBusy(true);setError("");
     try{
-      const {data,error:saveError}=await supabase.from("lesson_progress").upsert({enrollment_id:enrollment.id,lesson_id:selectedLesson.id,status:"completed",completed_at:new Date().toISOString(),last_position_seconds:0},{onConflict:"enrollment_id,lesson_id"}).select("id,enrollment_id,lesson_id,status").single();
+      const {data,error:saveError}=await supabase.rpc("save_lesson_progress",{
+        p_enrollment_id:enrollment.id,
+        p_lesson_id:selectedLesson.id,
+        p_last_position_seconds:0,
+      });
       if(saveError)throw saveError;
-      setProgress(current=>[...current.filter(item=>!(item.enrollment_id===enrollment.id&&item.lesson_id===selectedLesson.id)),data as Progress]);
+      const saved=Array.isArray(data)?data[0]:data;
+      if(!saved?.progress_id)throw new Error("El servidor no devolvió el progreso guardado.");
+      const nextProgress:Progress={id:saved.progress_id,enrollment_id:enrollment.id,lesson_id:selectedLesson.id,status:saved.progress_status};
+      setProgress(current=>[...current.filter(item=>!(item.enrollment_id===enrollment.id&&item.lesson_id===selectedLesson.id)),nextProgress]);
     }catch(e){setError(e instanceof Error?e.message:"No se pudo guardar el avance.");}
     finally{setBusy(false);}
   }
@@ -125,7 +132,7 @@ export default function FormationPage() {
       <div className="mt-6 grid gap-6 lg:grid-cols-[.8fr_1.2fr]"><aside className="space-y-4">{courseModules.map(courseModule=><section key={courseModule.id} className="rounded-2xl border border-slate-200 bg-white p-4"><h2 className="font-bold">{courseModule.title}</h2>{courseModule.description&&<p className="mt-1 text-xs text-slate-500">{courseModule.description}</p>}<div className="mt-3 space-y-2">{lessons.filter(lesson=>lesson.module_id===courseModule.id).map(lesson=>{const done=progress.some(item=>item.enrollment_id===selectedEnrollmentId&&item.lesson_id===lesson.id&&item.status==="completed");return <button key={lesson.id} onClick={()=>setSelectedLessonId(lesson.id)} className={"w-full rounded-xl border p-3 text-left text-sm "+(selectedLessonId===lesson.id?"border-[#087DB5] bg-sky-50":"border-slate-100 hover:border-slate-300")}><span className="flex items-center justify-between gap-2"><span className="font-semibold">{lesson.title}</span><span className="text-xs text-teal-700">{done?"Completada":"Pendiente"}</span></span>{lesson.estimated_minutes&&<span className="mt-1 block text-xs text-slate-500">{lesson.estimated_minutes} minutos</span>}</button>})}</div></section>)}</aside>
       <section className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">{selectedLesson?<><p className="text-xs font-bold uppercase tracking-wide text-[#087DB5]">Lección</p><h2 className="mt-2 text-2xl font-bold">{selectedLesson.title}</h2>{selectedLesson.summary&&<p className="mt-3 text-sm leading-6 text-slate-600">{selectedLesson.summary}</p>}{selectedLesson.objectives.length>0&&<div className="mt-5 rounded-xl bg-slate-50 p-4"><h3 className="font-bold">Objetivos de aprendizaje</h3><ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">{selectedLesson.objectives.map((objective,index)=><li key={index}>{objective}</li>)}</ul></div>}{bodyText(selectedLesson.content)&&<pre className="mt-6 whitespace-pre-wrap break-words rounded-xl bg-slate-50 p-4 text-sm leading-7 text-slate-700">{bodyText(selectedLesson.content)}</pre>}
         <div className="mt-7 border-t border-slate-100 pt-5"><h3 className="font-bold">Materiales de la lección</h3>{materials.length?<div className="mt-3 space-y-3">{materials.map(item=><article key={item.id} className="rounded-xl border border-slate-100 p-4"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="font-semibold">{item.title}</p><p className="mt-1 text-xs text-slate-500">{labels[item.material_type]??item.material_type}</p>{item.description&&<p className="mt-2 text-sm text-slate-600">{item.description}</p>}</div>{(item.storage_path||item.external_url)&&<button onClick={()=>void openMaterial(item)} className="rounded-lg bg-[#087DB5] px-3 py-2 text-xs font-semibold text-white">Abrir recurso</button>}</div>{item.content&&<p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">{item.content}</p>}</article>)}</div>:<p className="mt-3 rounded-xl border border-dashed border-slate-200 p-5 text-sm text-slate-500">No hay materiales publicados para esta lección.</p>}</div>
-        <div className="mt-7 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-5"><span className="text-sm text-slate-500">{selectedProgress?.status==="completed"?"Lección completada":"Al terminar, registra tu avance."}</span><button disabled={busy||selectedProgress?.status==="completed"} onClick={()=>void completeLesson()} className="rounded-xl bg-[#19A7A0] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">{busy?"Guardando...":selectedProgress?.status==="completed"?"Completada":"Marcar como completada"}</button></div>
+        <div className="mt-7 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-5"><span className="text-sm text-slate-500">{selectedProgress?.status==="completed"?"Lección completada":"Puedes guardar tu avance sin declarar la lección completada."}</span><button disabled={busy||selectedProgress?.status==="completed"} onClick={()=>void saveLessonProgress()} className="rounded-xl bg-[#19A7A0] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">{busy?"Guardando...":selectedProgress?.status==="completed"?"Completada":"Guardar avance"}</button></div>
       </>:<p className="py-12 text-center text-sm text-slate-500">Este curso todavía no tiene lecciones publicadas.</p>}</section></div>
     </>}
   </div></main>;
