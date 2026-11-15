@@ -591,10 +591,13 @@ export default function DashboardPage() {
   return (
     <main className={`min-h-screen ${background} ${primaryText}`}>
       <div className="flex min-h-screen">
-        {/* MENÚ LATERAL */}
+        {mobileMenuOpen && (
+          <button type="button" aria-label="Cerrar menú" onClick={() => setMobileMenuOpen(false)} className="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-[2px] lg:hidden" />
+        )}
+        {/* MENÚ LATERAL: persistente en escritorio y drawer en móvil. */}
         <aside
           data-collapsed={sidebarCollapsed}
-          className={`hidden shrink-0 flex-col border-r transition-[width] duration-200 lg:flex ${sidebarCollapsed ? "w-20" : "w-64"} ${borderColor} ${surface}`}
+          className={`${mobileMenuOpen ? "fixed inset-y-0 left-0 z-50 flex w-72 shadow-2xl" : "fixed inset-y-0 left-0 z-50 hidden w-72"} shrink-0 flex-col border-r transition-[width,transform] duration-200 lg:sticky lg:top-0 lg:z-20 lg:flex lg:h-screen lg:shadow-none ${sidebarCollapsed ? "lg:w-20" : "lg:w-64"} ${borderColor} ${surface}`}
         >
           <div className="border-b border-inherit p-4">
             <div className="flex items-center justify-between gap-2">
@@ -759,14 +762,16 @@ export default function DashboardPage() {
         <section className="min-w-0 flex-1">
           {/* ENCABEZADO */}
           <header
-            className={`flex items-center justify-between border-b ${borderColor} ${surface} px-5 py-4 md:px-8`}
+            className={`flex items-center justify-between border-b ${borderColor} ${surface} px-4 py-4 md:px-8`}
           >
-            <div>
-              <p className={`text-xs font-medium ${secondaryText}`}>
-                ACADEMIA DECOM
-              </p>
-
-              <h2 className="mt-1 text-lg font-bold">Panel principal</h2>
+            <div className="flex min-w-0 items-center gap-3">
+              <button type="button" onClick={() => setMobileMenuOpen(true)} aria-label="Abrir menú de navegación" aria-expanded={mobileMenuOpen} className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${borderColor} lg:hidden`}>
+                <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+              </button>
+              <div>
+                <p className={`text-xs font-medium ${secondaryText}`}>ACADEMIA DECOM</p>
+                <h2 className="mt-1 text-lg font-bold">Panel principal</h2>
+              </div>
             </div>
 
             <div className="flex items-center gap-2">
