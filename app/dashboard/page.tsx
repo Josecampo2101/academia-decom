@@ -1251,15 +1251,15 @@ export default function DashboardPage() {
                                 Área
                               </th>
 
-                              <th className="px-4 py-4 font-semibold">
+                              <th scope="col" className="px-4 py-4 font-semibold">
                                 Descripción
                               </th>
 
-                              <th className="px-4 py-4 font-semibold">
+                              <th scope="col" className="px-4 py-4 font-semibold">
                                 Estado
                               </th>
 
-                              <th className="px-4 py-4 font-semibold">
+                              <th scope="col" className="px-4 py-4 font-semibold">
                                 Acciones
                               </th>
                             </tr>
