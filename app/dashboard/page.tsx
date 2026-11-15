@@ -162,7 +162,20 @@ export default function DashboardPage() {
     roleKeys.includes("district_coordinator") ||
     roleKeys.includes("area_coordinator");
 
-  // Restaurar preferencia visual del menú lateral.\n  useEffect(() => {\n    const saved = localStorage.getItem("academia-sidebar-collapsed");\n    if (saved === "true" || saved === "false") {\n      setSidebarCollapsed(saved === "true");\n    }\n  }, []);\n\n  // Persistir el estado del menú lateral.\n  useEffect(() => {\n    localStorage.setItem("academia-sidebar-collapsed", String(sidebarCollapsed));\n  }, [sidebarCollapsed]);\n\n  // Cargar preferencia de tema.
+  // Restaurar y persistir la preferencia visual del menú lateral.
+  useEffect(() => {
+    const saved = localStorage.getItem("academia-sidebar-collapsed");
+    if (saved === "true" || saved === "false") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSidebarCollapsed(saved === "true");
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("academia-sidebar-collapsed", String(sidebarCollapsed));
+  }, [sidebarCollapsed]);
+
+  // Cargar preferencia de tema.
   useEffect(() => {
     const updateDailyContent = () => {
       const now = new Date();
@@ -627,6 +640,7 @@ export default function DashboardPage() {
 
             <a
               href="/dashboard"
+              onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-3 rounded-xl bg-[#087DB5]/10 px-4 py-3 text-sm font-semibold text-[#087DB5]"
             >
               <span aria-hidden="true">⌂</span>{!sidebarCollapsed && <span>Inicio</span>}
@@ -677,6 +691,7 @@ export default function DashboardPage() {
             {canManageTutorAssignments && (
               <a
                 href="/dashboard/administracion/tutores"
+              onClick={() => setMobileMenuOpen(false)}
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
                 <span className="text-lg">♙</span>
@@ -687,6 +702,7 @@ export default function DashboardPage() {
             {canManageAcademicCatalog && (
               <a
                 href="/dashboard/administracion/actividades"
+              onClick={() => setMobileMenuOpen(false)}
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
                 <span className="text-lg">✓</span>
@@ -697,6 +713,7 @@ export default function DashboardPage() {
             {canManageAcademicCatalog && (
               <a
                 href="/dashboard/administracion/catalogo"
+              onClick={() => setMobileMenuOpen(false)}
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
                 <span className="text-lg">▤</span>
@@ -707,6 +724,7 @@ export default function DashboardPage() {
             {canManageLibrary && (
               <a
                 href="/dashboard/administracion/biblioteca"
+              onClick={() => setMobileMenuOpen(false)}
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
                 <span className="text-lg">▣</span>
@@ -717,6 +735,7 @@ export default function DashboardPage() {
             {canManageInvitations && (
               <a
                 href="/dashboard/invitaciones"
+              onClick={() => setMobileMenuOpen(false)}
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
                 <span className="text-lg">✉</span>
@@ -728,6 +747,7 @@ export default function DashboardPage() {
             {canManageTransfers && (
               <a
                 href="/dashboard/reubicaciones"
+              onClick={() => setMobileMenuOpen(false)}
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
                 <span className="text-lg">⇄</span>
