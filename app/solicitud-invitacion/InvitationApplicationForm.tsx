@@ -3,14 +3,11 @@
 import Script from "next/script";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 
-type InvitationType = "guest" | "decom_member";
 type Option = { id: string; name: string };
 type InvitationInfo = {
   valid: true;
-  invitationType: InvitationType;
   districtName: string;
   congregations: Option[];
-  roles: Option[];
 };
 
 declare global {
@@ -46,7 +43,6 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
   const [phone, setPhone] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [congregationId, setCongregationId] = useState("");
-  const [requestedRoleId, setRequestedRoleId] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [message, setMessage] = useState("");
@@ -98,10 +94,8 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
       message?: string;
       valid?: boolean;
       success?: boolean;
-      invitationType?: InvitationType;
       districtName?: string;
       congregations?: Option[];
-      roles?: Option[];
     };
 
     if (!response.ok) {
@@ -125,16 +119,13 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
 
       if (
         result.valid &&
-        result.invitationType &&
         result.districtName &&
         result.congregations
       ) {
         setInvitation({
           valid: true,
-          invitationType: result.invitationType,
           districtName: result.districtName,
           congregations: result.congregations,
-          roles: result.roles ?? [],
         });
         setMessage(
           result.congregations.length
@@ -169,8 +160,6 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
         phone,
         dateOfBirth,
         congregationId,
-        requestedRoleId:
-          invitation.invitationType === "decom_member" ? requestedRoleId : null,
       });
 
       if (result.success) {
@@ -191,17 +180,15 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
   }
 
   const canValidate = Boolean(token && captchaToken && !loading);
-  const canSubmit =
-    Boolean(
-      captchaToken &&
-        fullName.trim() &&
-        email.trim() &&
-        phone.trim() &&
-        dateOfBirth &&
-        congregationId &&
-        !loading
-    ) &&
-    (invitation?.invitationType !== "decom_member" || Boolean(requestedRoleId));
+  const canSubmit = Boolean(
+    captchaToken &&
+      fullName.trim() &&
+      email.trim() &&
+      phone.trim() &&
+      dateOfBirth &&
+      congregationId &&
+      !loading
+  );
 
   return (
     <main className="min-h-screen bg-[#F4F7FA] px-4 py-8 text-[#102D4D] sm:px-6">
@@ -233,9 +220,9 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
               Solicitud de ingreso
             </h1>
             <p className="mt-3 max-w-xl text-sm leading-6 text-blue-100">
-              Completa tus datos para solicitar tu vinculación. Toda solicitud
-              debe ser revisada y aprobada por la administración antes de activar
-              el acceso a la plataforma.
+              Completa tus datos para solicitar tu vinculación como estudiante.
+              Toda solicitud debe ser revisada y aprobada por la administración
+              antes de activar el acceso a la plataforma.
             </p>
           </div>
 
@@ -287,14 +274,6 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
                   <p className="font-bold text-[#087DB5]">Invitación validada</p>
                   <p className="mt-1 text-slate-600">
                     Distrito: <strong>{invitation.districtName}</strong>
-                  </p>
-                  <p className="mt-1 text-slate-600">
-                    Tipo:{" "}
-                    <strong>
-                      {invitation.invitationType === "guest"
-                        ? "Invitado"
-                        : "Integrante de DECOM"}
-                    </strong>
                   </p>
                 </div>
 
@@ -363,30 +342,7 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
                         </option>
                       ))}
                     </select>
-                  </label>
-                  {invitation.invitationType === "decom_member" ? (
-                    <label className="text-sm font-semibold sm:col-span-2">
-                      Rol institucional que solicitas
-                      <select
-                        required
-                        value={requestedRoleId}
-                        onChange={(event) => setRequestedRoleId(event.target.value)}
-                        className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 font-normal outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10"
-                      >
-                        <option value="">Selecciona el rol que deseas solicitar</option>
-                        {invitation.roles.map((role) => (
-                          <option key={role.id} value={role.id}>
-                            {role.name}
-                          </option>
-                        ))}
-                      </select>
-                      <span className="mt-2 block text-xs font-normal text-slate-500">
-                        La selección no concede el rol automáticamente. Requiere
-                        aprobación administrativa.
-                      </span>
-                    </label>
-                  ) : null}
-                </div>
+                  </label>                </div>
 
                 <button
                   type="submit"
