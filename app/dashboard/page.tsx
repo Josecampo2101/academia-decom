@@ -3,6 +3,8 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { ArrowLeftRight, Award, BookOpen, ChevronLeft, ChevronRight, ClipboardCheck, Clock3, Home, Library, LogOut, Mail, Menu, Monitor, Moon, Settings, Sun, UserRound, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 type Theme = "light" | "dark" | "system";
@@ -24,42 +26,57 @@ const modules = [
   {
     name: "Mi formación",
     description: "Continúa tus procesos de aprendizaje.",
-    icon: "▤",
+    icon: BookOpen,
     color: "#087DB5",
   },
   {
     name: "Biblioteca",
     description: "Consulta documentos y recursos académicos.",
-    icon: "▣",
+    icon: Library,
     color: "#19A7A0",
   },
   {
     name: "Evaluaciones",
     description: "Desarrolla actividades y pruebas.",
-    icon: "✓",
+    icon: ClipboardCheck,
     color: "#D99A24",
   },
   {
     name: "Seguimiento",
     description: "Consulta tu progreso académico.",
-    icon: "◷",
+    icon: Clock3,
     color: "#8064B5",
   },
   {
     name: "Reconocimientos",
     description: "Consulta tus logros institucionales.",
-    icon: "✧",
+    icon: Award,
     color: "#D18A43",
   },
+];
+
+const dailyVerses = [
+  { text: "Todo lo que hagáis, hacedlo de corazón, como para el Señor y no para los hombres.", reference: "Colosenses 3:23" },
+  { text: "Hágase todo decentemente y con orden.", reference: "1 Corintios 14:40" },
+  { text: "La respuesta suave quita la ira.", reference: "Proverbios 15:1" },
+  { text: "Encomienda a Jehová tus obras, y tus pensamientos serán afirmados.", reference: "Proverbios 16:3" },
+  { text: "El que es fiel en lo muy poco, también en lo más es fiel.", reference: "Lucas 16:10" },
+  { text: "La blanda respuesta quita la ira; mas la palabra áspera hace subir el furor.", reference: "Proverbios 15:1" },
+  { text: "Todo lo puedo en Cristo que me fortalece.", reference: "Filipenses 4:13" },
 ];
 
 export default function DashboardPage() {
   const router = useRouter();
 
   const [theme, setTheme] = useState<Theme>("system");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [displayName, setDisplayName] = useState("Bienvenido");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [greeting, setGreeting] = useState("Bienvenido");
+  const [dailyVerseIndex, setDailyVerseIndex] = useState(0);
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
 
-  const [email, setEmail] = useState("");
   const [roleName, setRoleName] = useState("Consultando permisos...");
   const [roleKeys, setRoleKeys] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -147,7 +164,42 @@ export default function DashboardPage() {
     roleKeys.includes("district_coordinator") ||
     roleKeys.includes("area_coordinator");
 
+  // Restaurar y persistir la preferencia visual del menú lateral.
+  useEffect(() => {
+    const saved = localStorage.getItem("academia-sidebar-collapsed");
+    if (saved === "true" || saved === "false") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSidebarCollapsed(saved === "true");
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("academia-sidebar-collapsed", String(sidebarCollapsed));
+  }, [sidebarCollapsed]);
+
   // Cargar preferencia de tema.
+  useEffect(() => {
+    const updateDailyContent = () => {
+      const now = new Date();
+      const hour = Number(new Intl.DateTimeFormat("en-US", {
+        hour: "2-digit",
+        hourCycle: "h23",
+        timeZone: "America/Bogota",
+      }).format(now));
+      setGreeting(hour >= 5 && hour < 12 ? "Buenos días" : hour >= 12 && hour < 18 ? "Buenas tardes" : "Buenas noches");
+
+      const localDay = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Bogota",
+      }).format(now);
+      const dayNumber = Math.floor(Date.parse(`${localDay}T00:00:00Z`) / 86_400_000);
+      setDailyVerseIndex(((dayNumber % dailyVerses.length) + dailyVerses.length) % dailyVerses.length);
+    };
+
+    updateDailyContent();
+    const interval = window.setInterval(updateDailyContent, 60_000);
+    return () => window.clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     const savedTheme = localStorage.getItem("academia-theme") as Theme | null;
 
@@ -166,9 +218,9 @@ export default function DashboardPage() {
     const media = window.matchMedia("(prefers-color-scheme: dark)");
 
     function updateTheme() {
-      setResolvedTheme(
-        theme === "system" ? (media.matches ? "dark" : "light") : theme
-      );
+      const nextTheme = theme === "system" ? (media.matches ? "dark" : "light") : theme;
+      setResolvedTheme(nextTheme);
+      document.documentElement.classList.toggle("dark", nextTheme === "dark");
     }
 
     updateTheme();
@@ -224,7 +276,37 @@ export default function DashboardPage() {
         return;
       }
 
-      setEmail(data.user.email ?? "");
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("full_name, phone, avatar_path")
+        .eq("id", data.user.id)
+        .maybeSingle();
+
+      if (!active) return;
+
+      if (profileError) {
+        console.error("Error consultando el perfil institucional:", profileError);
+        router.replace("/dashboard/perfil");
+        return;
+      }
+
+      if (!profile || !profile.full_name?.trim() || !profile.phone?.trim()) {
+        router.replace("/dashboard/perfil");
+        return;
+      }
+
+      setDisplayName(profile.full_name.trim());
+
+      if (profile.avatar_path) {
+        const { data: avatar, error: avatarError } = await supabase.storage
+          .from("decom-profile-avatars")
+          .createSignedUrl(profile.avatar_path, 60 * 60);
+
+        if (active && !avatarError && avatar?.signedUrl) {
+          setAvatarUrl(avatar.signedUrl);
+        }
+      }
 
       const { data: permissionTest, error: permissionError } =
         await supabase.rpc("has_role", {
@@ -504,6 +586,8 @@ export default function DashboardPage() {
     router.refresh();
   }
 
+  const dailyVerse = dailyVerses[dailyVerseIndex];
+
   const dark = resolvedTheme === "dark";
 
   const surface = dark ? "bg-[#1C2B3D]" : "bg-white";
@@ -548,24 +632,30 @@ export default function DashboardPage() {
   return (
     <main className={`min-h-screen ${background} ${primaryText}`}>
       <div className="flex min-h-screen">
-        {/* MENÚ LATERAL */}
+        {mobileMenuOpen && (
+          <button type="button" aria-label="Cerrar menú" onClick={() => setMobileMenuOpen(false)} className="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-[2px] lg:hidden" />
+        )}
+        {/* MENÚ LATERAL: persistente en escritorio y drawer en móvil. */}
         <aside
-          className={`hidden w-64 shrink-0 flex-col border-r ${borderColor} ${surface} lg:flex`}
+          data-collapsed={sidebarCollapsed}
+          className={`${mobileMenuOpen ? "fixed inset-y-0 left-0 z-50 flex w-72 shadow-2xl" : "fixed inset-y-0 left-0 z-50 hidden w-72"} shrink-0 flex-col border-r transition-[width,transform] duration-200 lg:sticky lg:top-0 lg:z-20 lg:flex lg:h-screen lg:shadow-none ${sidebarCollapsed ? "lg:w-20" : "lg:w-64"} ${borderColor} ${surface}`}
         >
-          <div className="border-b border-inherit p-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#087DB5] text-2xl text-white">
-                ✦
+          <div className="border-b border-inherit p-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0B3970] text-sm font-black text-white">
+                  D34
+                </div>
+                {!sidebarCollapsed && <div className="min-w-0">
+                  <h1 className="text-xs font-bold tracking-wide">
+                    ESCUELA DE COMUNICACIONES
+                  </h1>
+                  <p className={`text-xs ${secondaryText}`}>Distrito 34 · IPUC</p>
+                </div>}
               </div>
-
-              <div>
-                <h1 className="text-sm font-bold tracking-wide">
-                  ACADEMIA DECOM
-                </h1>
-                <p className={`text-xs ${secondaryText}`}>
-                  Plataforma de formación
-                </p>
-              </div>
+              <button type="button" onClick={() => setSidebarCollapsed((value) => !value)} aria-label={sidebarCollapsed ? "Expandir menú" : "Contraer menú"} title={sidebarCollapsed ? "Expandir menú" : "Contraer menú"} className={`hidden rounded-lg p-2 transition hover:bg-[#087DB5]/10 lg:inline-flex ${secondaryText}`}>
+                {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+              </button>
             </div>
           </div>
 
@@ -573,21 +663,22 @@ export default function DashboardPage() {
             <p
               className={`mb-4 px-3 text-xs font-bold uppercase tracking-wider ${secondaryText}`}
             >
-              Menú principal
+              {!sidebarCollapsed && "Menú principal"}
             </p>
 
             <a
               href="/dashboard"
+              onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-3 rounded-xl bg-[#087DB5]/10 px-4 py-3 text-sm font-semibold text-[#087DB5]"
             >
-              <span>⌂</span> Inicio
+              <Home className="h-5 w-5 shrink-0" aria-hidden="true" />{!sidebarCollapsed && <span>Inicio</span>}
             </a>
 
             {modules.map((module) => (
               <button
                 key={module.name}
                 type="button"
-                onClick={() => openAcademicModule(module.name)}
+                onClick={() => { openAcademicModule(module.name); setMobileMenuOpen(false); }}
                 disabled={
                   !roleKeys.includes("member") &&
                   !(module.name === "Seguimiento" && roleKeys.includes("tutor")) &&
@@ -602,8 +693,8 @@ export default function DashboardPage() {
                 }
                 className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] disabled:cursor-not-allowed disabled:opacity-50 ${secondaryText}`}
               >
-                <span>{module.icon}</span>
-                {module.name}
+                <module.icon className="h-5 w-5 shrink-0" aria-hidden="true" />
+                {!sidebarCollapsed && <span>{module.name}</span>}
               </button>
             ))}
 
@@ -612,7 +703,7 @@ export default function DashboardPage() {
             <p
               className={`px-3 text-xs font-bold uppercase tracking-wider ${secondaryText}`}
             >
-              Institucional
+              {!sidebarCollapsed && "Institucional"}
             </p>
 
             <div
@@ -622,56 +713,61 @@ export default function DashboardPage() {
                   : `${secondaryText} opacity-50`
               }`}
             >
-              <span>⚙</span> Administración
+              <Settings className="h-5 w-5 shrink-0" aria-hidden="true" />{!sidebarCollapsed && <span>Administración</span>}
             </div>
 
             {canManageTutorAssignments && (
               <a
                 href="/dashboard/administracion/tutores"
+              onClick={() => setMobileMenuOpen(false)}
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
-                <span className="text-lg">♙</span>
-                <span>Asignación de tutores</span>
+                <Users className="h-5 w-5 shrink-0" aria-hidden="true" />
+                {!sidebarCollapsed && <span>Asignación de tutores</span>}
               </a>
             )}
 
             {canManageAcademicCatalog && (
               <a
                 href="/dashboard/administracion/actividades"
+              onClick={() => setMobileMenuOpen(false)}
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
-                <span className="text-lg">✓</span>
-                <span>Actividades y evaluaciones</span>
+                <ClipboardCheck className="h-5 w-5 shrink-0" aria-hidden="true" />
+                {!sidebarCollapsed && <span>Actividades y evaluaciones</span>}
               </a>
             )}
 
             {canManageAcademicCatalog && (
               <a
                 href="/dashboard/administracion/catalogo"
+              onClick={() => setMobileMenuOpen(false)}
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
-                <span className="text-lg">▤</span>
-                <span>Catálogo académico</span>
+                <BookOpen className="h-5 w-5 shrink-0" aria-hidden="true" />
+                {!sidebarCollapsed && <span>Catálogo académico</span>}
               </a>
             )}
 
             {canManageLibrary && (
               <a
                 href="/dashboard/administracion/biblioteca"
+              onClick={() => setMobileMenuOpen(false)}
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
-                <span className="text-lg">▣</span>
-                <span>Administrar biblioteca</span>
+                <Library className="h-5 w-5 shrink-0" aria-hidden="true" />
+                {!sidebarCollapsed && <span>Administrar biblioteca</span>}
               </a>
             )}
 
             {canManageInvitations && (
               <a
                 href="/dashboard/invitaciones"
+              onClick={() => setMobileMenuOpen(false)}
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
-                <span className="text-lg">✉</span>
-                <span>Invitaciones</span>
+                <Mail className="h-5 w-5 shrink-0" aria-hidden="true" />
+                {!sidebarCollapsed && <span>Invitaciones</span>}
               </a>
             )}
 
@@ -679,32 +775,31 @@ export default function DashboardPage() {
             {canManageTransfers && (
               <a
                 href="/dashboard/reubicaciones"
+              onClick={() => setMobileMenuOpen(false)}
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
-                <span className="text-lg">⇄</span>
-                <span>Reubicación de creyentes</span>
+                <ArrowLeftRight className="h-5 w-5 shrink-0" aria-hidden="true" />
+                {!sidebarCollapsed && <span>Reubicación de creyentes</span>}
               </a>
             )}
           </nav>
 
           {/* INFORMACIÓN DEL USUARIO */}
           <div className={`border-t ${borderColor} p-4`}>
-            <p className={`truncate text-xs ${secondaryText}`}>
+            {!sidebarCollapsed && <p className={`truncate text-xs ${secondaryText}`}>
               Sesión iniciada como
-            </p>
+            </p>}
 
-            <p className="mt-1 truncate text-sm font-semibold">{email}</p>
+            {!sidebarCollapsed && <p className="mt-1 truncate text-sm font-semibold">{displayName}</p>}
 
-            <p className="mt-1 text-xs font-semibold text-[#087DB5]">
-              {roleName}
-            </p>
+            {!sidebarCollapsed && <p className="mt-1 text-xs font-semibold text-[#087DB5]">{roleName}</p>}
 
             <button
               onClick={handleLogout}
               disabled={loggingOut}
               className="mt-4 w-full rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 disabled:opacity-50"
             >
-              {loggingOut ? "Cerrando..." : "Cerrar sesión"}
+              {loggingOut ? "Cerrando..." : sidebarCollapsed ? <LogOut className="mx-auto h-4 w-4" /> : "Cerrar sesión"}
             </button>
           </div>
         </aside>
@@ -713,14 +808,16 @@ export default function DashboardPage() {
         <section className="min-w-0 flex-1">
           {/* ENCABEZADO */}
           <header
-            className={`flex items-center justify-between border-b ${borderColor} ${surface} px-5 py-4 md:px-8`}
+            className={`flex items-center justify-between border-b ${borderColor} ${surface} px-4 py-4 md:px-8`}
           >
-            <div>
-              <p className={`text-xs font-medium ${secondaryText}`}>
-                ACADEMIA DECOM
-              </p>
-
-              <h2 className="mt-1 text-lg font-bold">Panel principal</h2>
+            <div className="flex min-w-0 items-center gap-3">
+              <button type="button" onClick={() => setMobileMenuOpen(true)} aria-label="Abrir menú de navegación" aria-expanded={mobileMenuOpen} className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${borderColor} lg:hidden`}>
+                <Menu className="h-5 w-5" aria-hidden="true" />
+              </button>
+              <div>
+                <p className={`text-xs font-medium ${secondaryText}`}>ACADEMIA DECOM</p>
+                <h2 className="mt-1 text-lg font-bold">Panel principal</h2>
+              </div>
             </div>
 
             <div className="flex items-center gap-2">
@@ -745,18 +842,26 @@ export default function DashboardPage() {
                         : secondaryText
                     }`}
                   >
-                    {item === "light"
-                      ? "☀"
-                      : item === "dark"
-                      ? "☾"
-                      : "◐"}
+                    {item === "light" ? <Sun className="h-4 w-4" /> : item === "dark" ? <Moon className="h-4 w-4" /> : <Monitor className="h-4 w-4" />}
                   </button>
                 ))}
               </div>
 
-              <div className="hidden rounded-xl bg-[#087DB5]/10 px-3 py-2 text-sm font-semibold text-[#087DB5] sm:block">
-                {email}
-              </div>
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/perfil")}
+                title="Editar perfil institucional"
+                className="inline-flex min-w-0 items-center gap-2 rounded-xl bg-[#087DB5]/10 px-2.5 py-2 text-sm font-semibold text-[#087DB5] transition hover:bg-[#087DB5]/15"
+              >
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#087DB5]/15">
+                  {avatarUrl ? (
+                    <Image src={avatarUrl} alt="" width={64} height={64} unoptimized className="h-full w-full object-cover" />
+                  ) : (
+                    <UserRound className="h-4 w-4" aria-hidden="true" />
+                  )}
+                </span>
+                <span className="hidden max-w-[160px] truncate sm:block">{displayName}</span>
+              </button>
 
               <button
                 onClick={handleLogout}
@@ -780,8 +885,11 @@ export default function DashboardPage() {
                   Formación institucional
                 </p>
 
-                <h2 className="mt-4 text-3xl font-bold md:text-4xl">
-                  Bienvenido a Academia DECOM
+                <p className="mt-4 text-sm font-semibold text-[#9BDCF5]">
+                  {greeting}
+                </p>
+                <h2 className="mt-2 text-3xl font-bold md:text-4xl">
+                  {displayName === "Bienvenido" ? "Bienvenido a tu escuela" : `Bienvenido, ${displayName}`}
                 </h2>
 
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-100">
@@ -795,6 +903,20 @@ export default function DashboardPage() {
                   Formación para comunicar con propósito.
                 </p>
               </div>
+            </section>
+
+            <section className={`mt-6 rounded-2xl border ${borderColor} ${surface} p-5 shadow-sm md:p-6`}>
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#FFBD00]/15 text-[#B78100]">✦</div>
+                <div>
+                  <p className="text-sm font-bold">Versículo del día</p>
+                  <p className={`text-xs ${secondaryText}`}>Una palabra para acompañar tu servicio</p>
+                </div>
+              </div>
+              <blockquote className="mt-4 text-base font-semibold leading-7">
+                «{dailyVerse.text}»
+              </blockquote>
+              <p className="mt-2 text-sm font-bold text-[#087DB5]">{dailyVerse.reference}</p>
             </section>
 
             {/* PERFIL */}
@@ -1227,7 +1349,7 @@ export default function DashboardPage() {
                         color: module.color,
                       }}
                     >
-                      {module.icon}
+                      <module.icon className="h-6 w-6" aria-hidden="true" />
                     </div>
 
                     <h4 className="mt-5 font-bold">{module.name}</h4>
