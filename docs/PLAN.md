@@ -50,6 +50,8 @@
 
 ## Fase 1 — Layout institucional y sidebar
 
+**Estado:** en curso. PR #56 abierta como Draft: https://github.com/Josecampo2101/academia-decom/pull/56.
+
 **Objetivo:** establecer un shell de navegación consistente, accesible y adaptable.
 
 **Qué se modifica**
