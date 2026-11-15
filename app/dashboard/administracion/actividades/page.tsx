@@ -3,86 +3,920 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-type Row = { id:string; title:string; status:string; district_id:string; program_id?:string; course_id?:string; module_id?:string; lesson_id?:string; description?:string|null; [key:string]:unknown };
-type RubricCriterion = { id?:string; activity_id?:string; title:string; description:string|null; max_points:number; sort_order:number };
-type RubricDraft = { id?:string; title:string; description:string; max_points:number; sort_order:number };
-type ActivityAssignment = { activity_id:string };
-type Activity = Row & { course_id:string; module_id:string; lesson_id:string; instructions:string; response_type:"text"|"file"|"link"|"mixed"; total_points:number; max_attempts:number; due_at:string|null; criteria:RubricCriterion[]; courseTitle:string; moduleTitle:string; lessonTitle:string; assigned:number };
-const blank = { title:"", description:"", instructions:"", program_id:"", course_id:"", module_id:"", lesson_id:"", response_type:"text" as "text"|"file"|"link"|"mixed", total_points:100, max_attempts:2, due_at:"" };
-const label = (s:string) => s==="published"?"Publicado":s==="archived"?"Archivado":"Borrador";
+type Row = {
+  id: string;
+  title: string;
+  status: string;
+  district_id: string;
+  program_id?: string;
+  course_id?: string;
+  module_id?: string;
+  lesson_id?: string;
+  description?: string | null;
+  [key: string]: unknown;
+};
+type RubricCriterion = {
+  id?: string;
+  activity_id?: string;
+  title: string;
+  description: string | null;
+  max_points: number;
+  sort_order: number;
+};
+type RubricDraft = {
+  id?: string;
+  title: string;
+  description: string;
+  max_points: number;
+  sort_order: number;
+};
+type ActivityAssignment = { activity_id: string };
+type Activity = Row & {
+  course_id: string;
+  module_id: string;
+  lesson_id: string;
+  instructions: string;
+  response_type: "text" | "file" | "link" | "mixed";
+  total_points: number;
+  max_attempts: number;
+  due_at: string | null;
+  criteria: RubricCriterion[];
+  courseTitle: string;
+  moduleTitle: string;
+  lessonTitle: string;
+  assigned: number;
+};
+const blank = {
+  title: "",
+  description: "",
+  instructions: "",
+  program_id: "",
+  course_id: "",
+  module_id: "",
+  lesson_id: "",
+  response_type: "text" as "text" | "file" | "link" | "mixed",
+  total_points: 100,
+  max_attempts: 2,
+  due_at: "",
+};
+const label = (s: string) =>
+  s === "published" ? "Publicado" : s === "archived" ? "Archivado" : "Borrador";
 export default function AcademicActivitiesAdminPage() {
- const router=useRouter(), supabase=useMemo(()=>createClient(),[]);
- const [access,setAccess]=useState("checking"),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[publishScope,setPublishScope]=useState<{global:boolean;districtIds:string[]}>({global:false,districtIds:[]});
- const [programs,setPrograms]=useState<Row[]>([]),[courses,setCourses]=useState<Row[]>([]),[modules,setModules]=useState<Row[]>([]),[lessons,setLessons]=useState<Row[]>([]),[activities,setActivities]=useState<Activity[]>([]);
- const [form,setForm]=useState(blank),[criteria,setCriteria]=useState<RubricDraft[]>([{title:"Dominio del tema",description:"Comprensión y aplicación del contenido.",max_points:100,sort_order:0}]);
- const [editing,setEditing]=useState<string|null>(null),[open,setOpen]=useState(false),[search,setSearch]=useState(""),[filter,setFilter]=useState("all"),[notice,setNotice]=useState(""),[error,setError]=useState("");
- const load=useCallback(async()=>{
-  try {
-   const [p,c,m,l,a]=await Promise.all([
-    supabase.from("academic_programs").select("id,title,status,district_id").order("sort_order"),
-    supabase.from("courses").select("id,title,status,program_id,district_id").order("sort_order"),
-    supabase.from("course_modules").select("id,title,status,course_id,district_id").order("sort_order"),
-    supabase.from("lessons").select("id,title,status,module_id,district_id").order("sort_order"),
-    supabase.from("academic_activities").select("*").order("updated_at",{ascending:false})
-   ]);
-   setError("");
-   for(const r of [p,c,m,l,a]) if(r.error) throw r.error;
-   const ps=(p.data??[]) as Row[], cs=(c.data??[]) as Row[], ms=(m.data??[]) as Row[], ls=(l.data??[]) as Row[], acts=(a.data??[]) as Row[];
-   setPrograms(ps);setCourses(cs);setModules(ms);setLessons(ls);
-   let rub:RubricCriterion[]=[];let ass:ActivityAssignment[]=[];
-   if(acts.length){const ids=acts.map(x=>x.id);const [r,s]=await Promise.all([supabase.from("academic_activity_rubric_criteria").select("id,activity_id,title,description,max_points,sort_order").in("activity_id",ids).order("sort_order"),supabase.from("academic_activity_assignments").select("activity_id").in("activity_id",ids).eq("status","active")]);if(r.error)throw r.error;if(s.error)throw s.error;rub=(r.data??[]) as RubricCriterion[];ass=(s.data??[]) as ActivityAssignment[];}
-   setActivities(acts.map(x=>({...x,criteria:rub.filter(y=>y.activity_id===x.id),assigned:ass.filter(y=>y.activity_id===x.id).length,courseTitle:cs.find(y=>y.id===x.course_id)?.title??"Curso no disponible",moduleTitle:ms.find(y=>y.id===x.module_id)?.title??"Módulo no disponible",lessonTitle:ls.find(y=>y.id===x.lesson_id)?.title??"Lección no disponible"})) as Activity[]);
-  }catch(e){setError(e instanceof Error?e.message:"No fue posible consultar el catálogo.");}finally{setLoading(false);}
- },[supabase]);
- useEffect(()=>{let active=true;(async()=>{try{const {data:{user},error:authError}=await supabase.auth.getUser();if(authError||!user){router.replace("/conexion");return;}const {data:ua,error:uae}=await supabase.from("user_role_assignments").select("role_id,district_id").eq("user_id",user.id);if(uae)throw uae;const ids=[...new Set((ua??[]).map(x=>x.role_id))];const {data:roles,error:re}=ids.length?await supabase.from("roles").select("id,role_key").in("id",ids):{data:[],error:null};if(re)throw re;if(!active)return;const roleById=new Map((roles??[]).map(x=>[x.id,x.role_key]));const assignments=ua??[];const roleKeys=assignments.map(x=>roleById.get(x.role_id));setPublishScope({global:roleKeys.includes("national_admin"),districtIds:[...new Set(assignments.filter(x=>roleById.get(x.role_id)==="academic_editor"&&x.district_id).map(x=>x.district_id as string))]});setAccess(roleKeys.some(x=>["national_admin","academic_editor","district_coordinator","area_coordinator","tutor"].includes(x??""))?"allowed":"denied");}catch{if(active)setAccess("error");}})();return()=>{active=false};},[router,supabase]);
- useEffect(()=>{let active=true;if(access==="allowed")void Promise.resolve().then(()=>{if(active)return load();});return()=>{active=false;};},[access,load]);
- const courseOptions=courses.filter(x=>x.program_id===form.program_id),moduleOptions=modules.filter(x=>x.course_id===form.course_id),lessonOptions=lessons.filter(x=>x.module_id===form.module_id);
- const filtered=activities.filter(x=>(filter==="all"||x.status===filter)&&[x.title,x.courseTitle,x.moduleTitle,x.lessonTitle].join(" ").toLowerCase().includes(search.toLowerCase()));
- const canPublishActivity=(x:Activity)=>publishScope.global||publishScope.districtIds.includes(x.district_id);
- function create(){setEditing(null);setForm({...blank,program_id:programs[0]?.id??""});setCriteria([{title:"Dominio del tema",description:"Comprensión y aplicación del contenido.",max_points:100,sort_order:0}]);setOpen(true);setError("");setNotice("");}
- function edit(x:Activity){if(x.status!=="draft")return;setEditing(x.id);setForm({title:x.title,description:x.description??"",instructions:x.instructions,program_id:courses.find(y=>y.id===x.course_id)?.program_id??"",course_id:x.course_id,module_id:x.module_id,lesson_id:x.lesson_id,response_type:x.response_type,total_points:Number(x.total_points),max_attempts:x.max_attempts,due_at:x.due_at?new Date(x.due_at).toISOString().slice(0,16):""});setCriteria(x.criteria.map((r,i)=>({...r,description:r.description??"",max_points:Number(r.max_points),sort_order:i})));setOpen(true);setError("");}
- async function save(e:FormEvent){e.preventDefault();setSaving(true);setError("");try{
-  const p=programs.find(x=>x.id===form.program_id),c=courses.find(x=>x.id===form.course_id),m=modules.find(x=>x.id===form.module_id),l=lessons.find(x=>x.id===form.lesson_id);
-  if(!p||!c||!m||!l||c.program_id!==p.id||m.course_id!==c.id||l.module_id!==m.id)throw Error("Selecciona una jerarquía completa y válida: programa, curso, módulo y lección.");
-  if(form.title.trim().length<3||form.instructions.trim().length<10)throw Error("Completa el título y las instrucciones (mínimo 10 caracteres).");
-  if(form.max_attempts<1||form.max_attempts>10||!Number.isInteger(form.max_attempts))throw Error("Los intentos deben estar entre 1 y 10.");
-  const clean=criteria.map((x,i)=>({...x,title:x.title.trim(),description:x.description.trim(),sort_order:i}));
-  if(!clean.length||clean.some(x=>x.title.length<2||!Number.isFinite(x.max_points)||x.max_points<=0)||Math.abs(clean.reduce((s,x)=>s+x.max_points,0)-form.total_points)>.001)throw Error("La rúbrica debe tener criterios válidos y sumar exactamente el puntaje total.");
-  const {data:{user}}=await supabase.auth.getUser();if(!user)throw Error("La sesión expiró.");
-  const payload={district_id:l.district_id,course_id:c.id,module_id:m.id,lesson_id:l.id,title:form.title.trim(),description:form.description.trim()||null,instructions:form.instructions.trim(),activity_type:"individual",response_type:form.response_type,total_points:form.total_points,max_attempts:form.max_attempts,due_at:form.due_at?new Date(form.due_at).toISOString():null,updated_at:new Date().toISOString()};
-  let id=editing;
-  if(editing){const {error}=await supabase.from("academic_activities").update(payload).eq("id",editing).eq("status","draft");if(error)throw error;const {error:de}=await supabase.from("academic_activity_rubric_criteria").delete().eq("activity_id",editing);if(de)throw de;}
-  else{const {data,error}=await supabase.from("academic_activities").insert({...payload,created_by:user.id,status:"draft"}).select("id").single();if(error)throw error;id=data.id;}
-  if(!id)throw new Error("No fue posible identificar la actividad guardada.");
-  const activityId=id;
-  const {error:re}=await supabase.from("academic_activity_rubric_criteria").insert(clean.map(x=>({activity_id:activityId,district_id:l.district_id,title:x.title,description:x.description||null,max_points:x.max_points,sort_order:x.sort_order})));if(re)throw re;
-  setOpen(false);setNotice(editing?"Borrador actualizado en Supabase.":"Actividad guardada como borrador en Supabase.");await load();
- }catch(e){setError(e instanceof Error?e.message:"No fue posible guardar.");}finally{setSaving(false);}}
- async function publish(x:Activity){const p=programs.find(y=>y.id===courses.find(z=>z.id===x.course_id)?.program_id),c=courses.find(y=>y.id===x.course_id),m=modules.find(y=>y.id===x.module_id),l=lessons.find(y=>y.id===x.lesson_id);if([p,c,m,l].some(y=>y?.status!=="published")){setError("No se puede publicar: programa, curso, módulo y lección deben estar publicados.");return;}if(!x.criteria.length||Math.abs(x.criteria.reduce((s,r)=>s+Number(r.max_points),0)-Number(x.total_points))>.001){setError("La rúbrica no coincide con el puntaje total.");return;}if(!publishScope.global&&!publishScope.districtIds.includes(x.district_id)){setError("Tu rol permite preparar el borrador, pero la publicación está reservada al editor académico autorizado del distrito o a administración nacional.");return;}
-  setSaving(true);setError("");try{const {data:count,error:pe}=await supabase.rpc("publish_academic_activity",{p_activity_id:x.id});if(pe)throw pe;setNotice("Actividad publicada de forma transaccional. Asignaciones nuevas: "+(count??0)+". Si la operación fallaba, la publicación y las asignaciones se revertían juntas.");await load();}catch(e){setError(e instanceof Error?e.message:"No fue posible publicar.");await load();}finally{setSaving(false);}}
- async function archive(x:Activity){setSaving(true);try{const {error}=await supabase.from("academic_activities").update({status:"archived",updated_at:new Date().toISOString()}).eq("id",x.id).eq("status","published");if(error)throw error;setNotice("Actividad archivada.");await load();}catch(e){setError(e instanceof Error?e.message:"No fue posible archivar.");}finally{setSaving(false);}}
- if(access==="checking")return <main className="grid min-h-screen place-items-center bg-[#F4F7FA] text-sm text-slate-500">Verificando permisos...</main>;
- if(access!=="allowed")return <main className="grid min-h-screen place-items-center bg-[#F4F7FA] p-5"><section className="rounded-2xl bg-white p-7 text-center"><h1 className="text-xl font-bold">{access==="error"?"No fue posible verificar el acceso":"Acceso restringido"}</h1><p className="mt-2 text-sm text-slate-500">Se requieren permisos de administración académica.</p><button onClick={()=>router.replace("/dashboard")} className="mt-4 rounded-xl bg-[#087DB5] px-4 py-2 text-white">Volver</button></section></main>;
- return <main className="min-h-screen bg-[#F4F7FA] px-4 py-7 text-[#102D4D] sm:px-7 lg:px-10"><div className="mx-auto max-w-7xl">
-  <a href="/dashboard" className="text-xs font-semibold text-[#087DB5]">← Volver al panel</a>
-  <header className="mt-5 flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-widest text-[#19A7A0]">Planner académico</p><h1 className="mt-2 text-3xl font-extrabold">Actividades y evaluaciones</h1><p className="mt-2 text-sm text-slate-500">Crea actividades reales vinculadas al programa, curso, módulo y lección.</p></div><button onClick={create} disabled={loading||!programs.length} className="rounded-xl bg-[#087DB5] px-4 py-3 text-xs font-bold text-white disabled:opacity-50">＋ Nueva actividad</button></header>
-  <div className="mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4 text-xs leading-5 text-sky-900">Los borradores se guardan en Supabase. La publicación requiere que toda la jerarquía académica esté publicada; luego se generan asignaciones para las matrículas activas autorizadas.</div>
-  {notice&&<p role="status" className="mt-4 rounded-xl border border-teal-200 bg-teal-50 p-3 text-xs text-teal-800">{notice}</p>}{error&&<p role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">{error}</p>}
-  <section className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{[["Actividades",activities.length],["Borradores",activities.filter(x=>x.status==="draft").length],["Publicadas",activities.filter(x=>x.status==="published").length],["Asignaciones activas",activities.reduce((s,x)=>s+x.assigned,0)]].map(([k,v])=><article key={String(k)} className="rounded-2xl border border-slate-200 bg-white p-4"><p className="text-xs text-slate-400">{k}</p><p className="mt-2 text-2xl font-extrabold">{v}</p></article>)}</section>
-  <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5"><div className="grid gap-3 md:grid-cols-[1fr_180px]"><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar actividad, curso o lección..." className="rounded-xl border border-slate-200 px-3 py-3 text-sm"/><select value={filter} onChange={e=>setFilter(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"><option value="all">Todos los estados</option><option value="draft">Borradores</option><option value="published">Publicados</option><option value="archived">Archivados</option></select></div>
-  {loading?<p className="py-12 text-center text-sm text-slate-400">Consultando Supabase...</p>:filtered.length?<div className="mt-5 space-y-3">{filtered.map(x=><article key={x.id} className="rounded-xl border border-slate-100 p-4"><div className="flex flex-wrap justify-between gap-3"><div className="min-w-0"><span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold">{label(x.status)}</span><h2 className="mt-3 text-sm font-bold">{x.title}</h2><p className="mt-1 text-xs text-slate-500">{x.courseTitle} · {x.moduleTitle} · {x.lessonTitle}</p><p className="mt-2 text-xs text-slate-400">{x.total_points} puntos · {x.max_attempts} intentos · {x.assigned} asignaciones</p></div><div className="flex gap-2">{x.status==="draft"&&<><button onClick={()=>edit(x)} className="rounded-lg border px-3 py-2 text-xs">Editar</button>{canPublishActivity(x)&&<button disabled={saving} onClick={()=>void publish(x)} className="rounded-lg bg-[#087DB5] px-3 py-2 text-xs font-bold text-white">Publicar</button>}</>}{x.status==="published"&&canPublishActivity(x)&&<button disabled={saving} onClick={()=>void archive(x)} className="rounded-lg border px-3 py-2 text-xs">Archivar</button>}</div></div></article>)}</div>:<p className="py-12 text-center text-sm text-slate-400">No hay actividades registradas. Crea el primer borrador desde el catálogo académico.</p>}</section>
-  {open&&<div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/40 p-0 sm:items-center sm:p-5"><section role="dialog" aria-modal="true" className="max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-3xl bg-white p-5 sm:rounded-3xl sm:p-7"><div className="flex justify-between"><div><p className="text-xs font-bold uppercase tracking-wider text-[#19A7A0]">Editor académico</p><h2 className="mt-1 text-xl font-extrabold">{editing?"Editar borrador":"Planificar actividad"}</h2></div><button onClick={()=>setOpen(false)} className="rounded-lg border px-3 py-2">✕</button></div>
-  <form onSubmit={save} className="mt-5 space-y-4">
-   <section className="rounded-2xl bg-slate-50 p-4"><h3 className="text-sm font-bold">1. Ubicación curricular</h3><div className="mt-3 grid gap-3 sm:grid-cols-2">
-    <label className="text-xs font-semibold">Programa<select required value={form.program_id} onChange={e=>setForm(v=>({...v,program_id:e.target.value,course_id:"",module_id:"",lesson_id:""}))} className="mt-1 w-full rounded-xl border bg-white p-3">{programs.map(x=><option key={x.id} value={x.id}>{x.title} · {label(x.status)}</option>)}</select></label>
-    <label className="text-xs font-semibold">Curso<select required value={form.course_id} onChange={e=>setForm(v=>({...v,course_id:e.target.value,module_id:"",lesson_id:""}))} className="mt-1 w-full rounded-xl border bg-white p-3"><option value="">Selecciona</option>{courseOptions.map(x=><option key={x.id} value={x.id}>{x.title} · {label(x.status)}</option>)}</select></label>
-    <label className="text-xs font-semibold">Módulo<select required value={form.module_id} onChange={e=>setForm(v=>({...v,module_id:e.target.value,lesson_id:""}))} className="mt-1 w-full rounded-xl border bg-white p-3"><option value="">Selecciona</option>{moduleOptions.map(x=><option key={x.id} value={x.id}>{x.title} · {label(x.status)}</option>)}</select></label>
-    <label className="text-xs font-semibold">Lección<select required value={form.lesson_id} onChange={e=>setForm(v=>({...v,lesson_id:e.target.value}))} className="mt-1 w-full rounded-xl border bg-white p-3"><option value="">Selecciona</option>{lessonOptions.map(x=><option key={x.id} value={x.id}>{x.title} · {label(x.status)}</option>)}</select></label>
-   </div><p className="mt-2 text-[10px] text-slate-400">Puedes planificar sobre contenido en borrador; para publicar, programa, curso, módulo y lección deben estar publicados.</p></section>
-   <section className="rounded-2xl border p-4"><h3 className="text-sm font-bold">2. Diseño pedagógico</h3><label className="mt-3 block text-xs font-semibold">Título<input required minLength={3} maxLength={180} value={form.title} onChange={e=>setForm(v=>({...v,title:e.target.value}))} className="mt-1 w-full rounded-xl border p-3"/></label><label className="mt-3 block text-xs font-semibold">Propósito / descripción<textarea rows={2} value={form.description} onChange={e=>setForm(v=>({...v,description:e.target.value}))} className="mt-1 w-full rounded-xl border p-3"/></label><label className="mt-3 block text-xs font-semibold">Instrucciones para el estudiante<textarea required minLength={10} rows={5} value={form.instructions} onChange={e=>setForm(v=>({...v,instructions:e.target.value}))} placeholder="Contexto, propósito, pasos, producto esperado y condiciones de entrega..." className="mt-1 w-full rounded-xl border p-3"/></label></section>
-   <section className="rounded-2xl border p-4"><h3 className="text-sm font-bold">3. Entrega y programación</h3><div className="mt-3 grid gap-3 sm:grid-cols-2"><label className="text-xs font-semibold">Formato<select value={form.response_type} onChange={e=>setForm(v=>({...v,response_type:e.target.value as typeof blank.response_type}))} className="mt-1 w-full rounded-xl border bg-white p-3"><option value="text">Respuesta escrita</option><option value="file">Archivo adjunto</option><option value="link">Enlace externo</option><option value="mixed">Texto, archivo o enlace</option></select></label><label className="text-xs font-semibold">Fecha límite<input type="datetime-local" value={form.due_at} onChange={e=>setForm(v=>({...v,due_at:e.target.value}))} className="mt-1 w-full rounded-xl border p-3"/></label><label className="text-xs font-semibold">Intentos permitidos<input type="number" min="1" max="10" value={form.max_attempts} onChange={e=>setForm(v=>({...v,max_attempts:Number(e.target.value)}))} className="mt-1 w-full rounded-xl border p-3"/></label><label className="text-xs font-semibold">Puntaje total<input type="number" min="1" max="10000" step="0.5" value={form.total_points} onChange={e=>setForm(v=>({...v,total_points:Number(e.target.value)}))} className="mt-1 w-full rounded-xl border p-3"/></label></div></section>
-   <section className="rounded-2xl bg-slate-50 p-4"><div className="flex items-center justify-between gap-2"><div><h3 className="text-sm font-bold">4. Rúbrica de evaluación</h3><p className="mt-1 text-[11px] text-slate-500">Los criterios deben sumar el puntaje total.</p></div><button type="button" onClick={()=>setCriteria(v=>[...v,{title:"",description:"",max_points:10,sort_order:v.length}])} className="rounded-lg border bg-white px-3 py-2 text-xs font-bold">＋ Criterio</button></div><div className="mt-3 space-y-3">{criteria.map((x,i)=><div key={x.id??i} className="rounded-xl border bg-white p-3"><div className="grid gap-2 sm:grid-cols-[1fr_110px_auto]"><input required value={x.title} onChange={e=>setCriteria(v=>v.map((r,j)=>i===j?{...r,title:e.target.value}:r))} placeholder="Nombre del criterio" className="rounded-lg border p-2 text-xs"/><input type="number" min="0.5" step="0.5" value={x.max_points} onChange={e=>setCriteria(v=>v.map((r,j)=>i===j?{...r,max_points:Number(e.target.value)}:r))} className="rounded-lg border p-2 text-xs"/><button type="button" disabled={criteria.length===1} onClick={()=>setCriteria(v=>v.filter((_,j)=>j!==i))} className="text-xs text-red-600 disabled:opacity-30">Eliminar</button></div><textarea rows={2} value={x.description} onChange={e=>setCriteria(v=>v.map((r,j)=>i===j?{...r,description:e.target.value}:r))} placeholder="Descripción observable" className="mt-2 w-full rounded-lg border p-2 text-xs"/></div>)}</div><p className="mt-3 text-right text-xs font-bold">Total: {criteria.reduce((s,x)=>s+x.max_points,0)} / {form.total_points}</p></section>
-   <div className="flex justify-end gap-2 border-t pt-4"><button type="button" onClick={()=>setOpen(false)} className="rounded-xl border px-4 py-3 text-xs">Cancelar</button><button disabled={saving} className="rounded-xl bg-[#087DB5] px-5 py-3 text-xs font-bold text-white disabled:opacity-50">{saving?"Guardando...":"Guardar borrador"}</button></div>
-  </form></section></div>}
- </div></main>;
+  const router = useRouter(),
+    supabase = useMemo(() => createClient(), []);
+  const [access, setAccess] = useState("checking"),
+    [loading, setLoading] = useState(true),
+    [saving, setSaving] = useState(false),
+    [publishScope, setPublishScope] = useState<{ global: boolean; districtIds: string[] }>({
+      global: false,
+      districtIds: [],
+    });
+  const [programs, setPrograms] = useState<Row[]>([]),
+    [courses, setCourses] = useState<Row[]>([]),
+    [modules, setModules] = useState<Row[]>([]),
+    [lessons, setLessons] = useState<Row[]>([]),
+    [activities, setActivities] = useState<Activity[]>([]);
+  const [form, setForm] = useState(blank),
+    [criteria, setCriteria] = useState<RubricDraft[]>([
+      {
+        title: "Dominio del tema",
+        description: "Comprensión y aplicación del contenido.",
+        max_points: 100,
+        sort_order: 0,
+      },
+    ]);
+  const [editing, setEditing] = useState<string | null>(null),
+    [open, setOpen] = useState(false),
+    [search, setSearch] = useState(""),
+    [filter, setFilter] = useState("all"),
+    [notice, setNotice] = useState(""),
+    [error, setError] = useState("");
+  const load = useCallback(async () => {
+    try {
+      const [p, c, m, l, a] = await Promise.all([
+        supabase
+          .from("academic_programs")
+          .select("id,title,status,district_id")
+          .order("sort_order"),
+        supabase
+          .from("courses")
+          .select("id,title,status,program_id,district_id")
+          .order("sort_order"),
+        supabase
+          .from("course_modules")
+          .select("id,title,status,course_id,district_id")
+          .order("sort_order"),
+        supabase
+          .from("lessons")
+          .select("id,title,status,module_id,district_id")
+          .order("sort_order"),
+        supabase.from("academic_activities").select("*").order("updated_at", { ascending: false }),
+      ]);
+      setError("");
+      for (const r of [p, c, m, l, a]) if (r.error) throw r.error;
+      const ps = (p.data ?? []) as Row[],
+        cs = (c.data ?? []) as Row[],
+        ms = (m.data ?? []) as Row[],
+        ls = (l.data ?? []) as Row[],
+        acts = (a.data ?? []) as Row[];
+      setPrograms(ps);
+      setCourses(cs);
+      setModules(ms);
+      setLessons(ls);
+      let rub: RubricCriterion[] = [];
+      let ass: ActivityAssignment[] = [];
+      if (acts.length) {
+        const ids = acts.map((x) => x.id);
+        const [r, s] = await Promise.all([
+          supabase
+            .from("academic_activity_rubric_criteria")
+            .select("id,activity_id,title,description,max_points,sort_order")
+            .in("activity_id", ids)
+            .order("sort_order"),
+          supabase
+            .from("academic_activity_assignments")
+            .select("activity_id")
+            .in("activity_id", ids)
+            .eq("status", "active"),
+        ]);
+        if (r.error) throw r.error;
+        if (s.error) throw s.error;
+        rub = (r.data ?? []) as RubricCriterion[];
+        ass = (s.data ?? []) as ActivityAssignment[];
+      }
+      setActivities(
+        acts.map((x) => ({
+          ...x,
+          criteria: rub.filter((y) => y.activity_id === x.id),
+          assigned: ass.filter((y) => y.activity_id === x.id).length,
+          courseTitle: cs.find((y) => y.id === x.course_id)?.title ?? "Curso no disponible",
+          moduleTitle: ms.find((y) => y.id === x.module_id)?.title ?? "Módulo no disponible",
+          lessonTitle: ls.find((y) => y.id === x.lesson_id)?.title ?? "Lección no disponible",
+        })) as Activity[],
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No fue posible consultar el catálogo.");
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase]);
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser();
+        if (authError || !user) {
+          router.replace("/conexion");
+          return;
+        }
+        const { data: ua, error: uae } = await supabase
+          .from("user_role_assignments")
+          .select("role_id,district_id")
+          .eq("user_id", user.id);
+        if (uae) throw uae;
+        const ids = [...new Set((ua ?? []).map((x) => x.role_id))];
+        const { data: roles, error: re } = ids.length
+          ? await supabase.from("roles").select("id,role_key").in("id", ids)
+          : { data: [], error: null };
+        if (re) throw re;
+        if (!active) return;
+        const roleById = new Map((roles ?? []).map((x) => [x.id, x.role_key]));
+        const assignments = ua ?? [];
+        const roleKeys = assignments.map((x) => roleById.get(x.role_id));
+        setPublishScope({
+          global: roleKeys.includes("national_admin"),
+          districtIds: [
+            ...new Set(
+              assignments
+                .filter((x) => roleById.get(x.role_id) === "academic_editor" && x.district_id)
+                .map((x) => x.district_id as string),
+            ),
+          ],
+        });
+        setAccess(
+          roleKeys.some((x) =>
+            [
+              "national_admin",
+              "academic_editor",
+              "district_coordinator",
+              "area_coordinator",
+              "tutor",
+            ].includes(x ?? ""),
+          )
+            ? "allowed"
+            : "denied",
+        );
+      } catch {
+        if (active) setAccess("error");
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [router, supabase]);
+  useEffect(() => {
+    let active = true;
+    if (access === "allowed")
+      void Promise.resolve().then(() => {
+        if (active) return load();
+      });
+    return () => {
+      active = false;
+    };
+  }, [access, load]);
+  const courseOptions = courses.filter((x) => x.program_id === form.program_id),
+    moduleOptions = modules.filter((x) => x.course_id === form.course_id),
+    lessonOptions = lessons.filter((x) => x.module_id === form.module_id);
+  const filtered = activities.filter(
+    (x) =>
+      (filter === "all" || x.status === filter) &&
+      [x.title, x.courseTitle, x.moduleTitle, x.lessonTitle]
+        .join(" ")
+        .toLowerCase()
+        .includes(search.toLowerCase()),
+  );
+  const canPublishActivity = (x: Activity) =>
+    publishScope.global || publishScope.districtIds.includes(x.district_id);
+  function create() {
+    setEditing(null);
+    setForm({ ...blank, program_id: programs[0]?.id ?? "" });
+    setCriteria([
+      {
+        title: "Dominio del tema",
+        description: "Comprensión y aplicación del contenido.",
+        max_points: 100,
+        sort_order: 0,
+      },
+    ]);
+    setOpen(true);
+    setError("");
+    setNotice("");
+  }
+  function edit(x: Activity) {
+    if (x.status !== "draft") return;
+    setEditing(x.id);
+    setForm({
+      title: x.title,
+      description: x.description ?? "",
+      instructions: x.instructions,
+      program_id: courses.find((y) => y.id === x.course_id)?.program_id ?? "",
+      course_id: x.course_id,
+      module_id: x.module_id,
+      lesson_id: x.lesson_id,
+      response_type: x.response_type,
+      total_points: Number(x.total_points),
+      max_attempts: x.max_attempts,
+      due_at: x.due_at ? new Date(x.due_at).toISOString().slice(0, 16) : "",
+    });
+    setCriteria(
+      x.criteria.map((r, i) => ({
+        ...r,
+        description: r.description ?? "",
+        max_points: Number(r.max_points),
+        sort_order: i,
+      })),
+    );
+    setOpen(true);
+    setError("");
+  }
+  async function save(e: FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    try {
+      const p = programs.find((x) => x.id === form.program_id),
+        c = courses.find((x) => x.id === form.course_id),
+        m = modules.find((x) => x.id === form.module_id),
+        l = lessons.find((x) => x.id === form.lesson_id);
+      if (
+        !p ||
+        !c ||
+        !m ||
+        !l ||
+        c.program_id !== p.id ||
+        m.course_id !== c.id ||
+        l.module_id !== m.id
+      )
+        throw Error(
+          "Selecciona una jerarquía completa y válida: programa, curso, módulo y lección.",
+        );
+      if (form.title.trim().length < 3 || form.instructions.trim().length < 10)
+        throw Error("Completa el título y las instrucciones (mínimo 10 caracteres).");
+      if (form.max_attempts < 1 || form.max_attempts > 10 || !Number.isInteger(form.max_attempts))
+        throw Error("Los intentos deben estar entre 1 y 10.");
+      const clean = criteria.map((x, i) => ({
+        ...x,
+        title: x.title.trim(),
+        description: x.description.trim(),
+        sort_order: i,
+      }));
+      if (
+        !clean.length ||
+        clean.some(
+          (x) => x.title.length < 2 || !Number.isFinite(x.max_points) || x.max_points <= 0,
+        ) ||
+        Math.abs(clean.reduce((s, x) => s + x.max_points, 0) - form.total_points) > 0.001
+      )
+        throw Error(
+          "La rúbrica debe tener criterios válidos y sumar exactamente el puntaje total.",
+        );
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw Error("La sesión expiró.");
+      const payload = {
+        district_id: l.district_id,
+        course_id: c.id,
+        module_id: m.id,
+        lesson_id: l.id,
+        title: form.title.trim(),
+        description: form.description.trim() || null,
+        instructions: form.instructions.trim(),
+        activity_type: "individual",
+        response_type: form.response_type,
+        total_points: form.total_points,
+        max_attempts: form.max_attempts,
+        due_at: form.due_at ? new Date(form.due_at).toISOString() : null,
+        updated_at: new Date().toISOString(),
+      };
+      let id = editing;
+      if (editing) {
+        const { error } = await supabase
+          .from("academic_activities")
+          .update(payload)
+          .eq("id", editing)
+          .eq("status", "draft");
+        if (error) throw error;
+        const { error: de } = await supabase
+          .from("academic_activity_rubric_criteria")
+          .delete()
+          .eq("activity_id", editing);
+        if (de) throw de;
+      } else {
+        const { data, error } = await supabase
+          .from("academic_activities")
+          .insert({ ...payload, created_by: user.id, status: "draft" })
+          .select("id")
+          .single();
+        if (error) throw error;
+        id = data.id;
+      }
+      if (!id) throw new Error("No fue posible identificar la actividad guardada.");
+      const activityId = id;
+      const { error: re } = await supabase
+        .from("academic_activity_rubric_criteria")
+        .insert(
+          clean.map((x) => ({
+            activity_id: activityId,
+            district_id: l.district_id,
+            title: x.title,
+            description: x.description || null,
+            max_points: x.max_points,
+            sort_order: x.sort_order,
+          })),
+        );
+      if (re) throw re;
+      setOpen(false);
+      setNotice(
+        editing
+          ? "Borrador actualizado en Supabase."
+          : "Actividad guardada como borrador en Supabase.",
+      );
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No fue posible guardar.");
+    } finally {
+      setSaving(false);
+    }
+  }
+  async function publish(x: Activity) {
+    const p = programs.find((y) => y.id === courses.find((z) => z.id === x.course_id)?.program_id),
+      c = courses.find((y) => y.id === x.course_id),
+      m = modules.find((y) => y.id === x.module_id),
+      l = lessons.find((y) => y.id === x.lesson_id);
+    if ([p, c, m, l].some((y) => y?.status !== "published")) {
+      setError("No se puede publicar: programa, curso, módulo y lección deben estar publicados.");
+      return;
+    }
+    if (
+      !x.criteria.length ||
+      Math.abs(x.criteria.reduce((s, r) => s + Number(r.max_points), 0) - Number(x.total_points)) >
+        0.001
+    ) {
+      setError("La rúbrica no coincide con el puntaje total.");
+      return;
+    }
+    if (!publishScope.global && !publishScope.districtIds.includes(x.district_id)) {
+      setError(
+        "Tu rol permite preparar el borrador, pero la publicación está reservada al editor académico autorizado del distrito o a administración nacional.",
+      );
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      const { data: count, error: pe } = await supabase.rpc("publish_academic_activity", {
+        p_activity_id: x.id,
+      });
+      if (pe) throw pe;
+      setNotice(
+        "Actividad publicada de forma transaccional. Asignaciones nuevas: " +
+          (count ?? 0) +
+          ". Si la operación fallaba, la publicación y las asignaciones se revertían juntas.",
+      );
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No fue posible publicar.");
+      await load();
+    } finally {
+      setSaving(false);
+    }
+  }
+  async function archive(x: Activity) {
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("academic_activities")
+        .update({ status: "archived", updated_at: new Date().toISOString() })
+        .eq("id", x.id)
+        .eq("status", "published");
+      if (error) throw error;
+      setNotice("Actividad archivada.");
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No fue posible archivar.");
+    } finally {
+      setSaving(false);
+    }
+  }
+  if (access === "checking")
+    return (
+      <main className="grid min-h-screen place-items-center bg-[#F4F7FA] text-sm text-slate-500">
+        Verificando permisos...
+      </main>
+    );
+  if (access !== "allowed")
+    return (
+      <main className="grid min-h-screen place-items-center bg-[#F4F7FA] p-5">
+        <section className="rounded-2xl bg-white p-7 text-center">
+          <h1 className="text-xl font-bold">
+            {access === "error" ? "No fue posible verificar el acceso" : "Acceso restringido"}
+          </h1>
+          <p className="mt-2 text-sm text-slate-500">
+            Se requieren permisos de administración académica.
+          </p>
+          <button
+            onClick={() => router.replace("/dashboard")}
+            className="mt-4 rounded-xl bg-[#087DB5] px-4 py-2 text-white"
+          >
+            Volver
+          </button>
+        </section>
+      </main>
+    );
+  return (
+    <main className="min-h-screen bg-[#F4F7FA] px-4 py-7 text-[#102D4D] sm:px-7 lg:px-10">
+      <div className="mx-auto max-w-7xl">
+        <a href="/dashboard" className="text-xs font-semibold text-[#087DB5]">
+          ← Volver al panel
+        </a>
+        <header className="mt-5 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-[#19A7A0]">
+              Planner académico
+            </p>
+            <h1 className="mt-2 text-3xl font-extrabold">Actividades y evaluaciones</h1>
+            <p className="mt-2 text-sm text-slate-500">
+              Crea actividades reales vinculadas al programa, curso, módulo y lección.
+            </p>
+          </div>
+          <button
+            onClick={create}
+            disabled={loading || !programs.length}
+            className="rounded-xl bg-[#087DB5] px-4 py-3 text-xs font-bold text-white disabled:opacity-50"
+          >
+            ＋ Nueva actividad
+          </button>
+        </header>
+        <div className="mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4 text-xs leading-5 text-sky-900">
+          Los borradores se guardan en Supabase. La publicación requiere que toda la jerarquía
+          académica esté publicada; luego se generan asignaciones para las matrículas activas
+          autorizadas.
+        </div>
+        {notice && (
+          <p
+            role="status"
+            className="mt-4 rounded-xl border border-teal-200 bg-teal-50 p-3 text-xs text-teal-800"
+          >
+            {notice}
+          </p>
+        )}
+        {error && (
+          <p
+            role="alert"
+            className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700"
+          >
+            {error}
+          </p>
+        )}
+        <section className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {[
+            ["Actividades", activities.length],
+            ["Borradores", activities.filter((x) => x.status === "draft").length],
+            ["Publicadas", activities.filter((x) => x.status === "published").length],
+            ["Asignaciones activas", activities.reduce((s, x) => s + x.assigned, 0)],
+          ].map(([k, v]) => (
+            <article key={String(k)} className="rounded-2xl border border-slate-200 bg-white p-4">
+              <p className="text-xs text-slate-400">{k}</p>
+              <p className="mt-2 text-2xl font-extrabold">{v}</p>
+            </article>
+          ))}
+        </section>
+        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+          <div className="grid gap-3 md:grid-cols-[1fr_180px]">
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar actividad, curso o lección..."
+              className="rounded-xl border border-slate-200 px-3 py-3 text-sm"
+            />
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
+            >
+              <option value="all">Todos los estados</option>
+              <option value="draft">Borradores</option>
+              <option value="published">Publicados</option>
+              <option value="archived">Archivados</option>
+            </select>
+          </div>
+          {loading ? (
+            <p className="py-12 text-center text-sm text-slate-400">Consultando Supabase...</p>
+          ) : filtered.length ? (
+            <div className="mt-5 space-y-3">
+              {filtered.map((x) => (
+                <article key={x.id} className="rounded-xl border border-slate-100 p-4">
+                  <div className="flex flex-wrap justify-between gap-3">
+                    <div className="min-w-0">
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold">
+                        {label(x.status)}
+                      </span>
+                      <h2 className="mt-3 text-sm font-bold">{x.title}</h2>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {x.courseTitle} · {x.moduleTitle} · {x.lessonTitle}
+                      </p>
+                      <p className="mt-2 text-xs text-slate-400">
+                        {x.total_points} puntos · {x.max_attempts} intentos · {x.assigned}{" "}
+                        asignaciones
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      {x.status === "draft" && (
+                        <>
+                          <button
+                            onClick={() => edit(x)}
+                            className="rounded-lg border px-3 py-2 text-xs"
+                          >
+                            Editar
+                          </button>
+                          {canPublishActivity(x) && (
+                            <button
+                              disabled={saving}
+                              onClick={() => void publish(x)}
+                              className="rounded-lg bg-[#087DB5] px-3 py-2 text-xs font-bold text-white"
+                            >
+                              Publicar
+                            </button>
+                          )}
+                        </>
+                      )}
+                      {x.status === "published" && canPublishActivity(x) && (
+                        <button
+                          disabled={saving}
+                          onClick={() => void archive(x)}
+                          className="rounded-lg border px-3 py-2 text-xs"
+                        >
+                          Archivar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="py-12 text-center text-sm text-slate-400">
+              No hay actividades registradas. Crea el primer borrador desde el catálogo académico.
+            </p>
+          )}
+        </section>
+        {open && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/40 p-0 sm:items-center sm:p-5">
+            <section
+              role="dialog"
+              aria-modal="true"
+              className="max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-3xl bg-white p-5 sm:rounded-3xl sm:p-7"
+            >
+              <div className="flex justify-between">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#19A7A0]">
+                    Editor académico
+                  </p>
+                  <h2 className="mt-1 text-xl font-extrabold">
+                    {editing ? "Editar borrador" : "Planificar actividad"}
+                  </h2>
+                </div>
+                <button onClick={() => setOpen(false)} className="rounded-lg border px-3 py-2">
+                  ✕
+                </button>
+              </div>
+              <form onSubmit={save} className="mt-5 space-y-4">
+                <section className="rounded-2xl bg-slate-50 p-4">
+                  <h3 className="text-sm font-bold">1. Ubicación curricular</h3>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <label className="text-xs font-semibold">
+                      Programa
+                      <select
+                        required
+                        value={form.program_id}
+                        onChange={(e) =>
+                          setForm((v) => ({
+                            ...v,
+                            program_id: e.target.value,
+                            course_id: "",
+                            module_id: "",
+                            lesson_id: "",
+                          }))
+                        }
+                        className="mt-1 w-full rounded-xl border bg-white p-3"
+                      >
+                        {programs.map((x) => (
+                          <option key={x.id} value={x.id}>
+                            {x.title} · {label(x.status)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="text-xs font-semibold">
+                      Curso
+                      <select
+                        required
+                        value={form.course_id}
+                        onChange={(e) =>
+                          setForm((v) => ({
+                            ...v,
+                            course_id: e.target.value,
+                            module_id: "",
+                            lesson_id: "",
+                          }))
+                        }
+                        className="mt-1 w-full rounded-xl border bg-white p-3"
+                      >
+                        <option value="">Selecciona</option>
+                        {courseOptions.map((x) => (
+                          <option key={x.id} value={x.id}>
+                            {x.title} · {label(x.status)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="text-xs font-semibold">
+                      Módulo
+                      <select
+                        required
+                        value={form.module_id}
+                        onChange={(e) =>
+                          setForm((v) => ({ ...v, module_id: e.target.value, lesson_id: "" }))
+                        }
+                        className="mt-1 w-full rounded-xl border bg-white p-3"
+                      >
+                        <option value="">Selecciona</option>
+                        {moduleOptions.map((x) => (
+                          <option key={x.id} value={x.id}>
+                            {x.title} · {label(x.status)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="text-xs font-semibold">
+                      Lección
+                      <select
+                        required
+                        value={form.lesson_id}
+                        onChange={(e) => setForm((v) => ({ ...v, lesson_id: e.target.value }))}
+                        className="mt-1 w-full rounded-xl border bg-white p-3"
+                      >
+                        <option value="">Selecciona</option>
+                        {lessonOptions.map((x) => (
+                          <option key={x.id} value={x.id}>
+                            {x.title} · {label(x.status)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                  <p className="mt-2 text-[10px] text-slate-400">
+                    Puedes planificar sobre contenido en borrador; para publicar, programa, curso,
+                    módulo y lección deben estar publicados.
+                  </p>
+                </section>
+                <section className="rounded-2xl border p-4">
+                  <h3 className="text-sm font-bold">2. Diseño pedagógico</h3>
+                  <label className="mt-3 block text-xs font-semibold">
+                    Título
+                    <input
+                      required
+                      minLength={3}
+                      maxLength={180}
+                      value={form.title}
+                      onChange={(e) => setForm((v) => ({ ...v, title: e.target.value }))}
+                      className="mt-1 w-full rounded-xl border p-3"
+                    />
+                  </label>
+                  <label className="mt-3 block text-xs font-semibold">
+                    Propósito / descripción
+                    <textarea
+                      rows={2}
+                      value={form.description}
+                      onChange={(e) => setForm((v) => ({ ...v, description: e.target.value }))}
+                      className="mt-1 w-full rounded-xl border p-3"
+                    />
+                  </label>
+                  <label className="mt-3 block text-xs font-semibold">
+                    Instrucciones para el estudiante
+                    <textarea
+                      required
+                      minLength={10}
+                      rows={5}
+                      value={form.instructions}
+                      onChange={(e) => setForm((v) => ({ ...v, instructions: e.target.value }))}
+                      placeholder="Contexto, propósito, pasos, producto esperado y condiciones de entrega..."
+                      className="mt-1 w-full rounded-xl border p-3"
+                    />
+                  </label>
+                </section>
+                <section className="rounded-2xl border p-4">
+                  <h3 className="text-sm font-bold">3. Entrega y programación</h3>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <label className="text-xs font-semibold">
+                      Formato
+                      <select
+                        value={form.response_type}
+                        onChange={(e) =>
+                          setForm((v) => ({
+                            ...v,
+                            response_type: e.target.value as typeof blank.response_type,
+                          }))
+                        }
+                        className="mt-1 w-full rounded-xl border bg-white p-3"
+                      >
+                        <option value="text">Respuesta escrita</option>
+                        <option value="file">Archivo adjunto</option>
+                        <option value="link">Enlace externo</option>
+                        <option value="mixed">Texto, archivo o enlace</option>
+                      </select>
+                    </label>
+                    <label className="text-xs font-semibold">
+                      Fecha límite
+                      <input
+                        type="datetime-local"
+                        value={form.due_at}
+                        onChange={(e) => setForm((v) => ({ ...v, due_at: e.target.value }))}
+                        className="mt-1 w-full rounded-xl border p-3"
+                      />
+                    </label>
+                    <label className="text-xs font-semibold">
+                      Intentos permitidos
+                      <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={form.max_attempts}
+                        onChange={(e) =>
+                          setForm((v) => ({ ...v, max_attempts: Number(e.target.value) }))
+                        }
+                        className="mt-1 w-full rounded-xl border p-3"
+                      />
+                    </label>
+                    <label className="text-xs font-semibold">
+                      Puntaje total
+                      <input
+                        type="number"
+                        min="1"
+                        max="10000"
+                        step="0.5"
+                        value={form.total_points}
+                        onChange={(e) =>
+                          setForm((v) => ({ ...v, total_points: Number(e.target.value) }))
+                        }
+                        className="mt-1 w-full rounded-xl border p-3"
+                      />
+                    </label>
+                  </div>
+                </section>
+                <section className="rounded-2xl bg-slate-50 p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <h3 className="text-sm font-bold">4. Rúbrica de evaluación</h3>
+                      <p className="mt-1 text-[11px] text-slate-500">
+                        Los criterios deben sumar el puntaje total.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCriteria((v) => [
+                          ...v,
+                          { title: "", description: "", max_points: 10, sort_order: v.length },
+                        ])
+                      }
+                      className="rounded-lg border bg-white px-3 py-2 text-xs font-bold"
+                    >
+                      ＋ Criterio
+                    </button>
+                  </div>
+                  <div className="mt-3 space-y-3">
+                    {criteria.map((x, i) => (
+                      <div key={x.id ?? i} className="rounded-xl border bg-white p-3">
+                        <div className="grid gap-2 sm:grid-cols-[1fr_110px_auto]">
+                          <input
+                            required
+                            value={x.title}
+                            onChange={(e) =>
+                              setCriteria((v) =>
+                                v.map((r, j) => (i === j ? { ...r, title: e.target.value } : r)),
+                              )
+                            }
+                            placeholder="Nombre del criterio"
+                            className="rounded-lg border p-2 text-xs"
+                          />
+                          <input
+                            type="number"
+                            min="0.5"
+                            step="0.5"
+                            value={x.max_points}
+                            onChange={(e) =>
+                              setCriteria((v) =>
+                                v.map((r, j) =>
+                                  i === j ? { ...r, max_points: Number(e.target.value) } : r,
+                                ),
+                              )
+                            }
+                            className="rounded-lg border p-2 text-xs"
+                          />
+                          <button
+                            type="button"
+                            disabled={criteria.length === 1}
+                            onClick={() => setCriteria((v) => v.filter((_, j) => j !== i))}
+                            className="text-xs text-red-600 disabled:opacity-30"
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                        <textarea
+                          rows={2}
+                          value={x.description}
+                          onChange={(e) =>
+                            setCriteria((v) =>
+                              v.map((r, j) =>
+                                i === j ? { ...r, description: e.target.value } : r,
+                              ),
+                            )
+                          }
+                          placeholder="Descripción observable"
+                          className="mt-2 w-full rounded-lg border p-2 text-xs"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-right text-xs font-bold">
+                    Total: {criteria.reduce((s, x) => s + x.max_points, 0)} / {form.total_points}
+                  </p>
+                </section>
+                <div className="flex justify-end gap-2 border-t pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    className="rounded-xl border px-4 py-3 text-xs"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    disabled={saving}
+                    className="rounded-xl bg-[#087DB5] px-5 py-3 text-xs font-bold text-white disabled:opacity-50"
+                  >
+                    {saving ? "Guardando..." : "Guardar borrador"}
+                  </button>
+                </div>
+              </form>
+            </section>
+          </div>
+        )}
+      </div>
+    </main>
+  );
 }

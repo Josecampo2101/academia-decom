@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -112,15 +111,13 @@ export default function ReubicacionesPage() {
   const [transferring, setTransferring] = useState(false);
 
   const [isNationalAdmin, setIsNationalAdmin] = useState(false);
-  const [isDistrictCoordinator, setIsDistrictCoordinator] =
-    useState(false);
+  const [isDistrictCoordinator, setIsDistrictCoordinator] = useState(false);
 
   const [activeTab, setActiveTab] = useState<Tab>("transfer");
 
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<MembershipResult[]>([]);
-  const [selected, setSelected] =
-    useState<MembershipResult | null>(null);
+  const [selected, setSelected] = useState<MembershipResult | null>(null);
 
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [destinationId, setDestinationId] = useState("");
@@ -162,10 +159,9 @@ export default function ReubicacionesPage() {
           return;
         }
 
-        const { data: nationalResult, error: nationalError } =
-          await supabase.rpc("has_role", {
-            requested_role: "national_admin",
-          });
+        const { data: nationalResult, error: nationalError } = await supabase.rpc("has_role", {
+          requested_role: "national_admin",
+        });
 
         if (nationalError) throw nationalError;
 
@@ -181,32 +177,25 @@ export default function ReubicacionesPage() {
 
         if (assignmentsError) throw assignmentsError;
 
-        const roleIds = [
-          ...new Set((assignments ?? []).map((assignment) => assignment.role_id)),
-        ];
+        const roleIds = [...new Set((assignments ?? []).map((assignment) => assignment.role_id))];
 
         const { data: roles, error: rolesError } = roleIds.length
-          ? await supabase
-              .from("roles")
-              .select("id, role_key")
-              .in("id", roleIds)
+          ? await supabase.from("roles").select("id, role_key").in("id", roleIds)
           : { data: [], error: null };
 
         if (rolesError) throw rolesError;
 
         const districtRoleIds = new Set(
           (roles ?? [])
-            .filter((role) =>
-              ["district_coordinator", "area_coordinator"].includes(role.role_key)
-            )
-            .map((role) => role.id)
+            .filter((role) => ["district_coordinator", "area_coordinator"].includes(role.role_key))
+            .map((role) => role.id),
         );
 
         const district = (assignments ?? []).some(
           (assignment) =>
             districtRoleIds.has(assignment.role_id) &&
             Boolean(assignment.district_id) &&
-            assignment.congregation_id === null
+            assignment.congregation_id === null,
         );
 
         if (!national && !district) {
@@ -219,19 +208,16 @@ export default function ReubicacionesPage() {
         setIsNationalAdmin(national);
         setIsDistrictCoordinator(district);
 
-        const { data: congregations, error: congregationError } =
-          await supabase
-            .from("congregations")
-            .select("id, name, district_id")
-            .eq("status", "active")
-            .order("name");
+        const { data: congregations, error: congregationError } = await supabase
+          .from("congregations")
+          .select("id, name, district_id")
+          .eq("status", "active")
+          .order("name");
 
         if (congregationError) throw congregationError;
 
         const congregationRows = congregations ?? [];
-        const districtIds = [
-          ...new Set(congregationRows.map((c) => c.district_id)),
-        ];
+        const districtIds = [...new Set(congregationRows.map((c) => c.district_id))];
 
         let districtRows: { id: string; name: string }[] = [];
 
@@ -246,19 +232,16 @@ export default function ReubicacionesPage() {
           districtRows = data ?? [];
         }
 
-        const districtMap = new Map(
-          districtRows.map((d) => [d.id, d.name])
-        );
+        const districtMap = new Map(districtRows.map((d) => [d.id, d.name]));
 
-        const availableDestinations: Destination[] =
-          congregationRows
-            .filter((c) => districtMap.has(c.district_id))
-            .map((c) => ({
-              id: c.id,
-              name: c.name,
-              district_id: c.district_id,
-              district_name: districtMap.get(c.district_id)!,
-            }));
+        const availableDestinations: Destination[] = congregationRows
+          .filter((c) => districtMap.has(c.district_id))
+          .map((c) => ({
+            id: c.id,
+            name: c.name,
+            district_id: c.district_id,
+            district_name: districtMap.get(c.district_id)!,
+          }));
 
         if (!active) return;
 
@@ -268,7 +251,7 @@ export default function ReubicacionesPage() {
 
         if (active) {
           setErrorMessage(
-            "No fue posible cargar el módulo. Verifica tu conexión e inténtalo nuevamente."
+            "No fue posible cargar el módulo. Verifica tu conexión e inténtalo nuevamente.",
           );
         }
       } finally {
@@ -297,36 +280,29 @@ export default function ReubicacionesPage() {
 
     if (term.length < 2) {
       setResults([]);
-      setErrorMessage(
-        "Escribe al menos dos caracteres para realizar la búsqueda."
-      );
+      setErrorMessage("Escribe al menos dos caracteres para realizar la búsqueda.");
       return;
     }
 
     try {
       setSearching(true);
 
-      const { data, error } = await supabase.rpc(
-        "search_memberships_for_transfer",
-        { p_search: term }
-      );
+      const { data, error } = await supabase.rpc("search_memberships_for_transfer", {
+        p_search: term,
+      });
 
       if (error) throw error;
 
       setResults((data ?? []) as MembershipResult[]);
 
       if (!data || data.length === 0) {
-        setSuccessMessage(
-          "No se encontraron creyentes activos con ese criterio de búsqueda."
-        );
+        setSuccessMessage("No se encontraron creyentes activos con ese criterio de búsqueda.");
       }
     } catch (error) {
       console.error("Error buscando creyentes:", error);
 
       setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "No fue posible realizar la búsqueda."
+        error instanceof Error ? error.message : "No fue posible realizar la búsqueda.",
       );
     } finally {
       setSearching(false);
@@ -339,10 +315,9 @@ export default function ReubicacionesPage() {
 
     if (term.length < 2) return;
 
-    const { data, error } = await supabase.rpc(
-      "search_memberships_for_transfer",
-      { p_search: term }
-    );
+    const { data, error } = await supabase.rpc("search_memberships_for_transfer", {
+      p_search: term,
+    });
 
     if (error) {
       console.error("Error actualizando resultados:", error);
@@ -358,22 +333,16 @@ export default function ReubicacionesPage() {
 
   async function executeTransfer() {
     if (!selected || !destinationId) {
-      setErrorMessage(
-        "Selecciona un creyente y una congregación de destino."
-      );
+      setErrorMessage("Selecciona un creyente y una congregación de destino.");
       return;
     }
 
     if (destinationId === selected.congregation_id) {
-      setErrorMessage(
-        "La congregación de destino debe ser diferente a la actual."
-      );
+      setErrorMessage("La congregación de destino debe ser diferente a la actual.");
       return;
     }
 
-    const destination = destinations.find(
-      (item) => item.id === destinationId
-    );
+    const destination = destinations.find((item) => item.id === destinationId);
 
     if (!destination) {
       setErrorMessage("La congregación seleccionada no es válida.");
@@ -383,7 +352,7 @@ export default function ReubicacionesPage() {
     const confirmed = window.confirm(
       `¿Confirmas el traslado de ${selected.full_name ?? "este creyente"}?\n\n` +
         `Origen: ${selected.congregation_name} (${selected.district_name})\n` +
-        `Destino: ${destination.name} (${destination.district_name})`
+        `Destino: ${destination.name} (${destination.district_name})`,
     );
 
     if (!confirmed) return;
@@ -393,20 +362,15 @@ export default function ReubicacionesPage() {
       setErrorMessage("");
       setSuccessMessage("");
 
-      const { data, error } = await supabase.rpc(
-        "transfer_membership",
-        {
-          p_membership_id: selected.membership_id,
-          p_to_congregation_id: destinationId,
-          p_observations: observations.trim() || undefined,
-        }
-      );
+      const { data, error } = await supabase.rpc("transfer_membership", {
+        p_membership_id: selected.membership_id,
+        p_to_congregation_id: destinationId,
+        p_observations: observations.trim() || undefined,
+      });
 
       if (error) throw error;
 
-      setSuccessMessage(
-        `Traslado realizado correctamente. Número de operación: ${data}`
-      );
+      setSuccessMessage(`Traslado realizado correctamente. Número de operación: ${data}`);
 
       setSelected(null);
       setDestinationId("");
@@ -420,9 +384,7 @@ export default function ReubicacionesPage() {
       console.error("Error realizando traslado:", error);
 
       setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "No fue posible completar el traslado."
+        error instanceof Error ? error.message : "No fue posible completar el traslado.",
       );
     } finally {
       setTransferring(false);
@@ -438,9 +400,7 @@ export default function ReubicacionesPage() {
       setLoadingHistory(true);
       setErrorMessage("");
 
-      const { data, error } = await supabase.rpc(
-        "get_membership_transfer_history"
-      );
+      const { data, error } = await supabase.rpc("get_membership_transfer_history");
 
       if (error) throw error;
 
@@ -450,9 +410,7 @@ export default function ReubicacionesPage() {
       console.error("Error cargando historial:", error);
 
       setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "No fue posible cargar el historial de traslados."
+        error instanceof Error ? error.message : "No fue posible cargar el historial de traslados.",
       );
     } finally {
       setLoadingHistory(false);
@@ -468,10 +426,9 @@ export default function ReubicacionesPage() {
       setLoadingReviews(true);
       setErrorMessage("");
 
-      const { data, error } = await supabase.rpc(
-        "get_membership_transfer_area_reviews",
-        { p_status: status }
-      );
+      const { data, error } = await supabase.rpc("get_membership_transfer_area_reviews", {
+        p_status: status,
+      });
 
       if (error) throw error;
 
@@ -483,24 +440,19 @@ export default function ReubicacionesPage() {
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "No fue posible cargar las revisiones de responsabilidades."
+          : "No fue posible cargar las revisiones de responsabilidades.",
       );
     } finally {
       setLoadingReviews(false);
     }
   }
 
-  async function resolveReview(
-    review: AreaReview,
-    decision: "maintained" | "ended"
-  ) {
+  async function resolveReview(review: AreaReview, decision: "maintained" | "ended") {
     const decisionText =
-      decision === "maintained"
-        ? "mantener la responsabilidad"
-        : "finalizar la responsabilidad";
+      decision === "maintained" ? "mantener la responsabilidad" : "finalizar la responsabilidad";
 
     const confirmed = window.confirm(
-      `¿Confirmas ${decisionText} de ${review.member_name ?? "este creyente"} en el área ${review.area_name}?`
+      `¿Confirmas ${decisionText} de ${review.member_name ?? "este creyente"} en el área ${review.area_name}?`,
     );
 
     if (!confirmed) return;
@@ -510,21 +462,18 @@ export default function ReubicacionesPage() {
       setErrorMessage("");
       setSuccessMessage("");
 
-      const { error } = await supabase.rpc(
-        "resolve_membership_transfer_area_review",
-        {
-          p_review_id: review.review_id,
-          p_decision: decision,
-          p_observations: reviewObservations.trim() || undefined,
-        }
-      );
+      const { error } = await supabase.rpc("resolve_membership_transfer_area_review", {
+        p_review_id: review.review_id,
+        p_decision: decision,
+        p_observations: reviewObservations.trim() || undefined,
+      });
 
       if (error) throw error;
 
       setSuccessMessage(
         decision === "maintained"
           ? "La responsabilidad fue confirmada y se mantiene activa."
-          : "La responsabilidad fue finalizada correctamente."
+          : "La responsabilidad fue finalizada correctamente.",
       );
 
       setReviewObservations("");
@@ -535,9 +484,7 @@ export default function ReubicacionesPage() {
       console.error("Error resolviendo revisión:", error);
 
       setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "No fue posible resolver la revisión."
+        error instanceof Error ? error.message : "No fue posible resolver la revisión.",
       );
     } finally {
       setResolvingReviewId("");
@@ -573,8 +520,7 @@ export default function ReubicacionesPage() {
   // =========================================================
 
   const filteredDestinations = destinations.filter(
-    (destination) =>
-      destination.id !== selected?.congregation_id
+    (destination) => destination.id !== selected?.congregation_id,
   );
 
   if (loading) {
@@ -597,7 +543,6 @@ export default function ReubicacionesPage() {
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 dark:bg-slate-950 sm:px-8">
       <div className="mx-auto max-w-6xl">
-
         {/* ENCABEZADO */}
 
         <div className="mb-8">
@@ -619,15 +564,13 @@ export default function ReubicacionesPage() {
               </h1>
 
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400">
-                Gestiona los traslados de creyentes entre congregaciones,
-                conservando su historial institucional y sus asignaciones.
+                Gestiona los traslados de creyentes entre congregaciones, conservando su historial
+                institucional y sus asignaciones.
               </p>
             </div>
 
             <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Alcance de tu acceso
-              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Alcance de tu acceso</p>
 
               <p className="mt-1 font-semibold text-slate-800 dark:text-white">
                 {isNationalAdmin
@@ -727,8 +670,8 @@ export default function ReubicacionesPage() {
                 </h2>
 
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  Busca por nombre o número de teléfono. Solo aparecen perfiles
-                  y membresías activos dentro de tu ámbito autorizado.
+                  Busca por nombre o número de teléfono. Solo aparecen perfiles y membresías activos
+                  dentro de tu ámbito autorizado.
                 </p>
               </div>
 
@@ -777,8 +720,7 @@ export default function ReubicacionesPage() {
 
                 <div className="space-y-3">
                   {results.map((member) => {
-                    const isSelected =
-                      selected?.membership_id === member.membership_id;
+                    const isSelected = selected?.membership_id === member.membership_id;
 
                     return (
                       <button
@@ -807,8 +749,7 @@ export default function ReubicacionesPage() {
                             </p>
 
                             <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
-                              Congregación:{" "}
-                              <strong>{member.congregation_name}</strong>
+                              Congregación: <strong>{member.congregation_name}</strong>
                             </p>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -819,9 +760,7 @@ export default function ReubicacionesPage() {
                           <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end">
                             <span className="text-xs text-slate-500 dark:text-slate-400">
                               Asignaciones activas a áreas:{" "}
-                              <strong>
-                                {member.active_area_assignments}
-                              </strong>
+                              <strong>{member.active_area_assignments}</strong>
                             </span>
 
                             <span
@@ -879,9 +818,7 @@ export default function ReubicacionesPage() {
                   <select
                     id="destination"
                     value={destinationId}
-                    onChange={(event) =>
-                      setDestinationId(event.target.value)
-                    }
+                    onChange={(event) => setDestinationId(event.target.value)}
                     className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                   >
                     <option value="">Seleccionar congregación...</option>
@@ -912,9 +849,7 @@ export default function ReubicacionesPage() {
                     id="observations"
                     rows={3}
                     value={observations}
-                    onChange={(event) =>
-                      setObservations(event.target.value)
-                    }
+                    onChange={(event) => setObservations(event.target.value)}
                     placeholder="Motivo del traslado u observaciones adicionales..."
                     maxLength={1000}
                     className="w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
@@ -931,10 +866,9 @@ export default function ReubicacionesPage() {
                   </p>
 
                   <p className="mt-1 text-sm leading-6 text-amber-800 dark:text-amber-400">
-                    El traslado actualizará la congregación de la membresía
-                    existente. Se conservarán el perfil y las asignaciones
-                    a áreas. Estas últimas generarán revisiones pendientes
-                    para su evaluación posterior.
+                    El traslado actualizará la congregación de la membresía existente. Se
+                    conservarán el perfil y las asignaciones a áreas. Estas últimas generarán
+                    revisiones pendientes para su evaluación posterior.
                   </p>
                 </div>
 
@@ -959,9 +893,7 @@ export default function ReubicacionesPage() {
                     disabled={!destinationId || transferring}
                     className="rounded-xl bg-sky-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {transferring
-                      ? "Procesando traslado..."
-                      : "Confirmar reubicación"}
+                    {transferring ? "Procesando traslado..." : "Confirmar reubicación"}
                   </button>
                 </div>
               </section>
@@ -1171,15 +1103,15 @@ export default function ReubicacionesPage() {
                 </p>
 
                 <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                  Las asignaciones activas de área generarán revisiones cuando se realicen traslados.
+                  Las asignaciones activas de área generarán revisiones cuando se realicen
+                  traslados.
                 </p>
               </div>
             ) : (
               <div className="space-y-4">
                 {reviews.map((review) => {
                   const isPending = review.review_status === "pending";
-                  const isResolving =
-                    resolvingReviewId === review.review_id;
+                  const isResolving = resolvingReviewId === review.review_id;
 
                   return (
                     <article
@@ -1249,19 +1181,11 @@ export default function ReubicacionesPage() {
                       </div>
 
                       <div className="grid gap-2 text-sm text-slate-500 dark:text-slate-400 sm:grid-cols-2">
-                        <p>
-                          Fecha del traslado: {formatDate(review.transfer_date)}
-                        </p>
+                        <p>Fecha del traslado: {formatDate(review.transfer_date)}</p>
 
-                        <p>
-                          Fecha de revisión: {formatDate(review.reviewed_at)}
-                        </p>
+                        <p>Fecha de revisión: {formatDate(review.reviewed_at)}</p>
 
-                        {review.reviewer_name && (
-                          <p>
-                            Revisado por: {review.reviewer_name}
-                          </p>
-                        )}
+                        {review.reviewer_name && <p>Revisado por: {review.reviewer_name}</p>}
                       </div>
 
                       {review.observations && (
@@ -1289,9 +1213,7 @@ export default function ReubicacionesPage() {
                             id={`review-observations-${review.review_id}`}
                             rows={2}
                             value={reviewObservations}
-                            onChange={(event) =>
-                              setReviewObservations(event.target.value)
-                            }
+                            onChange={(event) => setReviewObservations(event.target.value)}
                             maxLength={2000}
                             placeholder="Registra el motivo o las observaciones de esta decisión..."
                             disabled={Boolean(resolvingReviewId)}
@@ -1301,28 +1223,20 @@ export default function ReubicacionesPage() {
                           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
                             <button
                               type="button"
-                              onClick={() =>
-                                void resolveReview(review, "ended")
-                              }
+                              onClick={() => void resolveReview(review, "ended")}
                               disabled={Boolean(resolvingReviewId)}
                               className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                             >
-                              {isResolving
-                                ? "Procesando..."
-                                : "Finalizar responsabilidad"}
+                              {isResolving ? "Procesando..." : "Finalizar responsabilidad"}
                             </button>
 
                             <button
                               type="button"
-                              onClick={() =>
-                                void resolveReview(review, "maintained")
-                              }
+                              onClick={() => void resolveReview(review, "maintained")}
                               disabled={Boolean(resolvingReviewId)}
                               className="rounded-xl bg-sky-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-800 disabled:opacity-50"
                             >
-                              {isResolving
-                                ? "Procesando..."
-                                : "Mantener responsabilidad"}
+                              {isResolving ? "Procesando..." : "Mantener responsabilidad"}
                             </button>
                           </div>
                         </div>
@@ -1339,9 +1253,9 @@ export default function ReubicacionesPage() {
 
         <div className="mt-8 border-t border-slate-200 pt-5 dark:border-slate-800">
           <p className="text-xs leading-6 text-slate-500 dark:text-slate-400">
-            Academia DECOM · Formación para comunicar con propósito.
-            Los traslados se registran en el historial institucional.
-            Las revisiones de asignaciones a áreas se gestionan de forma independiente.
+            Academia DECOM · Formación para comunicar con propósito. Los traslados se registran en
+            el historial institucional. Las revisiones de asignaciones a áreas se gestionan de forma
+            independiente.
           </p>
         </div>
       </div>
