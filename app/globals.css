@@ -35,8 +35,7 @@
   --shadow-soft: 0 16px 40px -28px rgb(16 45 77 / 24%);
 }
 
-:root.dark,
-:root[data-theme="dark"] {
+:root.dark {
   color-scheme: dark;
 
   /* Brand */
@@ -82,8 +81,7 @@ html {
   scroll-behavior: smooth;
 }
 
-html.dark,
-html[data-theme="dark"] {
+html.dark {
   color-scheme: dark;
 }
 
