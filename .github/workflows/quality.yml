@@ -6,6 +6,7 @@ on:
       - "main"
       - "fix/**"
       - "feature/**"
+      - "security/**"
   pull_request:
 
 permissions:
@@ -17,9 +18,9 @@ concurrency:
 
 jobs:
   quality:
-    name: Lint, tipos y compilación
+    name: Pruebas, auditoría, lint, tipos y compilación
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Descargar código
@@ -33,6 +34,12 @@ jobs:
 
       - name: Instalar dependencias
         run: npm ci
+
+      - name: Auditar dependencias
+        run: npm audit --audit-level=high
+
+      - name: Ejecutar pruebas automatizadas
+        run: npm test
 
       - name: Revisar estilo y errores estáticos
         run: npm run lint
