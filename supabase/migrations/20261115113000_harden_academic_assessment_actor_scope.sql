@@ -255,7 +255,7 @@ begin
     end if;
 
     if q.question_type in ('single_choice', 'true_false') then
-      if jsonb_typeof(ans) <> 'string'
+      if jsonb_typeof(ans) is distinct from 'string'
         or not exists (
           select 1
           from jsonb_array_elements_text(q.options) o(value)
@@ -277,7 +277,7 @@ begin
       );
 
     elsif q.question_type = 'multiple_choice' then
-      if jsonb_typeof(ans) <> 'array'
+      if jsonb_typeof(ans) is distinct from 'array'
         or jsonb_array_length(ans) = 0
         or exists (
           select 1 from jsonb_array_elements(ans) v
