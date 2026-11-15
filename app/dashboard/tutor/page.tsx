@@ -178,7 +178,7 @@ export default function TutorDashboardPage() {
     }
   }, [router, supabase]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => { void Promise.resolve().then(load); }, [load]);
 
   const visibleReviews = reviews.filter((item) => {
     const query = search.trim().toLocaleLowerCase("es");
