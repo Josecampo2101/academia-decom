@@ -107,8 +107,6 @@ export default function Home() {
     <main className={`relative min-h-screen overflow-x-hidden transition-colors duration-300 ${isDark ? "bg-[#111827]" : "bg-[#f4f4f5]"}`}>
       <div className="absolute inset-x-0 top-0 h-[320px] px-[11px] pt-[11px] sm:h-[335px]" aria-hidden="true">
         <div className="relative h-full overflow-hidden rounded-[7px] bg-[#142b4b]">
-          <div className="absolute -left-20 top-12 h-64 w-64 rounded-full border-[34px] border-[#1c3b67]/35" />
-          <div className="absolute -right-24 bottom-[-170px] h-[390px] w-[390px] rounded-full border-[48px] border-[#1c3b67]/30" />
           <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(5,18,39,0.25),transparent_55%,rgba(5,18,39,0.18))]" />
         </div>
       </div>
@@ -137,18 +135,10 @@ export default function Home() {
 
         <section className={`relative z-10 -mt-0 w-full max-w-[272px] rounded-[9px] px-4 pb-5 pt-8 shadow-[0_10px_35px_rgba(15,23,42,0.08)] sm:max-w-[300px] sm:px-5 ${isDark ? "border border-white/10 bg-[#1f2937] text-white" : "bg-white text-[#252525]"}`}>
           <div className="mb-7 flex flex-col items-center text-center">
-            <div className="flex h-[82px] w-full items-center justify-center" aria-label="Escuela de Comunicaciones D34">
-              <div className="flex items-center gap-2.5">
-                <div className="relative flex h-14 w-12 items-center justify-center">
-                  <span className="absolute left-1 top-1 text-[3.5rem] font-black leading-none tracking-[-0.12em] text-[#087db5]">D</span>
-                  <span className="absolute right-0 top-0 text-2xl font-black text-[#f2b500]">34</span>
-                </div>
-                <div className="text-left">
-                  <p className="text-[13px] font-extrabold leading-tight tracking-[-0.04em]">Escuela de</p>
-                  <p className="text-[13px] font-extrabold leading-tight tracking-[-0.04em]">Comunicaciones</p>
-                  <p className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.19em] text-[#087db5]">Distrito 34 · IPUC</p>
-                </div>
-              </div>
+            <div className="flex min-h-[72px] w-full flex-col items-center justify-center text-center" aria-label="Escuela de Comunicaciones, Distrito 34, IPUC">
+              <p className={`text-[15px] font-bold leading-tight tracking-[-0.025em] ${isDark ? "text-white" : "text-[#142b4b]"}`}>Escuela de</p>
+              <p className={`text-[19px] font-extrabold leading-tight tracking-[-0.035em] ${isDark ? "text-white" : "text-[#142b4b]"}`}>Comunicaciones</p>
+              <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.18em] text-[#087db5]">Distrito 34 · IPUC</p>
             </div>
             <h1 className="mt-1 text-sm font-semibold">Acceso institucional</h1>
           </div>
