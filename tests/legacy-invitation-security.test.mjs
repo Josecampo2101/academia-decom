@@ -23,7 +23,7 @@ test("legacy invitation acceptance requires a Supabase-confirmed email", () => {
 test("legacy invitation acceptance requires an active profile before writes", () => {
   assert.match(
     migration,
-    /FROM public\.profiles p[\s\S]*?p\.status\s+IS DISTINCT FROM\s+'active'[\s\S]*?FOR SHARE/i
+    /FROM public\.profiles p[\s\S]*?FOR SHARE[\s\S]*?v_profile_status IS DISTINCT FROM\s+'active'/i
   );
   assert.match(
     migration,
