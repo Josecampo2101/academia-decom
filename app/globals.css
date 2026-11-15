@@ -2,47 +2,66 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
- * Academia DECOM design tokens.
- * Keep the existing semantic names so current pages remain compatible.
+ * Academia DECOM design system.
+ * Preserve these semantic tokens: existing modules depend on their names.
+ * Brand: blue #087DB5, turquoise #19A7A0, navy #102D4D.
  */
 :root {
   color-scheme: light;
-  --background: #f4f7fb;
+
+  /* Brand */
+  --brand: #087db5;
+  --brand-strong: #102d4d;
+  --accent: #19a7a0;
+  --accent-from: #087db5;
+  --accent-to: #19a7a0;
+  --gold: #a66d00;
+
+  /* Semantic surfaces and content */
+  --background: #f4f7fa;
   --foreground: #102d4d;
   --surface: #ffffff;
   --surface-raised: #ffffff;
-  --surface-muted: #edf3f8;
-  --muted: #60748a;
-  --border: #dce5ef;
-  --brand: #0756a0;
-  --brand-strong: #0b3970;
-  --accent: #39a9dc;
-  --accent-from: #087db5;
-  --accent-to: #19a7a0;
-  --gold: #ffbd00;
-  --focus: #168bc2;
+  --surface-muted: #eaf1f6;
+  --muted: #52677d;
+  --border: #d5e0e9;
+
+  /* Interaction and elevation */
+  --focus: #087db5;
+  --success: #16794b;
+  --warning: #946200;
+  --danger: #b42318;
   --radius-card: 16px;
-  --shadow-soft: 0 18px 50px -28px rgb(11 57 112 / 28%);
+  --shadow-soft: 0 16px 40px -28px rgb(16 45 77 / 24%);
 }
 
 :root.dark,
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --background: #0b1422;
-  --foreground: #edf4fb;
-  --surface: #142235;
-  --surface-raised: #1b2d43;
-  --surface-muted: #20354c;
-  --muted: #a8bbcf;
-  --border: #2b4058;
-  --brand: #55b8e8;
-  --brand-strong: #0b3970;
-  --accent: #65c8e9;
+
+  /* Brand */
+  --brand: #69c4eb;
+  --brand-strong: #b4e4f8;
+  --accent: #55c7be;
   --accent-from: #168bc2;
-  --accent-to: #19a7a0;
-  --gold: #ffd166;
-  --focus: #65c8e9;
-  --shadow-soft: 0 22px 55px -30px rgb(0 0 0 / 65%);
+  --accent-to: #35b8ad;
+  --gold: #f2c66d;
+
+  /* Semantic surfaces and content */
+  --background: #0c1724;
+  --foreground: #f1f6fa;
+  --surface: #142437;
+  --surface-raised: #1a2f45;
+  --surface-muted: #20384f;
+  --muted: #a8b9c9;
+  --border: #33495e;
+
+  /* Interaction and elevation */
+  --focus: #7cccf0;
+  --success: #6fd6a3;
+  --warning: #f2c66d;
+  --danger: #ff8b83;
+  --shadow-soft: 0 20px 48px -28px rgb(0 0 0 / 62%);
 }
 
 @theme inline {
@@ -59,14 +78,18 @@
 html {
   min-height: 100%;
   background: var(--background);
+  color-scheme: light;
   scroll-behavior: smooth;
+}
+
+html.dark,
+html[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 body {
   min-height: 100vh;
-  background:
-    radial-gradient(ellipse at top left, rgb(57 169 220 / 8%), transparent 38%),
-    var(--background);
+  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), Inter, Arial, Helvetica, sans-serif;
   text-rendering: optimizeLegibility;
@@ -74,7 +97,7 @@ body {
 }
 
 ::selection {
-  background: rgb(57 169 220 / 28%);
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
   color: var(--foreground);
 }
 
@@ -82,24 +105,6 @@ body {
   outline: 3px solid var(--focus);
   outline-offset: 3px;
 }
-
-.dark body {
-  background:
-    radial-gradient(ellipse at top left, rgb(57 169 220 / 10%), transparent 42%),
-    var(--background);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
 
 /* Shared interaction and form-control baseline for every module. */
 :where(button, a, input, select, textarea) {
@@ -133,5 +138,16 @@ body {
 @media (max-width: 640px) {
   :where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {
     max-width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
