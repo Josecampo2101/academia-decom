@@ -57,5 +57,5 @@ test("student interface uses the protected RPC instead of direct completion writ
   assert.match(studentFormation, /p_last_position_seconds:\s*0/);
   assert.doesNotMatch(studentFormation, /from\(["']lesson_progress["']\)\.upsert/);
   assert.doesNotMatch(studentFormation, /status:\s*["']completed["']/);
-  assert.match(studentFormation, /Guardar avance/);
+  assert.match(studentFormation, /Registrar inicio/);
 });
