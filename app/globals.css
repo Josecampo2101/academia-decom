@@ -99,3 +99,39 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* Shared interaction and form-control baseline for every module. */
+:where(button, a, input, select, textarea) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {
+  color: var(--foreground);
+  accent-color: var(--brand);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea)::placeholder {
+  color: var(--muted);
+  opacity: 0.82;
+}
+
+:where(button:disabled, input:disabled, select:disabled, textarea:disabled) {
+  cursor: not-allowed;
+}
+
+:where(table) {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+:where(th) {
+  font-weight: 650;
+}
+
+@media (max-width: 640px) {
+  :where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {
+    max-width: 100%;
+  }
+}
