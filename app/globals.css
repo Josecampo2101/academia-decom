@@ -1,33 +1,45 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Academia DECOM design tokens.
+ * Keep the existing semantic names so current pages remain compatible.
+ */
 :root {
   color-scheme: light;
   --background: #f4f7fb;
   --foreground: #102d4d;
   --surface: #ffffff;
   --surface-raised: #ffffff;
+  --surface-muted: #edf3f8;
   --muted: #60748a;
   --border: #dce5ef;
   --brand: #0756a0;
   --brand-strong: #0b3970;
   --accent: #39a9dc;
+  --accent-from: #087db5;
+  --accent-to: #19a7a0;
   --gold: #ffbd00;
-  --focus: #39a9dc;
+  --focus: #168bc2;
+  --radius-card: 16px;
   --shadow-soft: 0 18px 50px -28px rgb(11 57 112 / 28%);
 }
 
-:root.dark {
+:root.dark,
+:root[data-theme="dark"] {
   color-scheme: dark;
   --background: #0b1422;
   --foreground: #edf4fb;
   --surface: #142235;
   --surface-raised: #1b2d43;
+  --surface-muted: #20354c;
   --muted: #a8bbcf;
   --border: #2b4058;
   --brand: #55b8e8;
   --brand-strong: #0b3970;
   --accent: #65c8e9;
+  --accent-from: #168bc2;
+  --accent-to: #19a7a0;
   --gold: #ffd166;
   --focus: #65c8e9;
   --shadow-soft: 0 22px 55px -30px rgb(0 0 0 / 65%);
@@ -36,7 +48,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -56,7 +68,7 @@ body {
     radial-gradient(ellipse at top left, rgb(57 169 220 / 8%), transparent 38%),
     var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), Inter, Arial, Helvetica, sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
