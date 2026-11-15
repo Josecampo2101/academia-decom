@@ -1,7 +1,7 @@
 -- Restrict private lesson-material downloads to enrolled learners.
--- Academic managers/tutors retain access through the existing scoped helper.
--- This migration is intentionally separate from production rollout and must be
--- validated against a staging project before application.
+-- Academic managers/tutors retain the existing access to draft and published
+-- resources through the scoped helper.
+-- Validate in staging before production rollout.
 
 drop policy if exists academic_materials_storage_select on storage.objects;
 
@@ -27,15 +27,15 @@ using (
       on p.id = c.program_id
      and p.district_id = c.district_id
     where m.storage_path = objects.name
-      and m.status = 'published'
-      and l.status = 'published'
-      and cm.status = 'published'
-      and c.status = 'published'
-      and p.status = 'published'
       and (
         private.can_manage_lesson_resources_for_lesson(m.lesson_id)
         or (
-          private.can_view_academic_catalog(m.district_id, 'published')
+          m.status = 'published'
+          and l.status = 'published'
+          and cm.status = 'published'
+          and c.status = 'published'
+          and p.status = 'published'
+          and private.can_view_academic_catalog(m.district_id, 'published')
           and exists (
             select 1
             from public.course_enrollments e
@@ -50,4 +50,4 @@ using (
 );
 
 comment on policy academic_materials_storage_select on storage.objects is
-  'Published lesson files are readable only by scoped academic managers or enrolled active/completed learners.';
+  'Scoped academic managers retain lesson-resource access; learners need an active or completed course enrollment for published materials.';
