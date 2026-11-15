@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   ArrowLeft,
   Camera,
@@ -257,7 +258,7 @@ export default function ProfilePage() {
             <div className="flex flex-col items-center gap-4 sm:flex-row">
               <div className="relative flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-[#087db5]/15 bg-[#087db5]/10 text-[#087db5]">
                 {visibleAvatar ? (
-                  <img src={visibleAvatar} alt="Vista previa de tu fotografía de perfil" className="h-full w-full object-cover" />
+                  <Image src={visibleAvatar} alt="Vista previa de tu fotografía de perfil" width={112} height={112} unoptimized className="h-full w-full object-cover" />
                 ) : (
                   <UserRound className="h-12 w-12" />
                 )}
