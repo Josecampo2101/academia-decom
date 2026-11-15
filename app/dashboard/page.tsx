@@ -4,6 +4,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { canAccessAcademicModule } from "@/lib/academic/module-access";
 
 type Theme = "light" | "dark" | "system";
 
@@ -96,6 +97,11 @@ export default function DashboardPage() {
   const canManageAcademicCatalog = canManageLibrary;
   const canManageTutorAssignments = roleKeys.some((role) => ["national_admin", "academic_editor", "district_coordinator", "area_coordinator"].includes(role));
   const canOpenAdminModule = isNationalAdmin || roleKeys.includes("academic_editor");
+
+  // Mantiene las tarjetas y el menú lateral alineados con los destinos reales.
+  function canOpenAcademicModule(moduleName: string) {
+    return canAccessAcademicModule(moduleName, roleKeys);
+  }
 
   function openAcademicModule(moduleName: string) {
     const isStudent = roleKeys.includes("member");
@@ -588,15 +594,9 @@ export default function DashboardPage() {
                 key={module.name}
                 type="button"
                 onClick={() => openAcademicModule(module.name)}
-                disabled={
-                  !roleKeys.includes("member") &&
-                  !(module.name === "Seguimiento" && roleKeys.includes("tutor")) &&
-                  !(canOpenAdminModule && (module.name === "Mi formación" || module.name === "Biblioteca"))
-                }
+                disabled={!canOpenAcademicModule(module.name)}
                 title={
-                  roleKeys.includes("member") ||
-                  (module.name === "Seguimiento" && roleKeys.includes("tutor")) ||
-                  (canOpenAdminModule && (module.name === "Mi formación" || module.name === "Biblioteca"))
+                  canOpenAcademicModule(module.name)
                     ? module.description
                     : "No tienes un perfil académico habilitado para este módulo"
                 }
@@ -1238,9 +1238,22 @@ export default function DashboardPage() {
                       {module.description}
                     </p>
 
-                    <p className="mt-5 text-xs font-semibold text-[#087DB5]">
-                      Próximamente
-                    </p>
+                    <button
+                      type="button"
+                      onClick={() => openAcademicModule(module.name)}
+                      disabled={!canOpenAcademicModule(module.name)}
+                      aria-label={`Abrir ${module.name}`}
+                      title={
+                        canOpenAcademicModule(module.name)
+                          ? `Abrir ${module.name}`
+                          : "Este módulo no está habilitado para tu perfil"
+                      }
+                      className="mt-5 inline-flex items-center rounded-lg bg-[#087DB5]/10 px-3 py-2 text-xs font-semibold text-[#087DB5] transition hover:bg-[#087DB5]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087DB5] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:hover:bg-slate-100"
+                    >
+                      {canOpenAcademicModule(module.name)
+                        ? "Abrir módulo →"
+                        : "No habilitado para tu perfil"}
+                    </button>
                   </article>
                 ))}
               </div>
