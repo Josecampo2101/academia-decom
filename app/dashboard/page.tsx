@@ -4,6 +4,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { canAccessAcademicModule } from "@/lib/academic/module-access";
 
 type Theme = "light" | "dark" | "system";
 
@@ -98,29 +99,7 @@ export default function DashboardPage() {
   const canOpenAdminModule = isNationalAdmin || roleKeys.includes("academic_editor");
 
   function canOpenAcademicModule(moduleName: string) {
-    const isStudent = roleKeys.includes("member");
-    const isTutor = roleKeys.includes("tutor");
-    const hasManagementRole = roleKeys.some((role) =>
-      ["national_admin", "district_coordinator", "area_coordinator", "academic_editor", "local_responsible"].includes(role)
-    );
-
-    if (canOpenAdminModule && ["Mi formación", "Biblioteca"].includes(moduleName)) {
-      return true;
-    }
-
-    if (moduleName === "Seguimiento" && isTutor) {
-      return true;
-    }
-
-    if (moduleName === "Seguimiento" && hasManagementRole && !isTutor) {
-      return true;
-    }
-
-    if (moduleName === "Mi formación" && hasManagementRole && !isStudent) {
-      return true;
-    }
-
-    return isStudent;
+    return canAccessAcademicModule(moduleName, roleKeys);
   }
 
   function openAcademicModule(moduleName: string) {
