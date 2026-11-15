@@ -213,19 +213,29 @@ export default function DashboardPage() {
     }
   }, []);
 
-  // Gestionar tema claro, oscuro y automático.
+  // Gestionar tema claro, oscuro y automático sin sobrescribir el tema inicial.
   useEffect(() => {
+    const savedTheme = localStorage.getItem("academia-theme");
+    const activeTheme: Theme =
+      savedTheme === "light" || savedTheme === "dark" || savedTheme === "system"
+        ? savedTheme
+        : theme;
     const media = window.matchMedia("(prefers-color-scheme: dark)");
 
     function updateTheme() {
-      const nextTheme = theme === "system" ? (media.matches ? "dark" : "light") : theme;
+      const nextTheme =
+        activeTheme === "system"
+          ? media.matches
+            ? "dark"
+            : "light"
+          : activeTheme;
       setResolvedTheme(nextTheme);
       document.documentElement.classList.toggle("dark", nextTheme === "dark");
     }
 
     updateTheme();
 
-    if (theme === "system") {
+    if (activeTheme === "system") {
       media.addEventListener("change", updateTheme);
       return () => media.removeEventListener("change", updateTheme);
     }
