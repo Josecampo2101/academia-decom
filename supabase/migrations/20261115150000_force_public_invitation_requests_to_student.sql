@@ -431,6 +431,20 @@ BEGIN
     IF invitation_record.accepted_at IS NOT NULL THEN
 
         IF request_record.user_id = current_user_id THEN
+            -- En reintentos de invitaciones ya utilizadas, conservar el rol
+            -- que realmente se asignó antes de esta migración.
+            SELECT r.id, r.role_key
+            INTO target_role_id, target_role
+            FROM public.roles r
+            WHERE r.id = request_record.requested_role_id;
+
+            IF target_role_id IS NULL THEN
+                SELECT r.id, r.role_key
+                INTO target_role_id, target_role
+                FROM public.roles r
+                WHERE r.role_key = 'student';
+            END IF;
+
             RETURN jsonb_build_object(
                 'success', true,
                 'idempotent', true,
