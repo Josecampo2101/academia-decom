@@ -4,7 +4,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ArrowLeftRight, Award, BookOpen, ChevronLeft, ChevronRight, ClipboardCheck, Clock3, Home, Library, LogOut, Mail, Menu, Monitor, Moon, Settings, Sun, UserRound, Users } from "lucide-react";
+import { ArrowLeftRight, Award, BookOpen, ChevronLeft, ChevronRight, ClipboardCheck, Clock3, Home, Library, LogOut, Mail, Menu, Monitor, Moon, Settings, Sun, UserRound, Users, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 type Theme = "light" | "dark" | "system";
@@ -176,6 +176,24 @@ export default function DashboardPage() {
   useEffect(() => {
     localStorage.setItem("academia-sidebar-collapsed", String(sidebarCollapsed));
   }, [sidebarCollapsed]);
+
+  // Cerrar el drawer móvil con Escape y evitar que el documento se desplace detrás.
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileMenuOpen(false);
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [mobileMenuOpen]);
 
   // Cargar preferencia de tema.
   useEffect(() => {
@@ -633,173 +651,189 @@ export default function DashboardPage() {
     <main className={`min-h-screen ${background} ${primaryText}`}>
       <div className="flex min-h-screen">
         {mobileMenuOpen && (
-          <button type="button" aria-label="Cerrar menú" onClick={() => setMobileMenuOpen(false)} className="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-[2px] lg:hidden" />
+          <button
+            type="button"
+            aria-label="Cerrar menú de navegación"
+            onClick={() => setMobileMenuOpen(false)}
+            className="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-[2px] lg:hidden"
+          />
         )}
-        {/* MENÚ LATERAL: persistente en escritorio y drawer en móvil. */}
+        {/* Navegación institucional: drawer accesible en móvil y panel fijo en escritorio. */}
         <aside
+          id="dashboard-sidebar"
           data-collapsed={sidebarCollapsed}
-          className={`${mobileMenuOpen ? "fixed inset-y-0 left-0 z-50 flex w-72 shadow-2xl" : "fixed inset-y-0 left-0 z-50 hidden w-72"} shrink-0 flex-col border-r transition-[width,transform] duration-200 lg:sticky lg:top-0 lg:z-20 lg:flex lg:h-screen lg:shadow-none ${sidebarCollapsed ? "lg:w-20" : "lg:w-64"} ${borderColor} ${surface}`}
+          aria-label="Navegación principal"
+          onKeyDown={(event) => {
+            if (!mobileMenuOpen || event.key !== "Tab") return;
+            const focusable = event.currentTarget.querySelectorAll<HTMLElement>(
+              'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            );
+            if (focusable.length === 0) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+              event.preventDefault();
+              last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+              event.preventDefault();
+              first.focus();
+            }
+          }}
+          className={`${mobileMenuOpen ? "fixed inset-y-0 left-0 z-50 flex w-[min(19rem,calc(100vw-2.5rem))] shadow-2xl" : "fixed inset-y-0 left-0 z-50 hidden w-72"} min-h-0 shrink-0 flex-col overflow-hidden border-r transition-[width,transform] duration-200 motion-reduce:transition-none lg:sticky lg:top-0 lg:z-20 lg:flex lg:h-screen lg:shadow-none ${sidebarCollapsed ? "lg:w-20" : "lg:w-64"} ${borderColor} ${surface}`}
         >
-          <div className="border-b border-inherit p-4">
+          <div className={`shrink-0 border-b ${borderColor} p-4`}>
             <div className="flex items-center justify-between gap-2">
               <div className="flex min-w-0 items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0B3970] text-sm font-black text-white">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#102D4D] text-sm font-black text-white ring-1 ring-white/15">
                   D34
                 </div>
-                {!sidebarCollapsed && <div className="min-w-0">
-                  <h1 className="text-xs font-bold tracking-wide">
-                    ESCUELA DE COMUNICACIONES
-                  </h1>
-                  <p className={`text-xs ${secondaryText}`}>Distrito 34 · IPUC</p>
-                </div>}
+                {!sidebarCollapsed && (
+                  <div className="min-w-0">
+                    <h1 className="text-xs font-bold tracking-wide">ESCUELA DE COMUNICACIONES</h1>
+                    <p className={`mt-1 text-xs ${secondaryText}`}>Distrito 34 · IPUC</p>
+                  </div>
+                )}
               </div>
-              <button type="button" onClick={() => setSidebarCollapsed((value) => !value)} aria-label={sidebarCollapsed ? "Expandir menú" : "Contraer menú"} title={sidebarCollapsed ? "Expandir menú" : "Contraer menú"} className={`hidden rounded-lg p-2 transition hover:bg-[#087DB5]/10 lg:inline-flex ${secondaryText}`}>
-                {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(false)}
+                  aria-label="Cerrar menú"
+                  className={`inline-flex rounded-lg p-2 transition hover:bg-[#087DB5]/10 focus-visible:outline-offset-2 lg:hidden ${secondaryText}`}
+                >
+                  <X className="h-4 w-4" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSidebarCollapsed((value) => !value)}
+                  aria-label={sidebarCollapsed ? "Expandir menú" : "Contraer menú"}
+                  title={sidebarCollapsed ? "Expandir menú" : "Contraer menú"}
+                  aria-pressed={sidebarCollapsed}
+                  className={`hidden rounded-lg p-2 transition hover:bg-[#087DB5]/10 focus-visible:outline-offset-2 lg:inline-flex ${secondaryText}`}
+                >
+                  {sidebarCollapsed ? <ChevronRight className="h-4 w-4" aria-hidden="true" /> : <ChevronLeft className="h-4 w-4" aria-hidden="true" />}
+                </button>
+              </div>
             </div>
           </div>
 
-          <nav className="flex-1 space-y-2 p-4">
-            <p
-              className={`mb-4 px-3 text-xs font-bold uppercase tracking-wider ${secondaryText}`}
-            >
+          <nav aria-label="Secciones de la escuela" className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain p-3 sm:p-4">
+            <p className={`mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.14em] ${secondaryText}`}>
               {!sidebarCollapsed && "Menú principal"}
             </p>
 
             <a
               href="/dashboard"
+              aria-current="page"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 rounded-xl bg-[#087DB5]/10 px-4 py-3 text-sm font-semibold text-[#087DB5]"
+              title={sidebarCollapsed ? "Inicio" : undefined}
+              className="flex min-h-11 items-center gap-3 rounded-xl bg-[#087DB5]/10 px-4 py-3 text-sm font-semibold text-[#087DB5] ring-1 ring-inset ring-[#087DB5]/15 transition-colors"
             >
-              <Home className="h-5 w-5 shrink-0" aria-hidden="true" />{!sidebarCollapsed && <span>Inicio</span>}
+              <Home className="h-5 w-5 shrink-0" aria-hidden="true" />
+              {!sidebarCollapsed && <span>Inicio</span>}
             </a>
 
-            {modules.map((module) => (
-              <button
-                key={module.name}
-                type="button"
-                onClick={() => { openAcademicModule(module.name); setMobileMenuOpen(false); }}
-                disabled={
-                  !roleKeys.includes("member") &&
-                  !(module.name === "Seguimiento" && roleKeys.includes("tutor")) &&
-                  !(canOpenAdminModule && (module.name === "Mi formación" || module.name === "Biblioteca"))
-                }
-                title={
-                  roleKeys.includes("member") ||
-                  (module.name === "Seguimiento" && roleKeys.includes("tutor")) ||
-                  (canOpenAdminModule && (module.name === "Mi formación" || module.name === "Biblioteca"))
-                    ? module.description
-                    : "No tienes un perfil académico habilitado para este módulo"
-                }
-                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] disabled:cursor-not-allowed disabled:opacity-50 ${secondaryText}`}
-              >
-                <module.icon className="h-5 w-5 shrink-0" aria-hidden="true" />
-                {!sidebarCollapsed && <span>{module.name}</span>}
-              </button>
-            ))}
+            {modules.map((module) => {
+              const moduleEnabled =
+                roleKeys.includes("member") ||
+                (module.name === "Seguimiento" && roleKeys.includes("tutor")) ||
+                (canOpenAdminModule && (module.name === "Mi formación" || module.name === "Biblioteca"));
+              return (
+                <button
+                  key={module.name}
+                  type="button"
+                  onClick={() => { openAcademicModule(module.name); setMobileMenuOpen(false); }}
+                  disabled={!moduleEnabled}
+                  title={sidebarCollapsed ? module.name : moduleEnabled ? module.description : "No tienes un perfil académico habilitado para este módulo"}
+                  aria-label={module.name}
+                  className={`flex min-h-11 w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition-colors focus-visible:outline-offset-2 ${moduleEnabled ? `${secondaryText} hover:bg-[#087DB5]/10 hover:text-[#087DB5]` : `${secondaryText} cursor-not-allowed opacity-45`}`}
+                >
+                  <module.icon className="h-5 w-5 shrink-0" aria-hidden="true" />
+                  {!sidebarCollapsed && <span>{module.name}</span>}
+                </button>
+              );
+            })}
 
-            <div className={`my-5 border-t ${borderColor}`} />
+            <div className={`my-4 border-t ${borderColor}`} />
 
-            <p
-              className={`px-3 text-xs font-bold uppercase tracking-wider ${secondaryText}`}
-            >
+            <p className={`px-3 text-[11px] font-bold uppercase tracking-[0.14em] ${secondaryText}`}>
               {!sidebarCollapsed && "Institucional"}
             </p>
 
             <div
-              className={`mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm ${
-                isNationalAdmin
-                  ? "bg-[#087DB5]/10 font-semibold text-[#087DB5]"
-                  : `${secondaryText} opacity-50`
-              }`}
+              title={sidebarCollapsed ? "Administración" : undefined}
+              aria-label="Administración"
+              className={`mt-2 flex min-h-11 w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm ${isNationalAdmin ? "bg-[#087DB5]/10 font-semibold text-[#087DB5]" : `${secondaryText} opacity-50`}`}
             >
-              <Settings className="h-5 w-5 shrink-0" aria-hidden="true" />{!sidebarCollapsed && <span>Administración</span>}
+              <Settings className="h-5 w-5 shrink-0" aria-hidden="true" />
+              {!sidebarCollapsed && <span>Administración</span>}
             </div>
 
             {canManageTutorAssignments && (
-              <a
-                href="/dashboard/administracion/tutores"
-              onClick={() => setMobileMenuOpen(false)}
-                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
-              >
+              <a href="/dashboard/administracion/tutores" onClick={() => setMobileMenuOpen(false)} title={sidebarCollapsed ? "Asignación de tutores" : undefined} className={`flex min-h-11 items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors hover:bg-[#087DB5]/10 hover:text-[#087DB5] ${secondaryText}`}>
                 <Users className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>Asignación de tutores</span>}
               </a>
             )}
 
             {canManageAcademicCatalog && (
-              <a
-                href="/dashboard/administracion/actividades"
-              onClick={() => setMobileMenuOpen(false)}
-                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
-              >
+              <a href="/dashboard/administracion/actividades" onClick={() => setMobileMenuOpen(false)} title={sidebarCollapsed ? "Actividades y evaluaciones" : undefined} className={`flex min-h-11 items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors hover:bg-[#087DB5]/10 hover:text-[#087DB5] ${secondaryText}`}>
                 <ClipboardCheck className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>Actividades y evaluaciones</span>}
               </a>
             )}
 
             {canManageAcademicCatalog && (
-              <a
-                href="/dashboard/administracion/catalogo"
-              onClick={() => setMobileMenuOpen(false)}
-                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
-              >
+              <a href="/dashboard/administracion/catalogo" onClick={() => setMobileMenuOpen(false)} title={sidebarCollapsed ? "Catálogo académico" : undefined} className={`flex min-h-11 items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors hover:bg-[#087DB5]/10 hover:text-[#087DB5] ${secondaryText}`}>
                 <BookOpen className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>Catálogo académico</span>}
               </a>
             )}
 
             {canManageLibrary && (
-              <a
-                href="/dashboard/administracion/biblioteca"
-              onClick={() => setMobileMenuOpen(false)}
-                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
-              >
+              <a href="/dashboard/administracion/biblioteca" onClick={() => setMobileMenuOpen(false)} title={sidebarCollapsed ? "Administrar biblioteca" : undefined} className={`flex min-h-11 items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors hover:bg-[#087DB5]/10 hover:text-[#087DB5] ${secondaryText}`}>
                 <Library className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>Administrar biblioteca</span>}
               </a>
             )}
 
             {canManageInvitations && (
-              <a
-                href="/dashboard/invitaciones"
-              onClick={() => setMobileMenuOpen(false)}
-                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
-              >
+              <a href="/dashboard/invitaciones" onClick={() => setMobileMenuOpen(false)} title={sidebarCollapsed ? "Invitaciones" : undefined} className={`flex min-h-11 items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors hover:bg-[#087DB5]/10 hover:text-[#087DB5] ${secondaryText}`}>
                 <Mail className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>Invitaciones</span>}
               </a>
             )}
 
-            {/* REUBICACIÓN DE CREYENTES */}
             {canManageTransfers && (
-              <a
-                href="/dashboard/reubicaciones"
-              onClick={() => setMobileMenuOpen(false)}
-                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
-              >
+              <a href="/dashboard/reubicaciones" onClick={() => setMobileMenuOpen(false)} title={sidebarCollapsed ? "Reubicación de creyentes" : undefined} className={`flex min-h-11 items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors hover:bg-[#087DB5]/10 hover:text-[#087DB5] ${secondaryText}`}>
                 <ArrowLeftRight className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>Reubicación de creyentes</span>}
               </a>
             )}
           </nav>
 
-          {/* INFORMACIÓN DEL USUARIO */}
-          <div className={`border-t ${borderColor} p-4`}>
-            {!sidebarCollapsed && <p className={`truncate text-xs ${secondaryText}`}>
-              Sesión iniciada como
-            </p>}
-
-            {!sidebarCollapsed && <p className="mt-1 truncate text-sm font-semibold">{displayName}</p>}
-
-            {!sidebarCollapsed && <p className="mt-1 text-xs font-semibold text-[#087DB5]">{roleName}</p>}
-
+          <div className={`shrink-0 border-t ${borderColor} p-3 sm:p-4`}>
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#087DB5]/10 text-[#087DB5]">
+                {avatarUrl ? <Image src={avatarUrl} alt="" width={72} height={72} unoptimized className="h-full w-full object-cover" /> : <UserRound className="h-4 w-4" aria-hidden="true" />}
+              </span>
+              {!sidebarCollapsed && (
+                <div className="min-w-0 flex-1">
+                  <p className={`text-[10px] font-medium uppercase tracking-wide ${secondaryText}`}>Sesión iniciada como</p>
+                  <p className="mt-0.5 truncate text-sm font-semibold">{displayName}</p>
+                  <p className="mt-0.5 truncate text-xs font-semibold text-[#087DB5]">{roleName}</p>
+                </div>
+              )}
+            </div>
             <button
+              type="button"
               onClick={handleLogout}
               disabled={loggingOut}
-              className="mt-4 w-full rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 disabled:opacity-50"
+              title={sidebarCollapsed ? "Cerrar sesión" : undefined}
+              className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-red-200 px-3 py-2.5 text-sm font-semibold text-red-500 transition-colors hover:bg-red-50 disabled:cursor-wait disabled:opacity-50 dark:border-red-900/60 dark:hover:bg-red-950/30"
             >
-              {loggingOut ? "Cerrando..." : sidebarCollapsed ? <LogOut className="mx-auto h-4 w-4" /> : "Cerrar sesión"}
+              <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
+              {!sidebarCollapsed && (loggingOut ? "Cerrando sesión…" : "Cerrar sesión")}
             </button>
           </div>
         </aside>
@@ -811,7 +845,7 @@ export default function DashboardPage() {
             className={`flex items-center justify-between border-b ${borderColor} ${surface} px-4 py-4 md:px-8`}
           >
             <div className="flex min-w-0 items-center gap-3">
-              <button type="button" onClick={() => setMobileMenuOpen(true)} aria-label="Abrir menú de navegación" aria-expanded={mobileMenuOpen} className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${borderColor} lg:hidden`}>
+              <button type="button" onClick={() => setMobileMenuOpen(true)} aria-label="Abrir menú de navegación" aria-controls="dashboard-sidebar" aria-expanded={mobileMenuOpen} className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${borderColor} lg:hidden`}>
                 <Menu className="h-5 w-5" aria-hidden="true" />
               </button>
               <div>
