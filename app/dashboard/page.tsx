@@ -622,21 +622,21 @@ export default function DashboardPage() {
             <p
               className={`mb-4 px-3 text-xs font-bold uppercase tracking-wider ${secondaryText}`}
             >
-              Menú principal
+              {!sidebarCollapsed && "Menú principal"}
             </p>
 
             <a
               href="/dashboard"
               className="flex items-center gap-3 rounded-xl bg-[#087DB5]/10 px-4 py-3 text-sm font-semibold text-[#087DB5]"
             >
-              <span>⌂</span> Inicio
+              <span aria-hidden="true">⌂</span>{!sidebarCollapsed && <span>Inicio</span>}
             </a>
 
             {modules.map((module) => (
               <button
                 key={module.name}
                 type="button"
-                onClick={() => openAcademicModule(module.name)}
+                onClick={() => { openAcademicModule(module.name); setMobileMenuOpen(false); }}
                 disabled={
                   !roleKeys.includes("member") &&
                   !(module.name === "Seguimiento" && roleKeys.includes("tutor")) &&
@@ -651,8 +651,8 @@ export default function DashboardPage() {
                 }
                 className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] disabled:cursor-not-allowed disabled:opacity-50 ${secondaryText}`}
               >
-                <span>{module.icon}</span>
-                {module.name}
+                <span aria-hidden="true">{module.icon}</span>
+                {!sidebarCollapsed && <span>{module.name}</span>}
               </button>
             ))}
 
@@ -661,7 +661,7 @@ export default function DashboardPage() {
             <p
               className={`px-3 text-xs font-bold uppercase tracking-wider ${secondaryText}`}
             >
-              Institucional
+              {!sidebarCollapsed && "Institucional"}
             </p>
 
             <div
@@ -671,7 +671,7 @@ export default function DashboardPage() {
                   : `${secondaryText} opacity-50`
               }`}
             >
-              <span>⚙</span> Administración
+              <span aria-hidden="true">⚙</span>{!sidebarCollapsed && <span>Administración</span>}
             </div>
 
             {canManageTutorAssignments && (
@@ -680,7 +680,7 @@ export default function DashboardPage() {
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
                 <span className="text-lg">♙</span>
-                <span>Asignación de tutores</span>
+                {!sidebarCollapsed && <span>Asignación de tutores</span>}
               </a>
             )}
 
@@ -690,7 +690,7 @@ export default function DashboardPage() {
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
                 <span className="text-lg">✓</span>
-                <span>Actividades y evaluaciones</span>
+                {!sidebarCollapsed && <span>Actividades y evaluaciones</span>}
               </a>
             )}
 
@@ -700,7 +700,7 @@ export default function DashboardPage() {
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
                 <span className="text-lg">▤</span>
-                <span>Catálogo académico</span>
+                {!sidebarCollapsed && <span>Catálogo académico</span>}
               </a>
             )}
 
@@ -710,7 +710,7 @@ export default function DashboardPage() {
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
                 <span className="text-lg">▣</span>
-                <span>Administrar biblioteca</span>
+                {!sidebarCollapsed && <span>Administrar biblioteca</span>}
               </a>
             )}
 
@@ -720,7 +720,7 @@ export default function DashboardPage() {
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
                 <span className="text-lg">✉</span>
-                <span>Invitaciones</span>
+                {!sidebarCollapsed && <span>Invitaciones</span>}
               </a>
             )}
 
@@ -731,29 +731,27 @@ export default function DashboardPage() {
                 className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
               >
                 <span className="text-lg">⇄</span>
-                <span>Reubicación de creyentes</span>
+                {!sidebarCollapsed && <span>Reubicación de creyentes</span>}
               </a>
             )}
           </nav>
 
           {/* INFORMACIÓN DEL USUARIO */}
           <div className={`border-t ${borderColor} p-4`}>
-            <p className={`truncate text-xs ${secondaryText}`}>
+            {!sidebarCollapsed && <p className={`truncate text-xs ${secondaryText}`}>
               Sesión iniciada como
-            </p>
+            </p>}
 
-            <p className="mt-1 truncate text-sm font-semibold">{displayName}</p>
+            {!sidebarCollapsed && <p className="mt-1 truncate text-sm font-semibold">{displayName}</p>}
 
-            <p className="mt-1 text-xs font-semibold text-[#087DB5]">
-              {roleName}
-            </p>
+            {!sidebarCollapsed && <p className="mt-1 text-xs font-semibold text-[#087DB5]">{roleName}</p>}
 
             <button
               onClick={handleLogout}
               disabled={loggingOut}
               className="mt-4 w-full rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 disabled:opacity-50"
             >
-              {loggingOut ? "Cerrando..." : "Cerrar sesión"}
+              {loggingOut ? "Cerrando..." : sidebarCollapsed ? "↪" : "Cerrar sesión"}
             </button>
           </div>
         </aside>
@@ -806,7 +804,7 @@ export default function DashboardPage() {
               </div>
 
               <div className="hidden rounded-xl bg-[#087DB5]/10 px-3 py-2 text-sm font-semibold text-[#087DB5] sm:block">
-                {email}
+                {displayName}
               </div>
 
               <button
