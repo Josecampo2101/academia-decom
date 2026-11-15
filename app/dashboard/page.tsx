@@ -57,6 +57,8 @@ export default function DashboardPage() {
   const router = useRouter();
 
   const [theme, setTheme] = useState<Theme>("system");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [displayName, setDisplayName] = useState("Bienvenido");
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
 
   const [email, setEmail] = useState("");
@@ -225,6 +227,10 @@ export default function DashboardPage() {
       }
 
       setEmail(data.user.email ?? "");
+      const metadataName = data.user.user_metadata?.full_name ?? data.user.user_metadata?.name;
+      if (typeof metadataName === "string" && metadataName.trim()) {
+        setDisplayName(metadataName.trim().split(/\\s+/)[0]);
+      }
 
       const { data: permissionTest, error: permissionError } =
         await supabase.rpc("has_role", {
@@ -550,7 +556,7 @@ export default function DashboardPage() {
       <div className="flex min-h-screen">
         {/* MENÚ LATERAL */}
         <aside
-          className={`hidden w-64 shrink-0 flex-col border-r ${borderColor} ${surface} lg:flex`}
+          className={`hidden shrink-0 flex-col border-r transition-[width] duration-200 lg:flex ${sidebarCollapsed ? "w-20" : "w-64"} ${borderColor} ${surface} lg:flex`}
         >
           <div className="border-b border-inherit p-6">
             <div className="flex items-center gap-3">
@@ -560,7 +566,7 @@ export default function DashboardPage() {
 
               <div>
                 <h1 className="text-sm font-bold tracking-wide">
-                  ACADEMIA DECOM
+                  ESCUELA DE COMUNICACIONES D34
                 </h1>
                 <p className={`text-xs ${secondaryText}`}>
                   Plataforma de formación
@@ -693,7 +699,7 @@ export default function DashboardPage() {
               Sesión iniciada como
             </p>
 
-            <p className="mt-1 truncate text-sm font-semibold">{email}</p>
+            <p className="mt-1 truncate text-sm font-semibold">{displayName}</p>
 
             <p className="mt-1 text-xs font-semibold text-[#087DB5]">
               {roleName}
@@ -781,7 +787,7 @@ export default function DashboardPage() {
                 </p>
 
                 <h2 className="mt-4 text-3xl font-bold md:text-4xl">
-                  Bienvenido a Academia DECOM
+                  Bienvenido a la Escuela de Comunicaciones D34
                 </h2>
 
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-100">
