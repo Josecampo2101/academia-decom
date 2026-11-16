@@ -29,6 +29,17 @@ autenticación, Supabase, migraciones ni políticas RLS.
    - Texto sobre relleno turquesa: de blanco (3.0:1) a azul oscuro (4.7:1) en 6 botones.
    - El texto turquesa sobre fondo claro usa `#0e7a75` (5.2:1).
 
+9. **Páginas de estado.** `not-found`, `error`, `global-error` y `dashboard/loading` con la identidad de la
+   plataforma (antes se veían las pantallas por defecto de Next.js). El error no muestra el mensaje técnico.
+10. **Componentes compartidos.** `Spinner` (reemplaza 10 copias), `Skeleton` y `PublicFooter` en `components/ui`.
+11. **Accesibilidad base.** Enlace "Saltar al contenido" y `id="contenido"` en los 93 `<main>`;
+    `viewport.themeColor` claro/oscuro; plantilla de título.
+12. **Pie en el login** con enlaces verificados (`TODO` para términos, política de datos y redes).
+13. **Prettier.** `.prettierrc.json`, `.prettierignore` y scripts `format` / `format:check`.
+    No se reformateó el resto del repositorio a propósito: hay ramas sin fusionar (`security/*`, `fix/*`)
+    que tocan los mismos archivos y se generarían conflictos. Conviene correr `npm run format` una sola vez
+    cuando esas ramas estén fusionadas y entonces añadir `format:check` al CI.
+
 ## Verificación ejecutada
 
 | Comprobación | Resultado |
@@ -40,6 +51,10 @@ autenticación, Supabase, migraciones ni políticas RLS.
 | `/conexion` en ejecución | 307 hacia `/` |
 | Cabeceras en `/` | las 5 presentes |
 | CSS generado | todas las utilidades de tokens existen |
+| `/ruta-inexistente` | 404 con la página de marca y las cabeceras de seguridad |
+| Login | contiene enlace de salto, `theme-color`, `id="contenido"` y pie |
+| `/dashboard/...` sin sesión | 307 a `/` (el proxy sigue igual) |
+| `npm ci` + lint + pruebas tras agregar Prettier | sin errores, 30 de 30 |
 
 ## Lo que NO se verificó (revisar a ojo antes de fusionar)
 
@@ -53,8 +68,8 @@ insignias de estado (amber, red, sky, teal, emerald) y paneles con fondo azul ma
 
 - Colores sueltos restantes: 47 (casi todos únicos: `#0B1422`, `#101B2A`, `#0AA9D2`, etc.).
 - Partir `dashboard/page.tsx` y `reubicaciones/page.tsx` (más de 1.300 líneas cada uno).
-- Componentes compartidos (PageHeader, tabla, modal, estados).
-- Pie de página institucional (faltan las URLs oficiales).
+- Más componentes compartidos (PageHeader, tabla, modal, estado vacío); el modal "acceso denegado" está copiado en varias páginas.
+- `loading.tsx` por sección (solo existe el de `/dashboard`) y no hay `error.tsx` propio en el dashboard.
+- Pie de página: solo el del login; faltan términos, política de datos y redes oficiales.
 - `bg-decom-teal` con texto blanco quedó corregido en botones; las barras de progreso turquesa no llevan texto.
 - HSTS lleva `includeSubDomains`: confirmar que ningún subdominio del dominio final dependa de HTTP.
-- Un archivo de Prettier compartido (`.prettierrc`) y su script, para no volver a líneas gigantes.
