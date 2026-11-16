@@ -36,7 +36,7 @@ export default function StudentAssessmentsPage() {
         const { data: roles, error: roleError } = await supabase.from("roles").select("role_key").in("id", roleIds);
         if (roleError) throw roleError;
         const roleKeys = (roles ?? []).map((role) => role.role_key);
-        if (!roleKeys.includes("member") && !roleKeys.includes("national_admin")) {
+        if (!roleKeys.includes("student") && !roleKeys.includes("member") && !roleKeys.includes("national_admin")) {
           if (active) setAccess("denied");
           return;
         }

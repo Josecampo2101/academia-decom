@@ -37,7 +37,7 @@ export default function StudentActivityClient({activityId:assignmentId}:{activit
   }catch(cause){console.error("No fue posible cargar la actividad:",cause);setError(cause instanceof Error?cause.message:"No fue posible cargar esta actividad.");setAccess("error");}
   finally{setLoading(false);}
  },[assignmentId,router,supabase]);
- useEffect(()=>{void load();},[load]);
+ useEffect(()=>{void Promise.resolve().then(load);},[load]);
  const activity=assignment?.academic_activities;const editable=submission?.status==="draft";
  const responseType=activity?.response_type;const needText=responseType==="text"||responseType==="mixed";
  const needFile=responseType==="file"||responseType==="mixed";const needLink=responseType==="link"||responseType==="mixed";

@@ -29,7 +29,7 @@ export default function StudentActivitiesPage() {
   const {data:assignments,error:roleError}=await supabase.from("user_role_assignments").select("role_id").eq("user_id",user.id);if(roleError)throw roleError;
   const roleIds=[...new Set((assignments??[]).map(x=>x.role_id))];if(!roleIds.length){if(active)setAccess("denied");return;}
   const {data:roles,error:rolesError}=await supabase.from("roles").select("role_key").in("id",roleIds);if(rolesError)throw rolesError;if(!active)return;
-  const keys=(roles??[]).map(x=>x.role_key);if(!keys.includes("member")&&!keys.includes("national_admin")){setAccess("denied");return;}
+  const keys=(roles??[]).map(x=>x.role_key);if(!keys.includes("student")&&!keys.includes("member")&&!keys.includes("national_admin")){setAccess("denied");return;}
   setUserId(user.id);setAccess("allowed");await loadActivities(user.id);
  }catch(cause){console.error("No fue posible validar el acceso a actividades:",cause);if(active)setAccess("error");}}
  void verifyAccess();return()=>{active=false;};

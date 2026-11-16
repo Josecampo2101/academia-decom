@@ -239,26 +239,10 @@ export async function POST(request: NextRequest) {
       return json({ error: "No fue posible cargar las congregaciones." }, 503);
     }
 
-    let roles: Array<{ id: string; name: string }> = [];
-    if (invitation.invitation_type === "decom_member") {
-      const { data: roleRows, error: rolesError } = await supabase
-        .from("roles")
-        .select("id, name")
-        .in("role_key", ["district_coordinator", "area_coordinator"])
-        .order("name", { ascending: true });
-
-      if (rolesError) {
-        return json({ error: "No fue posible cargar los roles disponibles." }, 503);
-      }
-      roles = roleRows ?? [];
-    }
-
     return json({
       valid: true,
-      invitationType: invitation.invitation_type,
       districtName: district.name,
       congregations: congregations ?? [],
-      roles,
     });
   }
 
@@ -304,17 +288,8 @@ export async function POST(request: NextRequest) {
   if (!isValidUuid(congregationId)) {
     return json({ error: "Selecciona una congregación válida." }, 400);
   }
-  if (
-    invitation.invitation_type === "guest" &&
-    requestedRoleId
-  ) {
-    return json({ error: "Los invitados no pueden solicitar un rol institucional." }, 400);
-  }
-  if (
-    invitation.invitation_type === "decom_member" &&
-    (!requestedRoleId || !isValidUuid(requestedRoleId))
-  ) {
-    return json({ error: "Selecciona el rol institucional que deseas solicitar." }, 400);
+  if (requestedRoleId) {
+    return json({ error: "Los roles institucionales no se solicitan mediante el enlace público." }, 400);
   }
 
   const { data, error } = await supabase.rpc("submit_invitation_request_v2", {
@@ -324,7 +299,7 @@ export async function POST(request: NextRequest) {
     p_phone: phone,
     p_date_of_birth: dateOfBirth,
     p_requested_congregation_id: congregationId,
-    p_requested_role_id: requestedRoleId ?? undefined,
+    p_requested_role_id: undefined,
   });
 
   if (

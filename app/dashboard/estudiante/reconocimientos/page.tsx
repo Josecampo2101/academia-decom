@@ -36,7 +36,7 @@ export default function StudentAchievementsPage() {
         if (rolesError) throw rolesError;
         if (!active) return;
         const keys = (roles ?? []).map((role) => role.role_key);
-        setAccess(keys.includes("member") || keys.includes("national_admin") ? "allowed" : "denied");
+        setAccess(keys.includes("student") || keys.includes("member") || keys.includes("national_admin") ? "allowed" : "denied");
       } catch (error) {
         console.error("No fue posible validar el acceso a reconocimientos:", error);
         if (active) setAccess("error");

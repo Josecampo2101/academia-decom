@@ -14,7 +14,8 @@ const roleCopy: Record<string, { title: string; description: string }> = {
   national_admin: { title: "Administración nacional", description: "Control global de la Academia, los distritos, los accesos y la operación académica." },
   district_coordinator: { title: "Dirección distrital", description: "Seguimiento integral de congregaciones, integrantes, responsables y formación del distrito." },
   area_coordinator: { title: "Comité distrital", description: "Vista de seguimiento y gestión compartida de la operación del distrito." },
-  member: { title: "Espacio del estudiante", description: "Tu ruta de aprendizaje, cursos asignados y avance académico." },
+  student: { title: "Espacio del estudiante", description: "Tu ruta de aprendizaje, cursos asignados y avance académico." },
+  member: { title: "Miembro de DECOM", description: "Tu perfil y participación institucional dentro de DECOM." },
   academic_editor: { title: "Edición académica", description: "Construcción, revisión y publicación del contenido formativo autorizado." },
   tutor: { title: "Espacio del tutor", description: "Acompañamiento de estudiantes y seguimiento de su proceso formativo." },
   local_responsible: { title: "Responsable local", description: "Seguimiento de integrantes y coordinación de la congregación." },
@@ -74,7 +75,7 @@ export default function RoleWorkspacePage() {
         const scopedDistricts = (districtRows ?? []) as District[];
         setDistricts(scopedDistricts);
 
-        if (assignedRoles.some(r => r.role_key === "member")) {
+        if (assignedRoles.some(r => ["student", "member"].includes(r.role_key))) {
           const { data: enrollmentRows, error: enrollmentError } = await supabase
             .from("course_enrollments").select("id,course_id,status,enrolled_at")
             .eq("user_id", user.id).order("enrolled_at", { ascending: false });
@@ -137,9 +138,10 @@ export default function RoleWorkspacePage() {
     ?? roles.find(r => r.role_key === "academic_editor")
     ?? roles.find(r => r.role_key === "tutor")
     ?? roles.find(r => r.role_key === "local_responsible")
+    ?? roles.find(r => r.role_key === "student")
     ?? roles.find(r => r.role_key === "member");
   const copy = primaryRole ? roleCopy[primaryRole.role_key] : null;
-  const isStudent = roles.some(r => r.role_key === "member");
+  const isStudent = roles.some(r => ["student", "member"].includes(r.role_key));
   const isDistrict = roles.some(r => ["national_admin", "district_coordinator", "area_coordinator"].includes(r.role_key));
   const isNational = roles.some(r => r.role_key === "national_admin");
 

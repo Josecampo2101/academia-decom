@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -10,14 +10,6 @@ type Theme = "light" | "dark" | "system";
 type UserRole = {
   role_key: string;
   name: string;
-};
-
-type Area = {
-  id: string;
-  name: string;
-  description: string | null;
-  status: "active" | "inactive";
-  created_at: string;
 };
 
 const modules = [
@@ -69,25 +61,6 @@ export default function DashboardPage() {
     "checking" | "authorized" | "denied" | "error"
   >("checking");
 
-  // Gestión de áreas.
-  const [areas, setAreas] = useState<Area[]>([]);
-  const [areasLoading, setAreasLoading] = useState(false);
-  const [savingArea, setSavingArea] = useState(false);
-
-  const [areaName, setAreaName] = useState("");
-  const [areaDescription, setAreaDescription] = useState("");
-  const [editingAreaId, setEditingAreaId] = useState<string | null>(null);
-
-  const [areaSearch, setAreaSearch] = useState("");
-  const [areaFilter, setAreaFilter] = useState<
-    "all" | "active" | "inactive"
-  >("all");
-
-  const [areaMessage, setAreaMessage] = useState("");
-  const [areaMessageType, setAreaMessageType] = useState<
-    "success" | "error" | ""
-  >("");
-
   const isNationalAdmin = roleKeys.includes("national_admin");
   const canManageInvitations = roleKeys.some((role) =>
     ["national_admin", "district_coordinator", "area_coordinator"].includes(role)
@@ -98,7 +71,7 @@ export default function DashboardPage() {
   const canOpenAdminModule = isNationalAdmin || roleKeys.includes("academic_editor");
 
   function openAcademicModule(moduleName: string) {
-    const isStudent = roleKeys.includes("member");
+    const isStudent = roleKeys.includes("student") || roleKeys.includes("member");
     const isTutor = roleKeys.includes("tutor");
     const adminDestination =
       moduleName === "Mi formación"
@@ -178,35 +151,6 @@ export default function DashboardPage() {
       return () => media.removeEventListener("change", updateTheme);
     }
   }, [theme]);
-
-  // Consultar áreas.
-  async function loadAreas() {
-    setAreasLoading(true);
-
-    try {
-      const supabase = createClient();
-
-      const { data, error } = await supabase
-        .from("areas")
-        .select("id, name, description, status, created_at")
-        .order("name", { ascending: true });
-
-      if (error) {
-        console.error("Error consultando áreas:", error);
-        setAreaMessage(`No fue posible consultar las áreas: ${error.message}`);
-        setAreaMessageType("error");
-        return;
-      }
-
-      setAreas((data ?? []) as Area[]);
-    } catch (error) {
-      console.error("Error inesperado consultando áreas:", error);
-      setAreaMessage("Ocurrió un error al consultar las áreas.");
-      setAreaMessageType("error");
-    } finally {
-      setAreasLoading(false);
-    }
-  }
 
   // Verificar sesión, autorización y roles.
   useEffect(() => {
@@ -298,23 +242,7 @@ export default function DashboardPage() {
 
       setLoading(false);
 
-      // Cargar áreas para administración nacional.
-      if (keys.includes("national_admin")) {
-        const { data: areaData, error: areaError } = await supabase
-          .from("areas")
-          .select("id, name, description, status, created_at")
-          .order("name", { ascending: true });
 
-        if (!active) return;
-
-        if (areaError) {
-          console.error("Error cargando áreas:", areaError);
-          setAreaMessage(`Error al cargar áreas: ${areaError.message}`);
-          setAreaMessageType("error");
-        } else {
-          setAreas((areaData ?? []) as Area[]);
-        }
-      }
     }
 
     checkSession();
@@ -323,163 +251,6 @@ export default function DashboardPage() {
       active = false;
     };
   }, [router]);
-
-  // Limpiar formulario.
-  function resetAreaForm() {
-    setAreaName("");
-    setAreaDescription("");
-    setEditingAreaId(null);
-  }
-
-  // Crear o actualizar área.
-  async function handleSaveArea(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (!isNationalAdmin || savingArea) return;
-
-    const cleanName = areaName.trim();
-    const cleanDescription = areaDescription.trim();
-
-    if (!cleanName) {
-      setAreaMessage("El nombre del área es obligatorio.");
-      setAreaMessageType("error");
-      return;
-    }
-
-    if (cleanName.length > 150) {
-      setAreaMessage("El nombre no puede superar 150 caracteres.");
-      setAreaMessageType("error");
-      return;
-    }
-
-    if (cleanDescription.length > 1000) {
-      setAreaMessage("La descripción no puede superar 1000 caracteres.");
-      setAreaMessageType("error");
-      return;
-    }
-
-    const duplicate = areas.some(
-      (area) =>
-        area.id !== editingAreaId &&
-        area.name.trim().toLocaleLowerCase("es") ===
-          cleanName.toLocaleLowerCase("es")
-    );
-
-    if (duplicate) {
-      setAreaMessage("Ya existe un área con ese nombre.");
-      setAreaMessageType("error");
-      return;
-    }
-
-    setSavingArea(true);
-    setAreaMessage("");
-    setAreaMessageType("");
-
-    try {
-      const supabase = createClient();
-
-      if (editingAreaId) {
-        const { error } = await supabase
-          .from("areas")
-          .update({
-            name: cleanName,
-            description: cleanDescription || null,
-          })
-          .eq("id", editingAreaId);
-
-        if (error) {
-          console.error("Error actualizando área:", error);
-          setAreaMessage(`No se pudo actualizar el área: ${error.message}`);
-          setAreaMessageType("error");
-          return;
-        }
-
-        setAreaMessage(`El área "${cleanName}" fue actualizada correctamente.`);
-      } else {
-        const { error } = await supabase.from("areas").insert({
-          name: cleanName,
-          description: cleanDescription || null,
-          status: "active",
-        });
-
-        if (error) {
-          console.error("Error creando área:", error);
-          setAreaMessage(`No se pudo crear el área: ${error.message}`);
-          setAreaMessageType("error");
-          return;
-        }
-
-        setAreaMessage(`El área "${cleanName}" fue registrada correctamente.`);
-      }
-
-      setAreaMessageType("success");
-      resetAreaForm();
-      await loadAreas();
-    } catch (error) {
-      console.error("Error inesperado guardando área:", error);
-      setAreaMessage("Ocurrió un error inesperado al guardar el área.");
-      setAreaMessageType("error");
-    } finally {
-      setSavingArea(false);
-    }
-  }
-
-  // Cargar un área en el formulario para editarla.
-  function handleEditArea(area: Area) {
-    setEditingAreaId(area.id);
-    setAreaName(area.name);
-    setAreaDescription(area.description ?? "");
-    setAreaMessage("");
-    setAreaMessageType("");
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }
-
-  // Activar o desactivar un área.
-  async function handleToggleAreaStatus(area: Area) {
-    if (!isNationalAdmin) return;
-
-    const newStatus = area.status === "active" ? "inactive" : "active";
-
-    const confirmation =
-      newStatus === "inactive"
-        ? `¿Deseas desactivar el área "${area.name}"?`
-        : `¿Deseas activar nuevamente el área "${area.name}"?`;
-
-    if (!window.confirm(confirmation)) return;
-
-    try {
-      const supabase = createClient();
-
-      const { error } = await supabase
-        .from("areas")
-        .update({ status: newStatus })
-        .eq("id", area.id);
-
-      if (error) {
-        console.error("Error cambiando estado:", error);
-        setAreaMessage(`No se pudo cambiar el estado: ${error.message}`);
-        setAreaMessageType("error");
-        return;
-      }
-
-      setAreaMessage(
-        `El área "${area.name}" ahora está ${
-          newStatus === "active" ? "activa" : "inactiva"
-        }.`
-      );
-      setAreaMessageType("success");
-
-      await loadAreas();
-    } catch (error) {
-      console.error("Error inesperado cambiando estado:", error);
-      setAreaMessage("Ocurrió un error al cambiar el estado del área.");
-      setAreaMessageType("error");
-    }
-  }
 
   // Cambiar tema.
   function changeTheme(newTheme: Theme) {
@@ -511,25 +282,6 @@ export default function DashboardPage() {
   const primaryText = dark ? "text-white" : "text-[#102D4D]";
   const secondaryText = dark ? "text-slate-400" : "text-slate-500";
   const borderColor = dark ? "border-slate-700" : "border-slate-100";
-
-  const filteredAreas = areas.filter((area) => {
-    const matchesSearch = area.name
-      .toLocaleLowerCase("es")
-      .includes(areaSearch.trim().toLocaleLowerCase("es"));
-
-    const matchesFilter =
-      areaFilter === "all" || area.status === areaFilter;
-
-    return matchesSearch && matchesFilter;
-  });
-
-  const activeAreas = areas.filter(
-    (area) => area.status === "active"
-  ).length;
-
-  const inactiveAreas = areas.filter(
-    (area) => area.status === "inactive"
-  ).length;
 
   // Pantalla de carga.
   if (loading) {
@@ -589,11 +341,13 @@ export default function DashboardPage() {
                 type="button"
                 onClick={() => openAcademicModule(module.name)}
                 disabled={
+                  !roleKeys.includes("student") &&
                   !roleKeys.includes("member") &&
                   !(module.name === "Seguimiento" && roleKeys.includes("tutor")) &&
                   !(canOpenAdminModule && (module.name === "Mi formación" || module.name === "Biblioteca"))
                 }
                 title={
+                  roleKeys.includes("student") ||
                   roleKeys.includes("member") ||
                   (module.name === "Seguimiento" && roleKeys.includes("tutor")) ||
                   (canOpenAdminModule && (module.name === "Mi formación" || module.name === "Biblioteca"))
@@ -865,344 +619,6 @@ export default function DashboardPage() {
                 </span>
               </div>
             </section>
-
-            {/* GESTIÓN DE ÁREAS */}
-            {isNationalAdmin && (
-              <section
-                className={`${surface} mt-7 rounded-2xl border ${borderColor} p-5 md:p-7`}
-              >
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-[#087DB5]">
-                      Administración académica
-                    </p>
-
-                    <h3 className="mt-2 text-xl font-bold">
-                      Áreas de formación
-                    </h3>
-
-                    <p className={`mt-2 text-sm ${secondaryText}`}>
-                      Organiza y administra las áreas académicas de Academia
-                      DECOM.
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl bg-[#087DB5]/10 px-5 py-3">
-                    <p className="text-xs font-semibold text-[#087DB5]">
-                      Áreas registradas
-                    </p>
-                    <p className="mt-1 text-2xl font-bold text-[#087DB5]">
-                      {areas.length}
-                    </p>
-                  </div>
-                </div>
-
-                {/* INDICADORES */}
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  <div className={`rounded-xl border ${borderColor} p-4`}>
-                    <p className={`text-xs font-medium ${secondaryText}`}>
-                      Áreas activas
-                    </p>
-                    <p className="mt-1 text-2xl font-bold text-emerald-600">
-                      {activeAreas}
-                    </p>
-                  </div>
-
-                  <div className={`rounded-xl border ${borderColor} p-4`}>
-                    <p className={`text-xs font-medium ${secondaryText}`}>
-                      Áreas inactivas
-                    </p>
-                    <p className="mt-1 text-2xl font-bold text-slate-500">
-                      {inactiveAreas}
-                    </p>
-                  </div>
-                </div>
-
-                {/* FORMULARIO */}
-                <div className={`mt-7 border-t ${borderColor} pt-6`}>
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <h4 className="font-bold">
-                        {editingAreaId ? "Editar área" : "Registrar nueva área"}
-                      </h4>
-
-                      <p className={`mt-1 text-sm ${secondaryText}`}>
-                        Define el nombre y la descripción del área.
-                      </p>
-                    </div>
-
-                    {editingAreaId && (
-                      <button
-                        type="button"
-                        onClick={resetAreaForm}
-                        className={`rounded-xl border ${borderColor} px-4 py-2 text-sm font-semibold ${secondaryText}`}
-                      >
-                        Cancelar edición
-                      </button>
-                    )}
-                  </div>
-
-                  <form
-                    onSubmit={handleSaveArea}
-                    className="mt-5 space-y-4"
-                  >
-                    <div>
-                      <label
-                        htmlFor="areaName"
-                        className="mb-2 block text-sm font-semibold"
-                      >
-                        Nombre del área *
-                      </label>
-
-                      <input
-                        id="areaName"
-                        type="text"
-                        value={areaName}
-                        onChange={(event) => {
-                          setAreaName(event.target.value);
-                          setAreaMessage("");
-                          setAreaMessageType("");
-                        }}
-                        placeholder="Ejemplo: Medios Audiovisuales"
-                        maxLength={150}
-                        required
-                        disabled={savingArea}
-                        className={`w-full rounded-xl border ${borderColor} ${background} px-4 py-3 text-sm outline-none transition focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/20 disabled:opacity-50`}
-                      />
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="areaDescription"
-                        className="mb-2 block text-sm font-semibold"
-                      >
-                        Descripción
-                      </label>
-
-                      <textarea
-                        id="areaDescription"
-                        value={areaDescription}
-                        onChange={(event) => {
-                          setAreaDescription(event.target.value);
-                          setAreaMessage("");
-                          setAreaMessageType("");
-                        }}
-                        placeholder="Describe el propósito y el campo de formación de esta área."
-                        maxLength={1000}
-                        rows={4}
-                        disabled={savingArea}
-                        className={`w-full resize-y rounded-xl border ${borderColor} ${background} px-4 py-3 text-sm outline-none transition focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/20 disabled:opacity-50`}
-                      />
-
-                      <p className={`mt-1 text-right text-xs ${secondaryText}`}>
-                        {areaDescription.length}/1000
-                      </p>
-                    </div>
-
-                    <div className="flex justify-end">
-                      <button
-                        type="submit"
-                        disabled={savingArea || areasLoading || !areaName.trim()}
-                        className="rounded-xl bg-[#087DB5] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#066895] disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {savingArea
-                          ? "Guardando..."
-                          : editingAreaId
-                          ? "Guardar cambios"
-                          : "Registrar área"}
-                      </button>
-                    </div>
-                  </form>
-
-                  {/* MENSAJES */}
-                  {areaMessage && (
-                    <div
-                      role="status"
-                      className={`mt-5 rounded-xl p-4 text-sm ${
-                        areaMessageType === "success"
-                          ? "bg-emerald-50 text-emerald-800"
-                          : "bg-red-50 text-red-700"
-                      }`}
-                    >
-                      {areaMessage}
-                    </div>
-                  )}
-                </div>
-
-                {/* LISTADO */}
-                <div className={`mt-8 border-t ${borderColor} pt-6`}>
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <h4 className="font-bold">Áreas registradas</h4>
-                      <p className={`mt-1 text-sm ${secondaryText}`}>
-                        Consulta y administra las áreas de formación.
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={loadAreas}
-                      disabled={areasLoading}
-                      className="rounded-xl border border-[#087DB5] px-4 py-2 text-sm font-semibold text-[#087DB5] hover:bg-[#087DB5]/5 disabled:opacity-50"
-                    >
-                      {areasLoading ? "Actualizando..." : "Actualizar"}
-                    </button>
-                  </div>
-
-                  {/* BUSCADOR Y FILTRO */}
-                  <div className="mt-5 grid gap-3 md:grid-cols-2">
-                    <input
-                      type="search"
-                      value={areaSearch}
-                      onChange={(event) => setAreaSearch(event.target.value)}
-                      placeholder="Buscar área por nombre..."
-                      className={`w-full rounded-xl border ${borderColor} ${background} px-4 py-3 text-sm outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/20`}
-                    />
-
-                    <select
-                      value={areaFilter}
-                      onChange={(event) =>
-                        setAreaFilter(
-                          event.target.value as "all" | "active" | "inactive"
-                        )
-                      }
-                      className={`w-full rounded-xl border ${borderColor} ${background} px-4 py-3 text-sm outline-none focus:border-[#087DB5]`}
-                    >
-                      <option value="all">Todos los estados</option>
-                      <option value="active">Activas</option>
-                      <option value="inactive">Inactivas</option>
-                    </select>
-                  </div>
-
-                  {/* RESULTADOS */}
-                  {areasLoading && areas.length === 0 ? (
-                    <p className={`py-8 text-center text-sm ${secondaryText}`}>
-                      Consultando áreas...
-                    </p>
-                  ) : filteredAreas.length === 0 ? (
-                    <div
-                      className={`mt-5 rounded-xl border ${borderColor} p-6 text-center`}
-                    >
-                      <p className="font-semibold">
-                        {areas.length === 0
-                          ? "Todavía no hay áreas registradas."
-                          : "No se encontraron áreas."}
-                      </p>
-
-                      <p className={`mt-2 text-sm ${secondaryText}`}>
-                        {areas.length === 0
-                          ? "Utiliza el formulario para registrar la primera área."
-                          : "Prueba con otro nombre o cambia el filtro de estado."}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="mt-5">
-                      <p className={`mb-3 text-xs ${secondaryText}`}>
-                        Desliza horizontalmente la tabla si no puedes
-                        visualizar todas las columnas.
-                      </p>
-
-                      <div className={`overflow-x-auto rounded-xl border ${borderColor}`}>
-                        <table className="w-full min-w-[850px] table-fixed text-left text-sm">
-                          <colgroup>
-                            <col className="w-[22%]" />
-                            <col className="w-[34%]" />
-                            <col className="w-[16%]" />
-                            <col className="w-[28%]" />
-                          </colgroup>
-
-                          <thead>
-                            <tr className={`${background} ${secondaryText}`}>
-                              <th className="px-4 py-4 font-semibold">
-                                Área
-                              </th>
-
-                              <th className="px-4 py-4 font-semibold">
-                                Descripción
-                              </th>
-
-                              <th className="px-4 py-4 font-semibold">
-                                Estado
-                              </th>
-
-                              <th className="px-4 py-4 font-semibold">
-                                Acciones
-                              </th>
-                            </tr>
-                          </thead>
-
-                          <tbody>
-                            {filteredAreas.map((area) => (
-                              <tr
-                                key={area.id}
-                                className={`border-t ${borderColor} transition hover:bg-[#087DB5]/5`}
-                              >
-                                <td className="break-words px-4 py-5 align-middle font-semibold">
-                                  {area.name}
-                                </td>
-
-                                <td
-                                  className={`break-words px-4 py-5 align-middle ${secondaryText}`}
-                                >
-                                  {area.description || "Sin descripción"}
-                                </td>
-
-                                <td className="px-4 py-5 align-middle">
-                                  <span
-                                    className={`inline-flex whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold ${
-                                      area.status === "active"
-                                        ? "bg-emerald-100 text-emerald-700"
-                                        : "bg-slate-100 text-slate-600"
-                                    }`}
-                                  >
-                                    {area.status === "active"
-                                      ? "Activa"
-                                      : "Inactiva"}
-                                  </span>
-                                </td>
-
-                                <td className="px-4 py-5 align-middle">
-                                  <div className="flex items-center gap-3 whitespace-nowrap">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleEditArea(area)}
-                                      className="inline-flex items-center justify-center rounded-lg bg-[#087DB5]/10 px-3 py-2 text-xs font-semibold text-[#087DB5] transition hover:bg-[#087DB5]/20"
-                                    >
-                                      Editar
-                                    </button>
-
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleToggleAreaStatus(area)
-                                      }
-                                      className={`inline-flex items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold transition ${
-                                        area.status === "active"
-                                          ? "bg-amber-50 text-amber-700 hover:bg-amber-100"
-                                          : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                                      }`}
-                                    >
-                                      {area.status === "active"
-                                        ? "Desactivar"
-                                        : "Activar"}
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  )}
-
-                  <p className={`mt-4 text-xs ${secondaryText}`}>
-                    Las áreas inactivas se conservan en la base de datos. No se
-                    eliminan las asignaciones históricas de sus integrantes.
-                  </p>
-                </div>
-              </section>
-            )}
 
             {/* MÓDULOS */}
             <section className="mt-9">
