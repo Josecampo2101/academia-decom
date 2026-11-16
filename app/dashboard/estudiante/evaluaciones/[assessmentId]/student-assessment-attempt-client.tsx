@@ -8,6 +8,7 @@ import type { Json } from "@/lib/supabase/database.types";
 type Question = { id: string; prompt: string; question_type: string; options: Json; points: number; sort_order: number };
 type Assessment = { id: string; title: string; instructions: string | null; assessment_type: string; passing_score: number; max_attempts: number | null; time_limit_minutes: number | null };
 type Attempt = { id: string; attempt_number: number; status: string; score_percent: number | null; passed: boolean | null; manual_pending: number; submitted_at: string };
+type AttemptSession = { attempt_id: string; attempt_number: number; started_at: string; expires_at: string | null };
 
 export default function StudentAssessmentAttemptClient({ assessmentId }: { assessmentId: string }) {
   const router = useRouter();
@@ -20,6 +21,8 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
   const [result, setResult] = useState<Attempt | null>(null);
   const [notice, setNotice] = useState("");
   const [saving, setSaving] = useState(false);
+  const [session, setSession] = useState<AttemptSession | null>(null);
+  const [secondsRemaining, setSecondsRemaining] = useState<number | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -46,6 +49,23 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
         setAssessment(exam as Assessment);
         setQuestions((questionResult.data ?? []) as Question[]);
         setAttempts((attemptResult.data ?? []) as Attempt[]);
+        const { data: sessionData, error: startError } = await supabase.rpc(
+          "start_academic_assessment_attempt",
+          { p_assessment_id: assessmentId },
+        );
+        if (startError) {
+          setNotice(startError.message);
+        } else if (sessionData) {
+          const started = sessionData as unknown as AttemptSession & { status?: string };
+          if (started.status === "max_attempts_reached") {
+            setNotice("El intento anterior venció y alcanzaste el máximo permitido. No puedes iniciar otro intento.");
+            return;
+          }
+          setSession(started);
+          setSecondsRemaining(started.expires_at
+            ? Math.max(0, Math.ceil((new Date(started.expires_at).getTime() - Date.now()) / 1000))
+            : null);
+        }
       } catch (error) {
         if (active) setNotice(error instanceof Error ? error.message : "No fue posible abrir la evaluación.");
       } finally {
@@ -55,6 +75,18 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
     void Promise.resolve().then(load);
     return () => { active = false; };
   }, [assessmentId, router, supabase]);
+
+  useEffect(() => {
+    if (!session?.expires_at) return;
+    const updateRemaining = () => {
+      const remaining = Math.max(0, Math.ceil((new Date(session.expires_at!).getTime() - Date.now()) / 1000));
+      setSecondsRemaining(remaining);
+      if (remaining === 0) setNotice("El tiempo de esta evaluación terminó. El servidor rechazará cualquier envío fuera del plazo.");
+    };
+    updateRemaining();
+    const interval = window.setInterval(updateRemaining, 1000);
+    return () => window.clearInterval(interval);
+  }, [session]);
 
   function setSingle(questionId: string, value: string) {
     setAnswers((current) => ({ ...current, [questionId]: value }));
@@ -69,7 +101,14 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!assessment || !questions.length) return;
+    if (!assessment || !questions.length || !session) {
+      setNotice("No hay un intento activo. Vuelve a abrir la evaluación para iniciar uno.");
+      return;
+    }
+    if (secondsRemaining === 0) {
+      setNotice("El tiempo de la evaluación terminó.");
+      return;
+    }
     const missing = questions.filter((question) => {
       const answer = answers[question.id];
       return Array.isArray(answer) ? answer.length === 0 : typeof answer !== "string" || !answer.trim();
@@ -78,7 +117,7 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
     setSaving(true);
     setNotice("");
     const { data, error } = await supabase.rpc("submit_academic_assessment", {
-      p_assessment_id: assessment.id,
+      p_attempt_id: session.attempt_id,
       p_answers: Object.fromEntries(Object.entries(answers).map(([questionId, answer]) => [questionId, Array.isArray(answer) ? [...answer].sort((left, right) => left.localeCompare(right, "es")) : answer])) as Json,
     });
     setSaving(false);
@@ -94,9 +133,12 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
       submitted_at: new Date().toISOString(),
     };
     setResult(next);
+    setSession(null);
     setAttempts((current) => [next, ...current]);
     setAnswers({});
-    setNotice(payload.status === "review_pending"
+    setNotice(payload.status === "expired"
+      ? "El tiempo terminó antes de recibir el envío. El intento quedó registrado como vencido y cuenta para el límite de intentos."
+      : payload.status === "review_pending"
       ? "Tu evaluación fue enviada. Las respuestas cortas están pendientes de revisión del tutor."
       : payload.passed
         ? "¡Evaluación aprobada! El sistema ha actualizado tu progreso y, si era el examen final, ha habilitado el siguiente curso publicado."
@@ -116,8 +158,8 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
       <div className="mx-auto max-w-4xl space-y-5 px-5 py-7 md:px-8">
         {assessment ? <>
           <section className="rounded-3xl bg-[#102D4D] p-6 text-white md:p-8"><span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider">{assessment.assessment_type === "final" ? "Examen final" : assessment.assessment_type === "practice" ? "Práctica" : "Evaluación de lección"}</span><h1 className="mt-4 text-2xl font-extrabold">{assessment.title}</h1><p className="mt-2 text-sm leading-6 text-white/75">{assessment.instructions || "Responde cada pregunta y envía tus respuestas para recibir la calificación."}</p><div className="mt-4 flex flex-wrap gap-4 text-xs text-white/70"><span>{questions.length} preguntas</span><span>Aprobación: {assessment.passing_score}%</span>{assessment.time_limit_minutes && <span>{assessment.time_limit_minutes} min</span>}{assessment.max_attempts && <span>Máx. {assessment.max_attempts} intentos</span>}</div></section>
-          {result ? <section className="rounded-3xl border border-slate-200 bg-white p-6"><h2 className="text-lg font-bold">{result.status === "review_pending" ? "En revisión manual" : result.passed ? "Evaluación aprobada" : "Intento calificado"}</h2><p className="mt-2 text-sm text-slate-500">{result.score_percent === null ? `${result.manual_pending} respuesta(s) esperan revisión del tutor.` : `Resultado: ${result.score_percent}% · intento ${result.attempt_number}`}</p>{assessment.assessment_type === "final" && result.passed && <p className="mt-4 rounded-xl bg-teal-50 p-4 text-sm text-teal-800">El curso quedó completado. Si hay un siguiente curso publicado en la ruta, el sistema lo habilita automáticamente.</p>}<button onClick={() => setResult(null)} className="mt-5 rounded-xl bg-[#087DB5] px-4 py-3 text-xs font-bold text-white">Volver a mis evaluaciones</button></section> : <form onSubmit={submit} className="space-y-4">
-            <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs"><span className="font-semibold">Progreso de respuestas</span><span className="tabular-nums text-slate-500">{answered}/{questions.length}</span></div>
+          {result ? <section className="rounded-3xl border border-slate-200 bg-white p-6"><h2 className="text-lg font-bold">{result.status === "expired" ? "Tiempo agotado" : result.status === "review_pending" ? "En revisión manual" : result.passed ? "Evaluación aprobada" : "Intento calificado"}</h2><p className="mt-2 text-sm text-slate-500">{result.status === "expired" ? `El intento ${result.attempt_number} venció y cuenta para el límite de intentos.` : result.score_percent === null ? `${result.manual_pending} respuesta(s) esperan revisión del tutor.` : `Resultado: ${result.score_percent}% · intento ${result.attempt_number}`}</p>{assessment.assessment_type === "final" && result.passed && <p className="mt-4 rounded-xl bg-teal-50 p-4 text-sm text-teal-800">El curso quedó completado. Si hay un siguiente curso publicado en la ruta, el sistema lo habilita automáticamente.</p>}<button onClick={() => setResult(null)} className="mt-5 rounded-xl bg-[#087DB5] px-4 py-3 text-xs font-bold text-white">Volver a mis evaluaciones</button></section> : <form onSubmit={submit} className="space-y-4">
+            <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs"><span className="font-semibold">Progreso de respuestas</span><span className="tabular-nums text-slate-500">{answered}/{questions.length}</span>{secondsRemaining !== null && <span className={secondsRemaining <= 60 ? "font-bold text-red-600" : "font-semibold text-[#087DB5]"}>Tiempo: {Math.floor(secondsRemaining / 60).toString().padStart(2,"0")}:{(secondsRemaining % 60).toString().padStart(2,"0")}</span>}</div>
             {questions.map((question, index) => {
               const options = Array.isArray(question.options) ? question.options.filter((item): item is string => typeof item === "string") : [];
               const isMulti = question.question_type === "multiple_choice";
@@ -127,9 +169,9 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
                   <div className="mt-4 space-y-2">{options.map((option) => <label key={option} className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-100 p-3 text-sm text-slate-600 hover:bg-slate-50"><input type={isMulti ? "checkbox" : "radio"} name={question.id} checked={isMulti ? Array.isArray(answers[question.id]) && (answers[question.id] as string[]).includes(option) : answers[question.id] === option} onChange={() => isMulti ? toggleMultiple(question.id, option) : setSingle(question.id, option)} className="mt-0.5 h-4 w-4 accent-[#087DB5]" />{option}</label>)}</div>}
               </article>;
             })}
-            <button disabled={saving || questions.length === 0} className="w-full rounded-xl bg-[#087DB5] px-5 py-4 text-sm font-bold text-white disabled:opacity-50">{saving ? "Enviando..." : "Enviar evaluación"}</button>
+            <button disabled={saving || questions.length === 0 || !session || secondsRemaining === 0} className="w-full rounded-xl bg-[#087DB5] px-5 py-4 text-sm font-bold text-white disabled:opacity-50">{saving ? "Enviando..." : "Enviar evaluación"}</button>
           </form>}
-          {attempts.length > 0 && <section className="rounded-3xl border border-slate-200 bg-white p-5"><h2 className="text-sm font-bold">Historial de intentos</h2><div className="mt-3 space-y-2">{attempts.map((attempt) => <div key={attempt.id} className="flex flex-wrap justify-between gap-2 rounded-xl bg-[#F4F7FA] p-3 text-xs"><span>Intento {attempt.attempt_number} · {attempt.status === "review_pending" ? "En revisión" : attempt.passed ? "Aprobado" : "Calificado"}</span><span className="font-semibold">{attempt.score_percent === null ? "Pendiente" : `${attempt.score_percent}%`}</span></div>)}</div></section>}
+          {attempts.length > 0 && <section className="rounded-3xl border border-slate-200 bg-white p-5"><h2 className="text-sm font-bold">Historial de intentos</h2><div className="mt-3 space-y-2">{attempts.map((attempt) => <div key={attempt.id} className="flex flex-wrap justify-between gap-2 rounded-xl bg-[#F4F7FA] p-3 text-xs"><span>Intento {attempt.attempt_number} · {attempt.status === "expired" ? "Tiempo agotado" : attempt.status === "in_progress" ? "En curso" : attempt.status === "review_pending" ? "En revisión" : attempt.passed ? "Aprobado" : "Calificado"}</span><span className="font-semibold">{attempt.score_percent === null ? "Pendiente" : `${attempt.score_percent}%`}</span></div>)}</div></section>}
         </> : <section className="rounded-3xl border border-slate-200 bg-white p-8 text-center"><h1 className="text-lg font-bold">Evaluación no disponible</h1><p className="mt-2 text-sm text-slate-500">{notice || "No se pudo cargar el instrumento solicitado."}</p><button onClick={() => router.push("/dashboard/estudiante/evaluaciones")} className="mt-5 rounded-xl bg-[#087DB5] px-4 py-3 text-xs font-bold text-white">Volver</button></section>}
         {notice && assessment && <p role="status" className="rounded-xl border border-sky-100 bg-sky-50 p-4 text-xs leading-5 text-sky-800">{notice}</p>}
       </div>

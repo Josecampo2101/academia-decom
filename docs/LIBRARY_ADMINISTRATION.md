@@ -1,90 +1,58 @@
-# Administración de la Biblioteca académica
+# Biblioteca académica: implementación y operación
 
-> Entregable de interfaz y propuesta editorial. Los registros visibles en esta fase son sintéticos y locales. No hay persistencia, carga de archivos, publicación efectiva ni integración con Supabase Storage.
+## Estado de implementación
 
-## Objetivo
+La Biblioteca de Academia DECOM está conectada a Supabase en la rama de integración. La persistencia usa:
 
-Dar a Administración nacional y a Editores académicos una interfaz para preparar recursos de consulta, clasificarlos, asociarlos a cursos y gestionar su ciclo editorial sin confundir una acción visual con una publicación institucional.
+- `academic_library_categories`: categorías por distrito.
+- `academic_library_resources`: metadatos, ámbito, curso, versión, estado y ruta privada del archivo.
+- Bucket privado `academic-library-resources` para los archivos.
+- Políticas RLS y políticas de Storage que limitan las operaciones al ámbito académico autorizado.
 
-## Alcance de la interfaz
+La interfaz administrativa está en `/dashboard/administracion/biblioteca`; la vista de consulta del estudiante está en `/dashboard/estudiante/biblioteca`.
 
-Ruta: `/dashboard/administracion/biblioteca`.
+## Funciones implementadas
 
-- Resumen de recursos por estado editorial.
-- Búsqueda por título, descripción, categoría y curso.
-- Filtros por estado y tipo.
-- Alta de recursos en estado borrador.
-- Edición de metadatos y selección local de un archivo (solo se conserva el nombre en memoria).
-- Asociación a una categoría y a un curso, o alcance general.
-- Versión editorial visible.
-- Vista previa de cambios de estado: borrador, publicado y archivado.
-- Acceso desde el menú principal para `national_admin` y `academic_editor`.
+- Crear categorías y recursos en estado borrador.
+- Crear recursos de lectura y enlaces externos, o adjuntar archivos.
+- Asociar recursos a un curso o publicarlos como material general del distrito.
+- Validar campos obligatorios, extensión/tipo MIME declarado y límite de 50 MB en la interfaz.
+- Guardar archivos en el bucket privado y vincularlos con el registro del recurso.
+- Publicar y archivar recursos.
+- Crear nuevas versiones en registros separados, conservando la versión publicada anterior.
+- Eliminar borradores y sus archivos.
+- Mostrar al estudiante recursos publicados aplicables a su distrito y, si están asociados a un curso, a sus matrículas activas o completadas.
+- Generar enlaces firmados de corta duración para descargar/abrir archivos privados.
 
-La autorización de ruta en cliente solo mejora la experiencia. No constituye un control de seguridad suficiente para endpoints, descargas ni mutaciones futuras.
+La carga compensa errores posteriores al upload intentando retirar el objeto y el registro incompleto. Si la operación de compensación también falla, la interfaz informa que puede quedar limpieza manual pendiente.
 
-## Ciclo editorial propuesto
+## Seguridad aplicada
 
-1. **Borrador:** el editor completa metadatos y prepara el archivo.
-2. **Validación:** el servidor verifica título, descripción, tipo MIME, tamaño, categoría, curso, versión y permisos.
-3. **Publicación:** una operación privilegiada valida que el recurso está completo, registra autor y fecha y cambia su estado en una transacción.
-4. **Actualización:** un recurso publicado no debe sobrescribirse en sitio. Se crea una nueva versión en borrador, conservando el artefacto y los metadatos de la versión publicada.
-5. **Archivado:** deja de aparecer en el catálogo normal, pero conserva su historial y referencias para auditoría.
-6. **Retiro:** si se requiere ocultar contenido por seguridad o error, usar una acción explícita auditada y no borrar evidencia histórica.
+- RLS está habilitado en las tablas de categorías y recursos.
+- Las políticas de categorías y recursos usan `private.can_manage_academic_catalog` para restringir las mutaciones al ámbito editorial autorizado.
+- Los estudiantes solo consultan recursos publicados y dentro de su ámbito; los recursos vinculados a curso requieren matrícula activa o completada.
+- El bucket es privado, con límite de 50 MB y lista permitida de tipos MIME.
+- Las políticas de Storage comprueban bucket, distrito, recurso y estado editorial.
+- Los enlaces firmados se solicitan desde una sesión autenticada y duran cinco minutos.
+- Las versiones publicadas no se sobrescriben: se crea un nuevo registro borrador con `version_parent_id`.
 
-La interfaz actual no implementa estas garantías: los cambios son temporales y se pierden al recargar.
+## Límites que siguen pendientes
 
-## Modelo lógico que deberá concretarse
+- La comprobación de MIME/extensión en el navegador no sustituye un análisis de contenido del archivo en servidor. No hay antivirus ni inspección de contenido implementados.
+- No hay datos de recursos ni matrículas en el proyecto de pruebas consultado; las tablas de biblioteca y matrículas estaban vacías durante la validación.
+- Falta una prueba funcional con una cuenta real de editor y otra de estudiante, incluyendo carga, publicación, lectura, descarga firmada, nueva versión y archivado.
+- La integración está en una Pull Request; no debe considerarse activa en producción hasta que se integre y despliegue con autorización.
 
-- **Recurso:** identidad estable, título, descripción, categoría, tipo, ámbito, curso opcional y estado editorial.
-- **Versión de recurso:** número/etiqueta de versión, metadatos congelados, referencia privada al objeto, tamaño, MIME, checksum, autor, fecha y estado.
-- **Categoría:** nombre, descripción, orden y estado.
-- **Vinculación curricular:** recurso asociado a curso, versión de curso, módulo o lección; no asumir que el título del curso es una clave.
-- **Evento editorial:** actor, acción, recurso, versión, fecha, resultado y motivo.
-- **Permiso editorial:** capacidad de crear/editar borradores, publicar, archivar y administrar categorías, definida explícitamente y no derivada de acceso general al dashboard.
+## Procedimiento de prueba funcional
 
-Los nombres son conceptuales y no constituyen un esquema SQL aprobado.
+1. Ingresar con un usuario editor autorizado para el Distrito 34.
+2. Crear una categoría y un recurso de lectura.
+3. Crear un recurso de archivo PDF y comprobar que aparece en Storage como privado.
+4. Publicar ambos recursos.
+5. Ingresar con una cuenta estudiante con matrícula activa en el curso asociado.
+6. Confirmar que el estudiante ve el recurso publicado y puede abrir el archivo mediante el enlace firmado.
+7. Confirmar que una cuenta sin matrícula no ve el recurso específico del curso.
+8. Crear una nueva versión y verificar que la versión publicada anterior permanece intacta.
+9. Archivar la versión nueva y comprobar que deja de aparecer en el catálogo normal.
 
-## Matriz de autorización propuesta
-
-| Acción | Administración nacional | Editor académico |
-|---|---:|---:|
-| Consultar catálogo administrativo | Sí | Sí |
-| Crear borrador | Sí | Sí |
-| Editar borrador propio o autorizado | Sí | Sí |
-| Publicar recurso | Sí | Según permiso editorial explícito |
-| Archivar recurso | Sí | Según permiso editorial explícito |
-| Administrar categorías | Sí | Según permiso editorial explícito |
-| Acceder a archivos privados | Solo con permiso y URL firmada | Solo con permiso y URL firmada |
-| Consultar auditoría completa | Sí | Solo eventos de su ámbito |
-
-Esta matriz requiere aprobación funcional y pruebas RLS/servidor antes de implementarse. La interfaz no concede estos permisos.
-
-## Archivos y seguridad
-
-- Bucket privado; no habilitar lectura pública para materiales internos.
-- Validar MIME real y extensión, tamaño máximo y análisis de contenido en servidor.
-- Usar rutas de objeto no predecibles y evitar nombres de archivo como identificador.
-- Emitir URLs firmadas de corta duración solo tras comprobar sesión, rol, ámbito y relación curricular.
-- Nunca confiar en el nombre, MIME o tamaño declarados por el navegador.
-- No eliminar un objeto referenciado por una versión publicada sin una política de retención y auditoría.
-- Mantener auditoría de carga, reemplazo, publicación, archivo y descarga cuando corresponda.
-
-## Criterios de aceptación para la integración real
-
-- Un usuario sin `national_admin` ni permiso editorial no puede entrar ni invocar mutaciones.
-- Un editor no puede publicar fuera del ámbito autorizado.
-- Un recurso publicado conserva su versión anterior al crear una nueva.
-- La nueva versión no aparece a estudiantes hasta que el servidor confirma su publicación.
-- Los filtros del catálogo de estudiantes solo muestran recursos publicados y aplicables a su curso/ámbito.
-- No se puede acceder a un archivo privado cambiando su UUID o URL.
-- Los fallos de carga no dejan versiones publicadas sin objeto válido.
-- Las operaciones editoriales son idempotentes y quedan auditadas.
-- Los datos reales se conectan únicamente después de aprobar esquema, permisos, migraciones y pruebas en entorno aislado.
-
-## Límites de esta PR
-
-- No crea tablas, RPC, políticas RLS ni migraciones.
-- No escribe en Supabase ni Storage.
-- No persiste cambios de recursos ni archivos.
-- No habilita publicación real ni notificaciones.
-- No despliega a Vercel.
+No usar información personal real para las pruebas; utilizar cuentas de prueba autorizadas.

@@ -2270,6 +2270,18 @@ export type Database = {
           enrolled_at: string
         }[]
       }
+      get_tutor_student_academic_detail: {
+        Args: { p_student_id: string }
+        Returns: Json
+      }
+      get_tutor_student_notes: {
+        Args: { p_student_id: string }
+        Returns: Json
+      }
+      add_tutor_student_note: {
+        Args: { p_enrollment_id: string; p_note: string }
+        Returns: string
+      }
       get_invitation_requests: {
         Args: { p_status?: string }
         Returns: {
@@ -2439,8 +2451,12 @@ export type Database = {
         Args: { p_submission_id: string }
         Returns: undefined
       }
+      start_academic_assessment_attempt: {
+        Args: { p_assessment_id: string }
+        Returns: Json
+      }
       submit_academic_assessment: {
-        Args: { p_answers: Json; p_assessment_id: string }
+        Args: { p_answers: Json; p_attempt_id: string }
         Returns: Json
       }
       submit_invitation_request: {
