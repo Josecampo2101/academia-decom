@@ -1,5 +1,6 @@
 "use client";
 
+import { StatusScreen } from "@/components/ui/StatusScreen";
 import { Spinner } from "@/components/ui/Spinner";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -56,7 +57,12 @@ export default function TutorManualAssessmentReviewsPage() {
   }
 
   if (access !== "allowed") {
-    return <main id="contenido" className="flex min-h-screen items-center justify-center bg-background px-6"><section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center"><h1 className="text-xl font-bold text-foreground">{access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}</h1><p className="mt-2 text-sm text-muted-fg">{access === "error" ? "Intenta nuevamente." : "Este espacio está habilitado para tutores, editores académicos y administración nacional."}</p><button type="button" onClick={() => router.push("/dashboard/tutor")} className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white">Volver al panel</button></section></main>;
+    return <StatusScreen
+   title={access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}
+   message={access === "error" ? "Intenta nuevamente." : "Este espacio está habilitado para tutores, editores académicos y administración nacional."}
+   actionLabel="Volver al panel"
+   onAction={() => router.push("/dashboard/tutor")}
+ />;
   }
 
   return (

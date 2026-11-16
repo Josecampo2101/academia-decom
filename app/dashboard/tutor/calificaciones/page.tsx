@@ -1,4 +1,5 @@
 "use client";
+import { StatusScreen } from "@/components/ui/StatusScreen";
 import { Spinner } from "@/components/ui/Spinner";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -294,23 +295,12 @@ export default function TutorAssessmentWorkflowPage() {
     );
   if (access !== "allowed")
     return (
-      <main id="contenido" className="flex min-h-screen items-center justify-center bg-background px-6">
-        <section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center">
-          <h1 className="text-xl font-bold text-foreground">
-            {access === "denied" ? "Acceso restringido" : "No fue posible abrir la bandeja"}
-          </h1>
-          <p className="mt-2 text-sm text-muted-fg">
-            {error || "Este espacio está habilitado para tutores con asignación vigente."}
-          </p>
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard/tutor")}
-            className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
-          >
-            Volver a tutoría
-          </button>
-        </section>
-      </main>
+      <StatusScreen
+        title={access === "denied" ? "Acceso restringido" : "No fue posible abrir la bandeja"}
+        message={error || "Este espacio está habilitado para tutores con asignación vigente."}
+        actionLabel="Volver a tutoría"
+        onAction={() => router.push("/dashboard/tutor")}
+      />
     );
   return (
     <main id="contenido" className="min-h-screen bg-background text-foreground">

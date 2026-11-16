@@ -1,5 +1,6 @@
 "use client";
 
+import { StatusScreen } from "@/components/ui/StatusScreen";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -339,24 +340,12 @@ export default function LibraryAdministrationPage() {
     );
   if (access !== "allowed")
     return (
-      <main id="contenido" className="flex min-h-screen items-center justify-center bg-background px-6">
-        <section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center">
-          <h1 className="text-xl font-bold text-foreground">
-            {access === "error" ? "No pudimos validar tus permisos" : "Acceso restringido"}
-          </h1>
-          <p className="mt-2 text-sm text-muted-fg">
-            La administración de la Biblioteca está disponible para Administración nacional y
-            Editores académicos.
-          </p>
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard")}
-            className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
-          >
-            Volver al panel
-          </button>
-        </section>
-      </main>
+      <StatusScreen
+        title={access === "error" ? "No pudimos validar tus permisos" : "Acceso restringido"}
+        message="La administración de la Biblioteca está disponible para Administración nacional y Editores académicos."
+        actionLabel="Volver al panel"
+        onAction={() => router.push("/dashboard")}
+      />
     );
 
   return (

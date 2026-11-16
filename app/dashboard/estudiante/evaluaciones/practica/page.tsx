@@ -1,5 +1,6 @@
 "use client";
 
+import { StatusScreen } from "@/components/ui/StatusScreen";
 import { Spinner } from "@/components/ui/Spinner";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -217,25 +218,14 @@ export default function PracticeAssessmentPage() {
     );
   if (access !== "allowed")
     return (
-      <main id="contenido" className="flex min-h-screen items-center justify-center bg-background px-6">
-        <section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center">
-          <h1 className="text-xl font-bold text-foreground">
-            {access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}
-          </h1>
-          <p className="mt-2 text-sm text-muted-fg">
-            {access === "error"
+      <StatusScreen
+        title={access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}
+        message={access === "error"
               ? "Intenta nuevamente."
               : "Esta práctica está habilitada para estudiantes con una asignación vigente."}
-          </p>
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard/estudiante")}
-            className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
-          >
-            Volver al panel
-          </button>
-        </section>
-      </main>
+        actionLabel="Volver al panel"
+        onAction={() => router.push("/dashboard/estudiante")}
+      />
     );
 
   return (

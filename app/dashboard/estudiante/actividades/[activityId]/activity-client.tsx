@@ -1,4 +1,5 @@
 "use client";
+import { StatusScreen } from "@/components/ui/StatusScreen";
 import { Spinner } from "@/components/ui/Spinner";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -348,21 +349,12 @@ export default function StudentActivityClient({
     );
   if (access !== "allowed" || !assignment || !submission || !activity)
     return (
-      <main id="contenido" className="flex min-h-screen items-center justify-center bg-background px-6">
-        <section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center">
-          <h1 className="text-xl font-bold text-foreground">No fue posible abrir la actividad</h1>
-          <p className="mt-2 text-sm text-muted-fg">
-            {error || "Comprueba que la asignación siga vigente."}
-          </p>
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard/estudiante/actividades")}
-            className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
-          >
-            Volver a actividades
-          </button>
-        </section>
-      </main>
+      <StatusScreen
+        title="No fue posible abrir la actividad"
+        message={error || "Comprueba que la asignación siga vigente."}
+        actionLabel="Volver a actividades"
+        onAction={() => router.push("/dashboard/estudiante/actividades")}
+      />
     );
   const due = assignment.due_at ?? activity.due_at;
   const locked = submission.status === "submitted" || submission.status === "graded";
