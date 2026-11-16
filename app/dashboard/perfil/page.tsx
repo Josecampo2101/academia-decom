@@ -221,7 +221,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-4 text-foreground dark:bg-[#0b1422]">
+      <main id="contenido" className="flex min-h-screen items-center justify-center bg-background px-4 text-foreground dark:bg-[#0b1422]">
         <div className="text-center">
           <LoaderCircle className="mx-auto h-9 w-9 animate-spin text-decom-blue-text" />
           <p className="mt-3 text-sm text-muted-fg">Cargando tu perfil...</p>
@@ -231,7 +231,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="min-h-screen bg-background px-4 py-8 text-foreground dark:bg-[#0b1422] sm:py-12">
+    <main id="contenido" className="min-h-screen bg-background px-4 py-8 text-foreground dark:bg-[#0b1422] sm:py-12">
       <div className="mx-auto max-w-2xl">
         <button
           type="button"

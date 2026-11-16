@@ -20,7 +20,7 @@ export default function AccesoDenegado() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-background px-6 py-12 dark:bg-[#101B2A]">
+    <main id="contenido" className="min-h-screen flex items-center justify-center bg-background px-6 py-12 dark:bg-[#101B2A]">
       <section className="w-full max-w-lg rounded-2xl border border-line bg-surface p-8 text-center shadow-lg dark:bg-[#1C2B3D]">
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-3xl text-red-600 dark:bg-red-950 dark:text-red-400">
           !

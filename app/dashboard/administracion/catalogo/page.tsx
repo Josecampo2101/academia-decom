@@ -601,13 +601,13 @@ export default function AcademicCatalogPage() {
 
   if (access === "checking")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-fg">
+      <main id="contenido" className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-fg">
         Verificando permisos del catálogo académico...
       </main>
     );
   if (access !== "allowed")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-5">
+      <main id="contenido" className="flex min-h-screen items-center justify-center bg-background px-5">
         <section className="max-w-md rounded-2xl border border-line bg-surface p-7 text-center">
           <h1 className="text-xl font-extrabold text-foreground">
             {access === "error" ? "No fue posible verificar el acceso" : "Acceso restringido"}
@@ -629,7 +629,7 @@ export default function AcademicCatalogPage() {
     );
 
   return (
-    <main className="min-h-screen bg-background px-4 py-7 text-foreground sm:px-7 lg:px-10">
+    <main id="contenido" className="min-h-screen bg-background px-4 py-7 text-foreground sm:px-7 lg:px-10">
       <div className="mx-auto max-w-7xl">
         <a href="/dashboard" className="text-xs font-semibold text-decom-blue-text hover:underline">
           ← Volver al panel

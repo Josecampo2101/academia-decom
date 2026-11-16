@@ -454,13 +454,13 @@ export default function AcademicActivitiesAdminPage() {
   }
   if (access === "checking")
     return (
-      <main className="grid min-h-screen place-items-center bg-background text-sm text-muted-fg">
+      <main id="contenido" className="grid min-h-screen place-items-center bg-background text-sm text-muted-fg">
         Verificando permisos...
       </main>
     );
   if (access !== "allowed")
     return (
-      <main className="grid min-h-screen place-items-center bg-background p-5">
+      <main id="contenido" className="grid min-h-screen place-items-center bg-background p-5">
         <section className="rounded-2xl bg-surface p-7 text-center">
           <h1 className="text-xl font-bold">
             {access === "error" ? "No fue posible verificar el acceso" : "Acceso restringido"}
@@ -478,7 +478,7 @@ export default function AcademicActivitiesAdminPage() {
       </main>
     );
   return (
-    <main className="min-h-screen bg-background px-4 py-7 text-foreground sm:px-7 lg:px-10">
+    <main id="contenido" className="min-h-screen bg-background px-4 py-7 text-foreground sm:px-7 lg:px-10">
       <div className="mx-auto max-w-7xl">
         <a href="/dashboard" className="text-xs font-semibold text-decom-blue-text">
           ← Volver al panel

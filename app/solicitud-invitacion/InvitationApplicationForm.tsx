@@ -204,7 +204,7 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
     (invitation?.invitationType !== "decom_member" || Boolean(requestedRoleId));
 
   return (
-    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6">
+    <main id="contenido" className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6">
       {siteKey ? (
         <Script
           src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"

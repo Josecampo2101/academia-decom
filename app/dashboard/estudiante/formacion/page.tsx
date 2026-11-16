@@ -267,12 +267,12 @@ export default function FormationPage() {
 
   if (loading)
     return (
-      <main className="grid min-h-screen place-items-center bg-background text-sm text-muted-fg">
+      <main id="contenido" className="grid min-h-screen place-items-center bg-background text-sm text-muted-fg">
         Cargando tu ruta de aprendizaje...
       </main>
     );
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main id="contenido" className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>

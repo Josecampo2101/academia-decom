@@ -333,13 +333,13 @@ export default function LibraryAdministrationPage() {
 
   if (access === "checking")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background">
+      <main id="contenido" className="flex min-h-screen items-center justify-center bg-background">
         <p className="text-sm text-muted-fg">Verificando permisos editoriales...</p>
       </main>
     );
   if (access !== "allowed")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-6">
+      <main id="contenido" className="flex min-h-screen items-center justify-center bg-background px-6">
         <section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center">
           <h1 className="text-xl font-bold text-foreground">
             {access === "error" ? "No pudimos validar tus permisos" : "Acceso restringido"}
@@ -360,7 +360,7 @@ export default function LibraryAdministrationPage() {
     );
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main id="contenido" className="min-h-screen bg-background text-foreground">
       <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 md:px-8">
           <div>

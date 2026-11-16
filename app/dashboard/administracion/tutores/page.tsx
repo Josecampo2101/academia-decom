@@ -201,7 +201,7 @@ export default function CourseTutorAssignmentsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-7 lg:px-10">
+    <main id="contenido" className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-7 lg:px-10">
       <div className="mx-auto max-w-6xl">
         <button
           onClick={() => router.push("/dashboard/administracion")}

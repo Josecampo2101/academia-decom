@@ -670,7 +670,7 @@ export default function DashboardPage() {
   // Pantalla de carga.
   if (loading) {
     return (
-      <main className={`flex min-h-screen items-center justify-center ${background}`}>
+      <main id="contenido" className={`flex min-h-screen items-center justify-center ${background}`}>
         <div className="text-center">
           <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-decom-blue/20 border-t-decom-blue" />
           <p className={secondaryText}>Verificando tu sesión...</p>
@@ -680,7 +680,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className={`min-h-screen ${background} ${primaryText}`}>
+    <main id="contenido" className={`min-h-screen ${background} ${primaryText}`}>
       <div className="flex min-h-screen">
         {mobileMenuOpen && (
           <button

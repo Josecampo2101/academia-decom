@@ -250,3 +250,21 @@ body {
   --color-sky-900: #bae6fd;
   --color-teal-900: #99f6e4;
 }
+
+/* Enlace para saltar la navegación: invisible hasta recibir foco con el teclado. */
+.skip-link {
+  position: absolute;
+  top: -4rem;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  border-radius: 0.75rem;
+  background: var(--decom-navy);
+  color: #fff;
+  font-weight: 600;
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}

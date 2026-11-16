@@ -322,14 +322,14 @@ export default function InvitationsPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background p-6 text-sm text-muted-fg">
+      <main id="contenido" className="flex min-h-screen items-center justify-center bg-background p-6 text-sm text-muted-fg">
         Cargando administración de invitaciones...
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6">
+    <main id="contenido" className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6">
       <div className="mx-auto max-w-6xl">
         <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>

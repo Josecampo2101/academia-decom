@@ -1,5 +1,6 @@
 "use client";
 
+import { Spinner } from "@/components/ui/Spinner";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -51,15 +52,15 @@ export default function TutorManualAssessmentReviewsPage() {
   }, [router, supabase]);
 
   if (access === "checking") {
-    return <main className="flex min-h-screen items-center justify-center bg-background"><div className="h-10 w-10 animate-spin rounded-full border-4 border-decom-blue/20 border-t-decom-blue" /></main>;
+    return <main id="contenido" className="flex min-h-screen items-center justify-center bg-background"><Spinner /></main>;
   }
 
   if (access !== "allowed") {
-    return <main className="flex min-h-screen items-center justify-center bg-background px-6"><section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center"><h1 className="text-xl font-bold text-foreground">{access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}</h1><p className="mt-2 text-sm text-muted-fg">{access === "error" ? "Intenta nuevamente." : "Este espacio está habilitado para tutores, editores académicos y administración nacional."}</p><button type="button" onClick={() => router.push("/dashboard/tutor")} className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white">Volver al panel</button></section></main>;
+    return <main id="contenido" className="flex min-h-screen items-center justify-center bg-background px-6"><section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center"><h1 className="text-xl font-bold text-foreground">{access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}</h1><p className="mt-2 text-sm text-muted-fg">{access === "error" ? "Intenta nuevamente." : "Este espacio está habilitado para tutores, editores académicos y administración nacional."}</p><button type="button" onClick={() => router.push("/dashboard/tutor")} className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white">Volver al panel</button></section></main>;
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main id="contenido" className="min-h-screen bg-background text-foreground">
       <header className="border-b border-line bg-surface"><div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-4 md:px-8"><div><p className="text-xs font-extrabold tracking-[0.14em] text-decom-blue-text">ACADEMIA DECOM</p><p className="mt-1 text-xs text-muted-fg">Revisión de evaluaciones</p></div><div className="flex items-center gap-2"><button type="button" onClick={() => router.push("/dashboard/tutor/evaluaciones/crear")} className="rounded-xl bg-decom-teal px-4 py-2.5 text-xs font-semibold text-decom-navy">Crear evaluación</button><button type="button" onClick={() => router.push("/dashboard/tutor")} className="rounded-xl border border-line px-4 py-2.5 text-xs font-semibold text-muted-fg">Volver al panel</button></div></div></header>
       <div className="mx-auto max-w-6xl space-y-6 px-5 py-7 md:px-8 md:py-9">
         <section><p className="text-xs font-bold uppercase tracking-[0.16em] text-decom-teal-text">Evaluación del aprendizaje</p><h1 className="mt-2 text-2xl font-extrabold md:text-3xl">Revisión manual de evaluaciones</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-fg">Consulta respuestas cortas, asigna puntajes y deja retroalimentación para el estudiante.</p></section>

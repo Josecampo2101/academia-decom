@@ -525,7 +525,7 @@ export default function ReubicacionesPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-surface-muted">
+      <main id="contenido" className="flex min-h-screen items-center justify-center bg-surface-muted">
         <div className="text-center">
           <div className="mx-auto mb-3 h-9 w-9 animate-spin rounded-full border-4 border-sky-200 border-t-sky-700" />
           <p className="text-sm text-muted-fg">
@@ -541,7 +541,7 @@ export default function ReubicacionesPage() {
   // =========================================================
 
   return (
-    <main className="min-h-screen bg-surface-muted px-4 py-8 sm:px-8">
+    <main id="contenido" className="min-h-screen bg-surface-muted px-4 py-8 sm:px-8">
       <div className="mx-auto max-w-6xl">
         {/* ENCABEZADO */}
 

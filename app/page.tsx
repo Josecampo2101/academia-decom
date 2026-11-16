@@ -1,5 +1,6 @@
 "use client";
 
+import { PublicFooter } from "@/components/ui/PublicFooter";
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, LoaderCircle, Monitor, Moon, Sun } from "lucide-react";
@@ -111,8 +112,8 @@ export default function Home() {
   const isDark = resolvedTheme === "dark";
 
   return (
-    <main
-      className={`relative min-h-screen overflow-x-hidden transition-colors duration-300 ${isDark ? "bg-[#0b1422]" : "bg-surface-muted"}`}
+    <main id="contenido"
+      className={`relative min-h-screen overflow-x-hidden transition-colors duration-300 bg-background`}
     >
       <div
         className="absolute inset-x-0 top-0 h-[320px] px-[11px] pt-[11px] sm:h-[335px]"
@@ -318,6 +319,7 @@ export default function Home() {
             Escuela de Comunicaciones D34 · Formación para comunicar con propósito.
           </p>
         </section>
+        <PublicFooter />
       </div>
     </main>
   );

@@ -44,14 +44,14 @@ export default function ClassroomPreviewPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background p-6">
+      <main id="contenido" className="flex min-h-screen items-center justify-center bg-background p-6">
         <p className="text-sm text-muted-fg">Verificando tu sesión...</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main id="contenido" className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div>

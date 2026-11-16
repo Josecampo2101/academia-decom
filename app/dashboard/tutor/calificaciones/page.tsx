@@ -1,4 +1,5 @@
 "use client";
+import { Spinner } from "@/components/ui/Spinner";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -287,13 +288,13 @@ export default function TutorAssessmentWorkflowPage() {
   }
   if (access === "checking" || loading)
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-decom-blue/20 border-t-decom-blue" />
+      <main id="contenido" className="flex min-h-screen items-center justify-center bg-background">
+        <Spinner />
       </main>
     );
   if (access !== "allowed")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-6">
+      <main id="contenido" className="flex min-h-screen items-center justify-center bg-background px-6">
         <section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center">
           <h1 className="text-xl font-bold text-foreground">
             {access === "denied" ? "Acceso restringido" : "No fue posible abrir la bandeja"}
@@ -312,7 +313,7 @@ export default function TutorAssessmentWorkflowPage() {
       </main>
     );
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main id="contenido" className="min-h-screen bg-background text-foreground">
       <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-5 py-4 md:px-8">
           <div>

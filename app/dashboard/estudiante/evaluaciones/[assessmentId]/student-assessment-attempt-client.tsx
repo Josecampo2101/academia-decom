@@ -1,5 +1,6 @@
 "use client";
 
+import { Spinner } from "@/components/ui/Spinner";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -188,13 +189,13 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
 
   if (loading)
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-decom-blue/20 border-t-decom-blue" />
+      <main id="contenido" className="flex min-h-screen items-center justify-center bg-background">
+        <Spinner />
       </main>
     );
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main id="contenido" className="min-h-screen bg-background text-foreground">
       <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-5 py-4">
           <div>

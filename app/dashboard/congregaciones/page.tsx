@@ -385,7 +385,7 @@ export default function CongregationsPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-surface-muted flex items-center justify-center p-6">
+      <main id="contenido" className="min-h-screen bg-surface-muted flex items-center justify-center p-6">
         <p className="text-muted-fg">
           Cargando gestión de congregaciones...
         </p>
@@ -395,7 +395,7 @@ export default function CongregationsPage() {
 
   if (!authorized) {
     return (
-      <main className="min-h-screen bg-surface-muted flex items-center justify-center p-6">
+      <main id="contenido" className="min-h-screen bg-surface-muted flex items-center justify-center p-6">
         <div className="w-full max-w-lg rounded-2xl border border-line bg-surface p-8 text-center shadow-sm">
           <h1 className="text-xl font-semibold text-foreground">
             Acceso restringido
@@ -424,7 +424,7 @@ export default function CongregationsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-surface-muted px-4 py-8 sm:px-6 lg:px-8">
+    <main id="contenido" className="min-h-screen bg-surface-muted px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <header className="mb-8">
           <button
