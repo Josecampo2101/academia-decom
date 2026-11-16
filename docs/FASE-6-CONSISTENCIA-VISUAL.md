@@ -40,6 +40,9 @@ autenticación, Supabase, migraciones ni políticas RLS.
     que tocan los mismos archivos y se generarían conflictos. Conviene correr `npm run format` una sola vez
     cuando esas ramas estén fusionadas y entonces añadir `format:check` al CI.
 
+14. **`StatusScreen`.** El bloque de "acceso restringido" estaba copiado en 12 páginas; 10 usan ahora el
+    componente compartido (mismos textos y acciones). Quedan `lesson-client` y `tutor/page` con variantes propias.
+
 ## Verificación ejecutada
 
 | Comprobación | Resultado |
@@ -68,7 +71,7 @@ insignias de estado (amber, red, sky, teal, emerald) y paneles con fondo azul ma
 
 - Colores sueltos restantes: 47 (casi todos únicos: `#0B1422`, `#101B2A`, `#0AA9D2`, etc.).
 - Partir `dashboard/page.tsx` y `reubicaciones/page.tsx` (más de 1.300 líneas cada uno).
-- Más componentes compartidos (PageHeader, tabla, modal, estado vacío); el modal "acceso denegado" está copiado en varias páginas.
+- Más componentes compartidos (PageHeader, tabla, modal, estado vacío); falta el encabezado de página y el estado vacío de tablas.
 - `loading.tsx` por sección (solo existe el de `/dashboard`) y no hay `error.tsx` propio en el dashboard.
 - Pie de página: solo el del login; faltan términos, política de datos y redes oficiales.
 - `bg-decom-teal` con texto blanco quedó corregido en botones; las barras de progreso turquesa no llevan texto.
