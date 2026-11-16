@@ -151,18 +151,18 @@ export default function StudentActivitiesPage() {
   };
   if (access === "checking")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#087DB5]/20 border-t-[#087DB5]" />
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-decom-blue/20 border-t-decom-blue" />
       </main>
     );
   if (access !== "allowed")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6">
-        <section className="max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center">
-          <h1 className="text-xl font-bold text-[#102D4D]">
+      <main className="flex min-h-screen items-center justify-center bg-background px-6">
+        <section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center">
+          <h1 className="text-xl font-bold text-foreground">
             {access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}
           </h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-fg">
             {access === "error"
               ? "Intenta nuevamente."
               : "Esta sección está habilitada para estudiantes con una asignación vigente."}
@@ -170,7 +170,7 @@ export default function StudentActivitiesPage() {
           <button
             type="button"
             onClick={() => router.push("/dashboard/estudiante")}
-            className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white"
+            className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
           >
             Volver al panel
           </button>
@@ -178,19 +178,19 @@ export default function StudentActivitiesPage() {
       </main>
     );
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
-      <header className="border-b border-slate-200 bg-white">
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 md:px-8">
           <div>
-            <p className="text-xs font-extrabold tracking-[0.14em] text-[#087DB5]">
+            <p className="text-xs font-extrabold tracking-[0.14em] text-decom-blue-text">
               ACADEMIA DECOM
             </p>
-            <p className="mt-1 text-xs text-slate-400">Mis actividades</p>
+            <p className="mt-1 text-xs text-muted-fg">Mis actividades</p>
           </div>
           <button
             type="button"
             onClick={() => router.push("/dashboard/estudiante")}
-            className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600"
+            className="rounded-xl border border-line px-4 py-2.5 text-xs font-semibold text-muted-fg"
           >
             ← Panel del estudiante
           </button>
@@ -199,11 +199,11 @@ export default function StudentActivitiesPage() {
       <div className="mx-auto max-w-6xl space-y-7 px-5 py-7 pb-12 md:px-8 md:py-9">
         <section className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#19A7A0]">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-decom-teal-text">
               Trabajo académico
             </p>
             <h1 className="mt-2 text-2xl font-extrabold md:text-3xl">Actividades y entregas</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-fg">
               Consulta las actividades asignadas, prepara tus respuestas y sigue la
               retroalimentación del tutor.
             </p>
@@ -212,7 +212,7 @@ export default function StudentActivitiesPage() {
             type="button"
             disabled={!userId || loading}
             onClick={() => userId && void loadActivities(userId)}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 disabled:opacity-50"
+            className="rounded-xl border border-line bg-surface px-4 py-2.5 text-xs font-semibold text-muted-fg disabled:opacity-50"
           >
             Actualizar
           </button>
@@ -235,27 +235,27 @@ export default function StudentActivitiesPage() {
               detail: "Entregas que puedes corregir",
             },
           ].map((item) => (
-            <article key={item.label} className="rounded-2xl border border-slate-200 bg-white p-5">
-              <p className="text-xs font-semibold text-slate-400">{item.label}</p>
+            <article key={item.label} className="rounded-2xl border border-line bg-surface p-5">
+              <p className="text-xs font-semibold text-muted-fg">{item.label}</p>
               <p className="mt-2 text-3xl font-extrabold tabular-nums">{item.value}</p>
-              <p className="mt-1 text-[11px] text-slate-400">{item.detail}</p>
+              <p className="mt-1 text-[11px] text-muted-fg">{item.detail}</p>
             </article>
           ))}
         </section>
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-7">
+        <section className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-7">
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <div>
               <h2 className="text-lg font-bold">Tu bandeja de actividades</h2>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-muted-fg">
                 Datos consultados desde tus matrículas y asignaciones vigentes.
               </p>
             </div>
-            <label className="text-xs font-semibold text-slate-500">
+            <label className="text-xs font-semibold text-muted-fg">
               Filtrar estado{" "}
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                className="ml-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs"
+                className="ml-2 rounded-lg border border-line bg-surface px-3 py-2 text-xs"
               >
                 <option>Todas</option>
                 <option>Disponible</option>
@@ -272,37 +272,37 @@ export default function StudentActivitiesPage() {
             </p>
           )}
           {loading ? (
-            <p className="py-12 text-center text-sm text-slate-400">
+            <p className="py-12 text-center text-sm text-muted-fg">
               Consultando tus actividades...
             </p>
           ) : (
             <div className="mt-5 space-y-3">
               {visible.map((item) => (
-                <article key={item.id} className="rounded-2xl border border-slate-100 p-4 md:p-5">
+                <article key={item.id} className="rounded-2xl border border-line-soft p-4 md:p-5">
                   <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="text-sm font-bold">{item.academic_activities.title}</h3>
                         <span
-                          className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${classes[item.status] ?? "bg-slate-100 text-slate-600"}`}
+                          className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${classes[item.status] ?? "bg-surface-muted text-muted-fg"}`}
                         >
                           {labels[item.status] ?? item.status}
                         </span>
                       </div>
-                      <p className="mt-2 text-xs text-slate-500">
+                      <p className="mt-2 text-xs text-muted-fg">
                         {item.academic_activities.courses?.title ?? "Curso"} ·{" "}
                         {item.academic_activities.course_modules?.title ?? "Sin módulo"}
                       </p>
-                      <p className="mt-2 max-w-2xl text-xs leading-5 text-slate-400">
+                      <p className="mt-2 max-w-2xl text-xs leading-5 text-muted-fg">
                         {item.academic_activities.description ??
                           item.academic_activities.instructions}
                       </p>
-                      <p className="mt-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                      <p className="mt-3 text-[10px] font-semibold uppercase tracking-wider text-muted-fg">
                         Intento {item.attempt || "sin iniciar"} ·{" "}
                         {item.academic_activities.total_points} puntos
                       </p>
                       {(item.due_at ?? item.academic_activities.due_at) && (
-                        <p className="mt-1 text-[11px] text-slate-500">
+                        <p className="mt-1 text-[11px] text-muted-fg">
                           Fecha límite:{" "}
                           {new Date(item.due_at ?? item.academic_activities.due_at!).toLocaleString(
                             "es-CO",
@@ -313,7 +313,7 @@ export default function StudentActivitiesPage() {
                     <button
                       type="button"
                       onClick={() => router.push(`/dashboard/estudiante/actividades/${item.id}`)}
-                      className="shrink-0 rounded-xl bg-[#087DB5] px-4 py-3 text-xs font-bold text-white"
+                      className="shrink-0 rounded-xl bg-decom-blue px-4 py-3 text-xs font-bold text-white"
                     >
                       {item.status === "changes_requested"
                         ? "Corregir entrega →"
@@ -325,7 +325,7 @@ export default function StudentActivitiesPage() {
                 </article>
               ))}
               {visible.length === 0 && (
-                <p className="py-8 text-center text-sm text-slate-400">
+                <p className="py-8 text-center text-sm text-muted-fg">
                   {items.length === 0
                     ? "Todavía no tienes actividades asignadas."
                     : "No hay actividades para este filtro."}

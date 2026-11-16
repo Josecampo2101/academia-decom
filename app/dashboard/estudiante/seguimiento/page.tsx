@@ -112,24 +112,24 @@ export default function StudentProgressPage() {
 
   if (access === "checking")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]">
-        <p className="text-sm text-slate-500">Verificando tu acceso...</p>
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-sm text-muted-fg">Verificando tu acceso...</p>
       </main>
     );
   if (access !== "allowed")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6">
-        <section className="max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center">
-          <h1 className="text-xl font-bold text-[#102D4D]">
+      <main className="flex min-h-screen items-center justify-center bg-background px-6">
+        <section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center">
+          <h1 className="text-xl font-bold text-foreground">
             {access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}
           </h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-fg">
             Esta sección está habilitada para estudiantes autorizados.
           </p>
           <button
             type="button"
             onClick={() => router.push("/dashboard/estudiante")}
-            className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white"
+            className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
           >
             Volver al panel
           </button>
@@ -138,19 +138,19 @@ export default function StudentProgressPage() {
     );
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
-      <header className="border-b border-slate-200 bg-white">
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 md:px-8">
           <div>
-            <p className="text-xs font-extrabold tracking-[0.14em] text-[#087DB5]">
+            <p className="text-xs font-extrabold tracking-[0.14em] text-decom-blue-text">
               ACADEMIA DECOM
             </p>
-            <p className="mt-1 text-xs text-slate-400">Seguimiento académico</p>
+            <p className="mt-1 text-xs text-muted-fg">Seguimiento académico</p>
           </div>
           <button
             type="button"
             onClick={() => router.push("/dashboard/estudiante")}
-            className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600"
+            className="rounded-xl border border-line px-4 py-2.5 text-xs font-semibold text-muted-fg"
           >
             ← Panel del estudiante
           </button>
@@ -159,11 +159,11 @@ export default function StudentProgressPage() {
       <div className="mx-auto max-w-6xl space-y-7 px-5 py-7 md:px-8 md:py-9">
         <section className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#19A7A0]">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-decom-teal-text">
               Tu evolución
             </p>
             <h1 className="mt-2 text-2xl font-extrabold md:text-3xl">Mi seguimiento</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-fg">
               Consulta el estado de tu ruta, los hitos de aprendizaje y las próximas acciones.
             </p>
           </div>
@@ -172,34 +172,34 @@ export default function StudentProgressPage() {
           </span>
         </section>
         <section className="grid gap-4 sm:grid-cols-3">
-          <article className="rounded-2xl border border-slate-200 bg-white p-5">
-            <p className="text-xs font-semibold text-slate-400">Avance del curso actual</p>
+          <article className="rounded-2xl border border-line bg-surface p-5">
+            <p className="text-xs font-semibold text-muted-fg">Avance del curso actual</p>
             <p className="mt-2 text-3xl font-extrabold">68%</p>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
-              <div className="h-full w-[68%] rounded-full bg-[#19A7A0]" />
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-muted">
+              <div className="h-full w-[68%] rounded-full bg-decom-teal" />
             </div>
           </article>
-          <article className="rounded-2xl border border-slate-200 bg-white p-5">
-            <p className="text-xs font-semibold text-slate-400">Lecciones completadas</p>
+          <article className="rounded-2xl border border-line bg-surface p-5">
+            <p className="text-xs font-semibold text-muted-fg">Lecciones completadas</p>
             <p className="mt-2 text-3xl font-extrabold">
-              7 <span className="text-base font-semibold text-slate-400">/ 10</span>
+              7 <span className="text-base font-semibold text-muted-fg">/ 10</span>
             </p>
           </article>
-          <article className="rounded-2xl border border-slate-200 bg-white p-5">
-            <p className="text-xs font-semibold text-slate-400">Actividades por entregar</p>
+          <article className="rounded-2xl border border-line bg-surface p-5">
+            <p className="text-xs font-semibold text-muted-fg">Actividades por entregar</p>
             <p className="mt-2 text-3xl font-extrabold">1</p>
           </article>
         </section>
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+        <section className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-6">
           <h2 className="text-lg font-bold">Ruta de formación</h2>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-muted-fg">
             La secuencia definitiva se administrará desde el catálogo académico.
           </p>
           <div className="mt-5 space-y-5">
             {courses.map((course, index) => (
               <article key={course.name} className="flex gap-4">
                 <div
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-bold ${index === 0 ? "bg-[#E5F2F8] text-[#087DB5]" : "bg-slate-100 text-slate-400"}`}
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-bold ${index === 0 ? "bg-decom-blue-soft text-decom-blue-text" : "bg-surface-muted text-muted-fg"}`}
                 >
                   {index + 1}
                 </div>
@@ -207,17 +207,17 @@ export default function StudentProgressPage() {
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <h3 className="text-sm font-bold">{course.name}</h3>
                     <span
-                      className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${index === 0 ? "bg-teal-50 text-teal-700" : "bg-slate-100 text-slate-500"}`}
+                      className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${index === 0 ? "bg-teal-50 text-teal-700" : "bg-surface-muted text-muted-fg"}`}
                     >
                       {course.state}
                     </span>
                   </div>
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className="mt-1 text-xs text-muted-fg">
                     {course.done} de {course.total} lecciones · {course.next}
                   </p>
-                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-muted">
                     <div
-                      className="h-full rounded-full bg-[#19A7A0]"
+                      className="h-full rounded-full bg-decom-teal"
                       style={{ width: course.progress + "%" }}
                     />
                   </div>
@@ -227,9 +227,9 @@ export default function StudentProgressPage() {
           </div>
         </section>
         <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-          <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+          <article className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-6">
             <h2 className="text-lg font-bold">Actividad reciente</h2>
-            <div className="mt-4 divide-y divide-slate-100">
+            <div className="mt-4 divide-y divide-line-soft">
               {milestones.map((item) => (
                 <div key={item.title} className="flex gap-3 py-4">
                   <span
@@ -238,57 +238,57 @@ export default function StudentProgressPage() {
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="text-xs font-bold">{item.title}</h3>
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-semibold text-slate-500">
+                      <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[9px] font-semibold text-muted-fg">
                         {item.status}
                       </span>
                     </div>
-                    <p className="mt-1 text-xs leading-5 text-slate-500">{item.description}</p>
-                    <p className="mt-1 text-[10px] text-slate-400">{item.date}</p>
+                    <p className="mt-1 text-xs leading-5 text-muted-fg">{item.description}</p>
+                    <p className="mt-1 text-[10px] text-muted-fg">{item.date}</p>
                   </div>
                 </div>
               ))}
             </div>
           </article>
-          <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+          <article className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-6">
             <h2 className="text-lg font-bold">Próximos pasos</h2>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-muted-fg">
               Acciones sugeridas para continuar tu aprendizaje.
             </p>
             <div className="mt-5 space-y-3">
               <button
                 type="button"
                 onClick={() => router.push("/dashboard/estudiante/actividades")}
-                className="w-full rounded-xl border border-slate-200 p-4 text-left transition hover:border-[#087DB5]"
+                className="w-full rounded-xl border border-line p-4 text-left transition hover:border-decom-blue"
               >
                 <span className="text-xs font-bold">Entregar actividad pendiente</span>
-                <span className="mt-1 block text-[11px] text-slate-500">
+                <span className="mt-1 block text-[11px] text-muted-fg">
                   Aplicación de identidad visual
                 </span>
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/dashboard/estudiante/formacion")}
-                className="w-full rounded-xl border border-slate-200 p-4 text-left transition hover:border-[#087DB5]"
+                className="w-full rounded-xl border border-line p-4 text-left transition hover:border-decom-blue"
               >
                 <span className="text-xs font-bold">Continuar formación</span>
-                <span className="mt-1 block text-[11px] text-slate-500">
+                <span className="mt-1 block text-[11px] text-muted-fg">
                   Retoma el curso de identidad corporativa
                 </span>
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/dashboard/estudiante/evaluaciones")}
-                className="w-full rounded-xl border border-slate-200 p-4 text-left transition hover:border-[#087DB5]"
+                className="w-full rounded-xl border border-line p-4 text-left transition hover:border-decom-blue"
               >
                 <span className="text-xs font-bold">Practicar conocimientos</span>
-                <span className="mt-1 block text-[11px] text-slate-500">
+                <span className="mt-1 block text-[11px] text-muted-fg">
                   Cuestionario de fundamentos
                 </span>
               </button>
             </div>
           </article>
         </section>
-        <p className="text-[11px] leading-5 text-slate-400">
+        <p className="text-[11px] leading-5 text-muted-fg">
           Las cifras, fechas y estados de esta vista son ficticios. No representan registros
           académicos reales ni generan decisiones oficiales.
         </p>

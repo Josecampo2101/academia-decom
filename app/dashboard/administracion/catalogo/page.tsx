@@ -52,7 +52,7 @@ function statusClasses(status: DbStatus) {
   return status === "published"
     ? "bg-teal-50 text-teal-700"
     : status === "archived"
-      ? "bg-slate-100 text-slate-500"
+      ? "bg-surface-muted text-muted-fg"
       : "bg-amber-50 text-amber-700";
 }
 
@@ -601,18 +601,18 @@ export default function AcademicCatalogPage() {
 
   if (access === "checking")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] text-sm text-slate-500">
+      <main className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-fg">
         Verificando permisos del catálogo académico...
       </main>
     );
   if (access !== "allowed")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-5">
-        <section className="max-w-md rounded-2xl border border-slate-200 bg-white p-7 text-center">
-          <h1 className="text-xl font-extrabold text-[#102D4D]">
+      <main className="flex min-h-screen items-center justify-center bg-background px-5">
+        <section className="max-w-md rounded-2xl border border-line bg-surface p-7 text-center">
+          <h1 className="text-xl font-extrabold text-foreground">
             {access === "error" ? "No fue posible verificar el acceso" : "Acceso restringido"}
           </h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-fg">
             {access === "error"
               ? "Ocurrió un error al consultar tus permisos. Inténtalo nuevamente."
               : "Este módulo está disponible para Administración nacional y Editor académico con ámbito distrital asignado."}
@@ -620,7 +620,7 @@ export default function AcademicCatalogPage() {
           <button
             type="button"
             onClick={() => router.replace("/dashboard")}
-            className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-xs font-bold text-white"
+            className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-xs font-bold text-white"
           >
             Volver al panel
           </button>
@@ -629,18 +629,18 @@ export default function AcademicCatalogPage() {
     );
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] px-4 py-7 text-[#102D4D] sm:px-7 lg:px-10">
+    <main className="min-h-screen bg-background px-4 py-7 text-foreground sm:px-7 lg:px-10">
       <div className="mx-auto max-w-7xl">
-        <a href="/dashboard" className="text-xs font-semibold text-[#087DB5] hover:underline">
+        <a href="/dashboard" className="text-xs font-semibold text-decom-blue-text hover:underline">
           ← Volver al panel
         </a>
         <header className="mt-5 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#19A7A0]">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-decom-teal-text">
               Diseño curricular
             </p>
             <h1 className="mt-2 text-2xl font-extrabold md:text-3xl">Catálogo académico</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-fg">
               Administra programas, cursos, módulos y lecciones con persistencia, ámbito distrital y
               auditoría.
             </p>
@@ -649,7 +649,7 @@ export default function AcademicCatalogPage() {
             <select
               value={selectedDistrictId}
               onChange={(event) => setSelectedDistrictId(event.target.value)}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"
+              className="rounded-xl border border-line bg-surface px-3 py-3 text-sm"
             >
               {districts.map((district) => (
                 <option key={district.id} value={district.id}>
@@ -660,7 +660,7 @@ export default function AcademicCatalogPage() {
             <button
               type="button"
               onClick={() => openCreate("program")}
-              className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-bold text-white hover:bg-[#066b9c]"
+              className="rounded-xl bg-decom-blue px-5 py-3 text-sm font-bold text-white hover:bg-decom-blue-hover"
             >
               ＋ Nuevo programa
             </button>
@@ -686,17 +686,17 @@ export default function AcademicCatalogPage() {
             ["Lecciones", counts.lessons],
             ["Cursos publicados", counts.published],
           ].map(([label, value]) => (
-            <article key={label} className="rounded-2xl border border-slate-200 bg-white p-4">
-              <p className="text-xs font-semibold text-slate-400">{label}</p>
+            <article key={label} className="rounded-2xl border border-line bg-surface p-4">
+              <p className="text-xs font-semibold text-muted-fg">{label}</p>
               <p className="mt-2 text-2xl font-extrabold">{value}</p>
             </article>
           ))}
         </section>
         <section className="mt-6 grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <aside className="rounded-2xl border border-slate-200 bg-white p-4">
+          <aside className="rounded-2xl border border-line bg-surface p-4">
             <div className="flex items-center justify-between">
               <h2 className="font-bold">Programas</h2>
-              <span className="text-xs text-slate-400">{programs.length}</span>
+              <span className="text-xs text-muted-fg">{programs.length}</span>
             </div>
             <div className="mt-3 space-y-2">
               {programs.map((program) => (
@@ -708,16 +708,16 @@ export default function AcademicCatalogPage() {
                     setSelectedCourseId(program.courses[0]?.id ?? "");
                     setSelectedModuleId(program.courses[0]?.modules[0]?.id ?? "");
                   }}
-                  className={`w-full rounded-xl border p-3 text-left transition ${selectedProgramId === program.id ? "border-[#087DB5] bg-[#087DB5]/5" : "border-slate-100 hover:border-slate-300"}`}
+                  className={`w-full rounded-xl border p-3 text-left transition ${selectedProgramId === program.id ? "border-decom-blue bg-decom-blue/5" : "border-line-soft hover:border-line"}`}
                 >
                   <span className="block text-sm font-bold">{program.title}</span>
-                  <span className="mt-1 block text-[11px] text-slate-400">
+                  <span className="mt-1 block text-[11px] text-muted-fg">
                     {program.courses.length} cursos · {statusLabel(program.status)}
                   </span>
                 </button>
               ))}
               {programs.length === 0 && (
-                <p className="rounded-xl border border-dashed border-slate-200 p-4 text-xs text-slate-400">
+                <p className="rounded-xl border border-dashed border-line p-4 text-xs text-muted-fg">
                   Todavía no hay programas en este distrito.
                 </p>
               )}
@@ -725,22 +725,22 @@ export default function AcademicCatalogPage() {
             <button
               type="button"
               onClick={() => openCreate("program")}
-              className="mt-3 w-full rounded-xl border border-dashed border-[#087DB5]/40 px-3 py-2.5 text-xs font-bold text-[#087DB5]"
+              className="mt-3 w-full rounded-xl border border-dashed border-decom-blue/40 px-3 py-2.5 text-xs font-bold text-decom-blue-text"
             >
               ＋ Agregar programa
             </button>
           </aside>
           <div className="min-w-0 space-y-5">
-            <section className="rounded-2xl border border-slate-200 bg-white p-5">
+            <section className="rounded-2xl border border-line bg-surface p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#19A7A0]">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-decom-teal-text">
                     Programa seleccionado
                   </p>
                   <h2 className="mt-1 text-xl font-extrabold">
                     {selectedProgram?.title ?? "Selecciona un programa"}
                   </h2>
-                  <p className="mt-1 text-sm text-slate-500">{selectedProgram?.description}</p>
+                  <p className="mt-1 text-sm text-muted-fg">{selectedProgram?.description}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   {selectedProgram && (
@@ -753,7 +753,7 @@ export default function AcademicCatalogPage() {
                       <button
                         type="button"
                         onClick={() => openEdit("program", selectedProgram)}
-                        className="text-[11px] font-bold text-[#087DB5]"
+                        className="text-[11px] font-bold text-decom-blue-text"
                       >
                         Editar
                       </button>
@@ -767,7 +767,7 @@ export default function AcademicCatalogPage() {
                         !selectedProgram.courses.some((course) => course.status === "published")
                       }
                       onClick={() => void changeStatus("program", selectedProgram.id, "published")}
-                      className="text-[11px] font-bold text-[#087DB5] disabled:opacity-40"
+                      className="text-[11px] font-bold text-decom-blue-text disabled:opacity-40"
                     >
                       Publicar programa
                     </button>
@@ -777,7 +777,7 @@ export default function AcademicCatalogPage() {
                       type="button"
                       disabled={saving}
                       onClick={() => void changeStatus("program", selectedProgram.id, "archived")}
-                      className="text-[11px] font-bold text-slate-500 disabled:opacity-40"
+                      className="text-[11px] font-bold text-muted-fg disabled:opacity-40"
                     >
                       Archivar
                     </button>
@@ -786,7 +786,7 @@ export default function AcademicCatalogPage() {
                     type="button"
                     onClick={() => openCreate("course")}
                     disabled={!selectedProgram || saving}
-                    className="rounded-lg bg-[#087DB5] px-4 py-2.5 text-xs font-bold text-white disabled:opacity-40"
+                    className="rounded-lg bg-decom-blue px-4 py-2.5 text-xs font-bold text-white disabled:opacity-40"
                   >
                     ＋ Nuevo curso
                   </button>
@@ -797,12 +797,12 @@ export default function AcademicCatalogPage() {
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder="Buscar curso..."
-                  className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[#087DB5]"
+                  className="rounded-xl border border-line px-3 py-2.5 text-sm outline-none focus:border-decom-blue"
                 />
                 <select
                   value={statusFilter}
                   onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs"
+                  className="rounded-xl border border-line bg-surface px-3 py-2.5 text-xs"
                 >
                   <option>Todos</option>
                   <option>Borrador</option>
@@ -814,7 +814,7 @@ export default function AcademicCatalogPage() {
                 {filteredCourses.map((course) => (
                   <div
                     key={course.id}
-                    className={`rounded-xl border p-3 ${selectedCourse?.id === course.id ? "border-[#087DB5]/50 bg-[#087DB5]/5" : "border-slate-100"}`}
+                    className={`rounded-xl border p-3 ${selectedCourse?.id === course.id ? "border-decom-blue/50 bg-decom-blue/5" : "border-line-soft"}`}
                   >
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <button
@@ -826,7 +826,7 @@ export default function AcademicCatalogPage() {
                         className="min-w-0 flex-1 text-left"
                       >
                         <span className="block text-sm font-bold">{course.title}</span>
-                        <span className="mt-1 block text-xs text-slate-400">
+                        <span className="mt-1 block text-xs text-muted-fg">
                           {course.description || "Sin descripción"} · {course.modules.length}{" "}
                           módulos
                         </span>
@@ -840,7 +840,7 @@ export default function AcademicCatalogPage() {
                         <button
                           type="button"
                           onClick={() => openEdit("course", course)}
-                          className="text-[11px] font-bold text-[#087DB5]"
+                          className="text-[11px] font-bold text-decom-blue-text"
                         >
                           Editar
                         </button>
@@ -849,7 +849,7 @@ export default function AcademicCatalogPage() {
                             type="button"
                             disabled={saving}
                             onClick={() => void changeStatus("course", course.id, "published")}
-                            className="text-[11px] font-bold text-[#087DB5] disabled:opacity-40"
+                            className="text-[11px] font-bold text-decom-blue-text disabled:opacity-40"
                           >
                             Publicar
                           </button>
@@ -859,7 +859,7 @@ export default function AcademicCatalogPage() {
                             type="button"
                             disabled={saving}
                             onClick={() => void changeStatus("course", course.id, "archived")}
-                            className="text-[11px] font-bold text-slate-500 disabled:opacity-40"
+                            className="text-[11px] font-bold text-muted-fg disabled:opacity-40"
                           >
                             Archivar
                           </button>
@@ -869,16 +869,16 @@ export default function AcademicCatalogPage() {
                   </div>
                 ))}
                 {filteredCourses.length === 0 && (
-                  <p className="rounded-xl border border-dashed border-slate-200 py-8 text-center text-sm text-slate-400">
+                  <p className="rounded-xl border border-dashed border-line py-8 text-center text-sm text-muted-fg">
                     No hay cursos para los filtros seleccionados.
                   </p>
                 )}
               </div>
             </section>
-            <section className="rounded-2xl border border-slate-200 bg-white p-5">
+            <section className="rounded-2xl border border-line bg-surface p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#19A7A0]">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-decom-teal-text">
                     Estructura del curso
                   </p>
                   <h2 className="mt-1 text-lg font-extrabold">
@@ -889,7 +889,7 @@ export default function AcademicCatalogPage() {
                   type="button"
                   onClick={() => openCreate("module")}
                   disabled={!selectedCourse || saving}
-                  className="rounded-lg border border-[#087DB5]/30 px-4 py-2.5 text-xs font-bold text-[#087DB5] disabled:opacity-40"
+                  className="rounded-lg border border-decom-blue/30 px-4 py-2.5 text-xs font-bold text-decom-blue-text disabled:opacity-40"
                 >
                   ＋ Nuevo módulo
                 </button>
@@ -898,7 +898,7 @@ export default function AcademicCatalogPage() {
                 {(selectedCourse?.modules ?? []).map((module, index) => (
                   <article
                     key={module.id}
-                    className={`rounded-xl border p-4 ${selectedModule?.id === module.id ? "border-[#19A7A0] bg-teal-50/40" : "border-slate-100"}`}
+                    className={`rounded-xl border p-4 ${selectedModule?.id === module.id ? "border-decom-teal bg-teal-50/40" : "border-line-soft"}`}
                   >
                     <button
                       type="button"
@@ -908,7 +908,7 @@ export default function AcademicCatalogPage() {
                       <span className="text-sm font-bold">
                         {index + 1}. {module.title}
                       </span>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[10px] text-muted-fg">
                         {module.lessons.length} lecciones
                       </span>
                     </button>
@@ -921,7 +921,7 @@ export default function AcademicCatalogPage() {
                       <button
                         type="button"
                         onClick={() => openEdit("module", module)}
-                        className="text-[10px] font-bold text-[#087DB5]"
+                        className="text-[10px] font-bold text-decom-blue-text"
                       >
                         Editar
                       </button>
@@ -933,7 +933,7 @@ export default function AcademicCatalogPage() {
                             !module.lessons.some((lesson) => lesson.status === "published")
                           }
                           onClick={() => void changeStatus("module", module.id, "published")}
-                          className="text-[10px] font-bold text-[#087DB5] disabled:opacity-40"
+                          className="text-[10px] font-bold text-decom-blue-text disabled:opacity-40"
                         >
                           Publicar módulo
                         </button>
@@ -943,20 +943,20 @@ export default function AcademicCatalogPage() {
                       {module.lessons.map((lesson, lessonIndex) => (
                         <div
                           key={lesson.id}
-                          className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2"
+                          className="flex items-center justify-between gap-2 rounded-lg bg-surface-muted px-3 py-2"
                         >
                           <div className="min-w-0">
-                            <span className="block text-xs text-slate-600">
+                            <span className="block text-xs text-muted-fg">
                               {lessonIndex + 1}. {lesson.title}
                             </span>
-                            <span className="text-[10px] text-slate-400">
+                            <span className="text-[10px] text-muted-fg">
                               {lesson.duration ?? "—"} min · {statusLabel(lesson.status)}
                             </span>
                           </div>
                           <button
                             type="button"
                             onClick={() => openEdit("lesson", lesson)}
-                            className="shrink-0 text-[10px] font-bold text-[#087DB5]"
+                            className="shrink-0 text-[10px] font-bold text-decom-blue-text"
                           >
                             Editar
                           </button>
@@ -965,7 +965,7 @@ export default function AcademicCatalogPage() {
                               type="button"
                               disabled={saving || !String(lesson.content.markdown ?? "").trim()}
                               onClick={() => void changeStatus("lesson", lesson.id, "published")}
-                              className="shrink-0 text-[10px] font-bold text-[#087DB5] disabled:opacity-40"
+                              className="shrink-0 text-[10px] font-bold text-decom-blue-text disabled:opacity-40"
                             >
                               Publicar
                             </button>
@@ -973,13 +973,13 @@ export default function AcademicCatalogPage() {
                         </div>
                       ))}
                       {module.lessons.length === 0 && (
-                        <p className="text-xs text-slate-400">Aún no hay lecciones.</p>
+                        <p className="text-xs text-muted-fg">Aún no hay lecciones.</p>
                       )}
                     </div>
                   </article>
                 ))}
                 {!selectedCourse && (
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-muted-fg">
                     Selecciona un curso para administrar su estructura.
                   </p>
                 )}
@@ -989,11 +989,11 @@ export default function AcademicCatalogPage() {
                   type="button"
                   onClick={() => openCreate("lesson")}
                   disabled={!selectedModule || saving}
-                  className="rounded-lg bg-[#102D4D] px-4 py-2.5 text-xs font-bold text-white disabled:opacity-40"
+                  className="rounded-lg bg-decom-navy px-4 py-2.5 text-xs font-bold text-white disabled:opacity-40"
                 >
                   ＋ Añadir lección al módulo seleccionado
                 </button>
-                <span className="self-center text-[11px] text-slate-400">
+                <span className="self-center text-[11px] text-muted-fg">
                   {selectedModule ? `Módulo: ${selectedModule.title}` : "Selecciona un módulo"}
                 </span>
               </div>
@@ -1001,7 +1001,7 @@ export default function AcademicCatalogPage() {
           </div>
         </section>
         {loadingCatalog && (
-          <p className="mt-4 text-center text-xs text-slate-400">
+          <p className="mt-4 text-center text-xs text-muted-fg">
             Sincronizando catálogo con Supabase...
           </p>
         )}
@@ -1011,11 +1011,11 @@ export default function AcademicCatalogPage() {
               role="dialog"
               aria-modal="true"
               aria-labelledby="catalog-form-title"
-              className="w-full max-w-xl rounded-t-3xl bg-white p-5 shadow-2xl sm:rounded-3xl sm:p-7"
+              className="w-full max-w-xl rounded-t-3xl bg-surface p-5 shadow-2xl sm:rounded-3xl sm:p-7"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#19A7A0]">
+                  <p className="text-xs font-bold uppercase tracking-wider text-decom-teal-text">
                     Estructura académica
                   </p>
                   <h2 id="catalog-form-title" className="mt-1 text-xl font-extrabold">
@@ -1033,13 +1033,13 @@ export default function AcademicCatalogPage() {
                   type="button"
                   onClick={() => setShowForm(false)}
                   aria-label="Cerrar"
-                  className="rounded-lg border border-slate-200 px-3 py-2 text-slate-500"
+                  className="rounded-lg border border-line px-3 py-2 text-muted-fg"
                 >
                   ✕
                 </button>
               </div>
               <form onSubmit={saveItem} className="mt-5 space-y-4">
-                <label className="block text-xs font-semibold text-slate-600">
+                <label className="block text-xs font-semibold text-muted-fg">
                   Nombre
                   <input
                     autoFocus
@@ -1047,7 +1047,7 @@ export default function AcademicCatalogPage() {
                     maxLength={160}
                     value={title}
                     onChange={(event) => setTitle(event.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none focus:border-[#087DB5]"
+                    className="mt-1.5 w-full rounded-xl border border-line px-3 py-3 text-sm outline-none focus:border-decom-blue"
                     placeholder={
                       level === "lesson"
                         ? "Ej. Introducción y objetivos"
@@ -1056,51 +1056,51 @@ export default function AcademicCatalogPage() {
                   />
                 </label>
                 {(level === "program" || level === "course" || level === "module") && (
-                  <label className="block text-xs font-semibold text-slate-600">
+                  <label className="block text-xs font-semibold text-muted-fg">
                     Descripción
                     <textarea
                       rows={3}
                       maxLength={500}
                       value={description}
                       onChange={(event) => setDescription(event.target.value)}
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none focus:border-[#087DB5]"
+                      className="mt-1.5 w-full rounded-xl border border-line px-3 py-3 text-sm outline-none focus:border-decom-blue"
                       placeholder="Propósito y alcance formativo."
                     />
                   </label>
                 )}
                 {level === "lesson" && (
                   <>
-                    <label className="block text-xs font-semibold text-slate-600">
+                    <label className="block text-xs font-semibold text-muted-fg">
                       Resumen
                       <textarea
                         rows={2}
                         maxLength={500}
                         value={description}
                         onChange={(event) => setDescription(event.target.value)}
-                        className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"
+                        className="mt-1.5 w-full rounded-xl border border-line px-3 py-3 text-sm"
                         placeholder="Breve descripción de la lección."
                       />
                     </label>
-                    <label className="block text-xs font-semibold text-slate-600">
+                    <label className="block text-xs font-semibold text-muted-fg">
                       Objetivos de aprendizaje{" "}
-                      <span className="font-normal text-slate-400">(uno por línea)</span>
+                      <span className="font-normal text-muted-fg">(uno por línea)</span>
                       <textarea
                         rows={3}
                         maxLength={3000}
                         value={lessonObjectives}
                         onChange={(event) => setLessonObjectives(event.target.value)}
-                        className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"
+                        className="mt-1.5 w-full rounded-xl border border-line px-3 py-3 text-sm"
                         placeholder="Identificar el propósito del DECOM.\nReconocer su relación con la misión."
                       />
                     </label>
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <label className="text-xs font-semibold text-slate-600">
+                        <label className="text-xs font-semibold text-muted-fg">
                           Contenido de la lección{" "}
-                          <span className="font-normal text-slate-400">(Markdown)</span>
+                          <span className="font-normal text-muted-fg">(Markdown)</span>
                         </label>
                         <div className="flex items-center gap-2">
-                          <label className="cursor-pointer rounded-lg border border-slate-200 px-3 py-2 text-[11px] font-bold text-[#087DB5]">
+                          <label className="cursor-pointer rounded-lg border border-line px-3 py-2 text-[11px] font-bold text-decom-blue-text">
                             {importingLessonFile ? "Importando..." : "Importar .md / .txt"}
                             <input
                               type="file"
@@ -1113,15 +1113,15 @@ export default function AcademicCatalogPage() {
                           <button
                             type="button"
                             onClick={() => setShowLessonPreview((value) => !value)}
-                            className="rounded-lg border border-slate-200 px-3 py-2 text-[11px] font-bold text-slate-600"
+                            className="rounded-lg border border-line px-3 py-2 text-[11px] font-bold text-muted-fg"
                           >
                             {showLessonPreview ? "Editar texto" : "Vista previa"}
                           </button>
                         </div>
                       </div>
                       {showLessonPreview ? (
-                        <div className="min-h-40 max-h-72 overflow-auto rounded-xl border border-slate-200 bg-slate-50 p-4">
-                          <pre className="whitespace-pre-wrap break-words font-sans text-sm leading-6 text-slate-700">
+                        <div className="min-h-40 max-h-72 overflow-auto rounded-xl border border-line bg-surface-muted p-4">
+                          <pre className="whitespace-pre-wrap break-words font-sans text-sm leading-6 text-foreground">
                             {lessonContent || "Todavía no hay contenido para previsualizar."}
                           </pre>
                         </div>
@@ -1130,17 +1130,17 @@ export default function AcademicCatalogPage() {
                           rows={10}
                           value={lessonContent}
                           onChange={(event) => setLessonContent(event.target.value)}
-                          className="w-full rounded-xl border border-slate-200 px-3 py-3 font-mono text-sm leading-6"
+                          className="w-full rounded-xl border border-line px-3 py-3 font-mono text-sm leading-6"
                           placeholder="# Título de la lección\n\nDesarrolla aquí el contenido formativo..."
                         />
                       )}
-                      <p className="text-[10px] leading-5 text-slate-400">
+                      <p className="text-[10px] leading-5 text-muted-fg">
                         Importación inicial limitada a Markdown y texto plano de hasta 2 MB. Los
                         PDF, documentos, presentaciones, imágenes y videos requerirán una carga
                         segura a Supabase Storage.
                       </p>
                     </div>
-                    <label className="block text-xs font-semibold text-slate-600">
+                    <label className="block text-xs font-semibold text-muted-fg">
                       Duración estimada (minutos)
                       <input
                         required
@@ -1149,23 +1149,23 @@ export default function AcademicCatalogPage() {
                         max="600"
                         value={duration}
                         onChange={(event) => setDuration(event.target.value)}
-                        className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"
+                        className="mt-1.5 w-full rounded-xl border border-line px-3 py-3 text-sm"
                       />
                     </label>
                   </>
                 )}
-                <div className="flex flex-col-reverse justify-end gap-2 border-t border-slate-100 pt-4 sm:flex-row">
+                <div className="flex flex-col-reverse justify-end gap-2 border-t border-line-soft pt-4 sm:flex-row">
                   <button
                     type="button"
                     onClick={() => setShowForm(false)}
-                    className="rounded-xl border border-slate-200 px-5 py-3 text-xs font-bold text-slate-600"
+                    className="rounded-xl border border-line px-5 py-3 text-xs font-bold text-muted-fg"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="rounded-xl bg-[#087DB5] px-5 py-3 text-xs font-bold text-white disabled:opacity-50"
+                    className="rounded-xl bg-decom-blue px-5 py-3 text-xs font-bold text-white disabled:opacity-50"
                   >
                     {saving ? "Guardando..." : editingId ? "Guardar cambios" : "Crear borrador"}
                   </button>
@@ -1174,7 +1174,7 @@ export default function AcademicCatalogPage() {
             </section>
           </div>
         )}
-        <footer className="mt-8 border-t border-slate-200 py-5 text-center text-[11px] text-slate-400">
+        <footer className="mt-8 border-t border-line py-5 text-center text-[11px] text-muted-fg">
           Academia DECOM · Catálogo curricular · Datos persistentes en Supabase
         </footer>
       </div>

@@ -165,24 +165,24 @@ export default function StudentLibraryPage() {
 
   if (access === "checking")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]">
-        <p className="text-sm text-slate-500">Verificando tu acceso...</p>
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-sm text-muted-fg">Verificando tu acceso...</p>
       </main>
     );
   if (access !== "allowed")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6">
-        <section className="max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center">
-          <h1 className="text-xl font-bold text-[#102D4D]">
+      <main className="flex min-h-screen items-center justify-center bg-background px-6">
+        <section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center">
+          <h1 className="text-xl font-bold text-foreground">
             {access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}
           </h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-fg">
             La biblioteca está habilitada para estudiantes con una asignación vigente.
           </p>
           <button
             type="button"
             onClick={() => router.push("/dashboard/estudiante")}
-            className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white"
+            className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
           >
             Volver al panel
           </button>
@@ -191,19 +191,19 @@ export default function StudentLibraryPage() {
     );
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
-      <header className="border-b border-slate-200 bg-white">
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 md:px-8">
           <div>
-            <p className="text-xs font-extrabold tracking-[0.14em] text-[#087DB5]">
+            <p className="text-xs font-extrabold tracking-[0.14em] text-decom-blue-text">
               ACADEMIA DECOM
             </p>
-            <p className="mt-1 text-xs text-slate-400">Biblioteca de aprendizaje</p>
+            <p className="mt-1 text-xs text-muted-fg">Biblioteca de aprendizaje</p>
           </div>
           <button
             type="button"
             onClick={() => router.push("/dashboard/estudiante")}
-            className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600"
+            className="rounded-xl border border-line px-4 py-2.5 text-xs font-semibold text-muted-fg"
           >
             ← Panel del estudiante
           </button>
@@ -212,11 +212,11 @@ export default function StudentLibraryPage() {
       <div className="mx-auto max-w-6xl space-y-7 px-5 py-7 md:px-8 md:py-9">
         <section className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#19A7A0]">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-decom-teal-text">
               Recursos para crecer
             </p>
             <h1 className="mt-2 text-2xl font-extrabold md:text-3xl">Biblioteca DECOM</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-fg">
               Consulta materiales de apoyo para fortalecer tus conocimientos y llevarlos a la
               práctica.
             </p>
@@ -225,7 +225,7 @@ export default function StudentLibraryPage() {
             Catálogo de demostración
           </span>
         </section>
-        <section className="rounded-3xl bg-gradient-to-br from-[#102D4D] to-[#087DB5] p-6 text-white md:p-8">
+        <section className="rounded-3xl bg-gradient-to-br from-decom-navy to-decom-blue p-6 text-white md:p-8">
           <p className="text-xs font-bold uppercase tracking-wider text-white/70">
             Recurso destacado
           </p>
@@ -240,7 +240,7 @@ export default function StudentLibraryPage() {
             <button
               type="button"
               onClick={() => setSelected(resources[0])}
-              className="rounded-xl bg-white px-4 py-3 text-xs font-bold text-[#102D4D]"
+              className="rounded-xl bg-surface px-4 py-3 text-xs font-bold text-foreground"
             >
               Explorar recurso →
             </button>
@@ -254,7 +254,7 @@ export default function StudentLibraryPage() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Buscar por título, tema o descripción..."
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-[#087DB5]"
+                className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-decom-blue"
               />
             </label>
             <label>
@@ -262,7 +262,7 @@ export default function StudentLibraryPage() {
               <select
                 value={category}
                 onChange={(event) => setCategory(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-600 outline-none focus:border-[#087DB5]"
+                className="w-full rounded-xl border border-line bg-surface px-3 py-3 text-sm text-muted-fg outline-none focus:border-decom-blue"
               >
                 {categories.map((item) => (
                   <option key={item}>{item}</option>
@@ -274,7 +274,7 @@ export default function StudentLibraryPage() {
               <select
                 value={type}
                 onChange={(event) => setType(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-600 outline-none focus:border-[#087DB5]"
+                className="w-full rounded-xl border border-line bg-surface px-3 py-3 text-sm text-muted-fg outline-none focus:border-decom-blue"
               >
                 {["Todos", "Guía", "Plantilla", "Video", "Lectura"].map((item) => (
                   <option key={item}>{item}</option>
@@ -284,14 +284,14 @@ export default function StudentLibraryPage() {
           </div>
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold">Todos los recursos</h2>
-            <span className="text-xs text-slate-400">{filtered.length} resultados</span>
+            <span className="text-xs text-muted-fg">{filtered.length} resultados</span>
           </div>
           {filtered.length ? (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {filtered.map((item) => (
                 <article
                   key={item.id}
-                  className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                  className="flex flex-col rounded-2xl border border-line bg-surface p-5 shadow-sm"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span
@@ -299,18 +299,18 @@ export default function StudentLibraryPage() {
                     >
                       {item.type}
                     </span>
-                    <span className="text-[10px] font-semibold text-slate-400">{item.level}</span>
+                    <span className="text-[10px] font-semibold text-muted-fg">{item.level}</span>
                   </div>
                   <h3 className="mt-4 text-sm font-bold">{item.title}</h3>
-                  <p className="mt-2 flex-1 text-xs leading-5 text-slate-500">{item.description}</p>
-                  <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
-                    <span className="text-[10px] text-slate-400">
+                  <p className="mt-2 flex-1 text-xs leading-5 text-muted-fg">{item.description}</p>
+                  <div className="mt-4 flex items-center justify-between border-t border-line-soft pt-3">
+                    <span className="text-[10px] text-muted-fg">
                       {item.category} · {item.duration}
                     </span>
                     <button
                       type="button"
                       onClick={() => setSelected(item)}
-                      className="shrink-0 text-xs font-bold text-[#087DB5] hover:underline"
+                      className="shrink-0 text-xs font-bold text-decom-blue-text hover:underline"
                     >
                       Ver detalle →
                     </button>
@@ -319,9 +319,9 @@ export default function StudentLibraryPage() {
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
+            <div className="rounded-2xl border border-dashed border-line bg-surface p-10 text-center">
               <h3 className="text-sm font-bold">No encontramos recursos</h3>
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2 text-xs text-muted-fg">
                 Prueba con otra búsqueda o cambia los filtros.
               </p>
               <button
@@ -331,14 +331,14 @@ export default function StudentLibraryPage() {
                   setCategory("Todos");
                   setType("Todos");
                 }}
-                className="mt-4 text-xs font-bold text-[#087DB5]"
+                className="mt-4 text-xs font-bold text-decom-blue-text"
               >
                 Limpiar filtros
               </button>
             </div>
           )}
         </section>
-        <p className="text-[11px] leading-5 text-slate-400">
+        <p className="text-[11px] leading-5 text-muted-fg">
           Los recursos son ejemplos de catálogo. La descarga, reproducción, favoritos y permisos por
           curso se conectarán cuando se apruebe el módulo documental y su almacenamiento.
         </p>
@@ -349,7 +349,7 @@ export default function StudentLibraryPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="resource-title"
-            className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl"
+            className="w-full max-w-lg rounded-3xl bg-surface p-6 shadow-2xl"
           >
             <div className="flex items-center justify-between">
               <span
@@ -361,7 +361,7 @@ export default function StudentLibraryPage() {
                 type="button"
                 aria-label="Cerrar detalle"
                 onClick={() => setSelected(null)}
-                className="rounded-lg px-3 py-1 text-lg text-slate-400 hover:bg-slate-100"
+                className="rounded-lg px-3 py-1 text-lg text-muted-fg hover:bg-surface-muted"
               >
                 ×
               </button>
@@ -369,22 +369,22 @@ export default function StudentLibraryPage() {
             <h2 id="resource-title" className="mt-4 text-lg font-bold">
               {selected.title}
             </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">{selected.description}</p>
-            <dl className="mt-5 grid grid-cols-2 gap-3 rounded-xl bg-[#F4F7FA] p-4 text-xs">
+            <p className="mt-2 text-sm leading-6 text-muted-fg">{selected.description}</p>
+            <dl className="mt-5 grid grid-cols-2 gap-3 rounded-xl bg-surface-muted p-4 text-xs">
               <div>
-                <dt className="text-slate-400">Categoría</dt>
+                <dt className="text-muted-fg">Categoría</dt>
                 <dd className="mt-1 font-semibold">{selected.category}</dd>
               </div>
               <div>
-                <dt className="text-slate-400">Nivel</dt>
+                <dt className="text-muted-fg">Nivel</dt>
                 <dd className="mt-1 font-semibold">{selected.level}</dd>
               </div>
               <div>
-                <dt className="text-slate-400">Duración</dt>
+                <dt className="text-muted-fg">Duración</dt>
                 <dd className="mt-1 font-semibold">{selected.duration}</dd>
               </div>
               <div>
-                <dt className="text-slate-400">Tipo</dt>
+                <dt className="text-muted-fg">Tipo</dt>
                 <dd className="mt-1 font-semibold">{selected.type}</dd>
               </div>
             </dl>
@@ -395,7 +395,7 @@ export default function StudentLibraryPage() {
             <button
               type="button"
               onClick={() => setSelected(null)}
-              className="mt-5 w-full rounded-xl bg-[#087DB5] px-4 py-3 text-sm font-semibold text-white"
+              className="mt-5 w-full rounded-xl bg-decom-blue px-4 py-3 text-sm font-semibold text-white"
             >
               Cerrar
             </button>

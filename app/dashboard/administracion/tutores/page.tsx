@@ -201,20 +201,20 @@ export default function CourseTutorAssignmentsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] px-4 py-8 text-[#102D4D] sm:px-7 lg:px-10">
+    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-7 lg:px-10">
       <div className="mx-auto max-w-6xl">
         <button
           onClick={() => router.push("/dashboard/administracion")}
-          className="text-sm font-semibold text-[#087DB5]"
+          className="text-sm font-semibold text-decom-blue-text"
         >
           ← Administración
         </button>
         <header className="mt-5">
-          <p className="text-xs font-bold uppercase tracking-[.18em] text-[#19A7A0]">
+          <p className="text-xs font-bold uppercase tracking-[.18em] text-decom-teal-text">
             Gestión académica
           </p>
           <h1 className="mt-2 text-3xl font-extrabold">Asignación de tutores</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-fg">
             Vincula tutores con cursos concretos. Las asignaciones se conservan como historial
             cuando se revocan.
           </p>
@@ -233,21 +233,21 @@ export default function CourseTutorAssignmentsPage() {
           </p>
         )}
         {loading ? (
-          <div className="mt-8 rounded-2xl bg-white p-8 text-sm text-slate-500">
+          <div className="mt-8 rounded-2xl bg-surface p-8 text-sm text-muted-fg">
             Cargando cursos y tutores…
           </div>
         ) : (
           <div className="mt-7 grid gap-6 lg:grid-cols-[.9fr_1.1fr]">
-            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <section className="rounded-2xl border border-line bg-surface p-5 shadow-sm">
               <h2 className="text-lg font-bold">Nueva asignación</h2>
-              <label className="mt-5 block text-xs font-bold text-slate-600">Curso</label>
+              <label className="mt-5 block text-xs font-bold text-muted-fg">Curso</label>
               <select
                 value={courseId}
                 onChange={(e) => {
                   setCourseId(e.target.value);
                   setTutorId("");
                 }}
-                className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"
+                className="mt-2 w-full rounded-xl border border-line bg-surface px-3 py-3 text-sm"
               >
                 {courses.map((x) => (
                   <option key={x.id} value={x.id}>
@@ -255,13 +255,13 @@ export default function CourseTutorAssignmentsPage() {
                   </option>
                 ))}
               </select>
-              <label className="mt-4 block text-xs font-bold text-slate-600">
+              <label className="mt-4 block text-xs font-bold text-muted-fg">
                 Tutor disponible en el distrito
               </label>
               <select
                 value={tutorId}
                 onChange={(e) => setTutorId(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"
+                className="mt-2 w-full rounded-xl border border-line bg-surface px-3 py-3 text-sm"
               >
                 <option value="">Seleccionar tutor</option>
                 {availableCandidates.map((x) => (
@@ -271,7 +271,7 @@ export default function CourseTutorAssignmentsPage() {
                   </option>
                 ))}
               </select>
-              <label className="mt-4 block text-xs font-bold text-slate-600">
+              <label className="mt-4 block text-xs font-bold text-muted-fg">
                 Observaciones (opcional)
               </label>
               <textarea
@@ -279,13 +279,13 @@ export default function CourseTutorAssignmentsPage() {
                 onChange={(e) => setNotes(e.target.value)}
                 maxLength={1000}
                 rows={3}
-                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                className="mt-2 w-full rounded-xl border border-line px-3 py-2 text-sm"
                 placeholder="Responsabilidades o alcance de la tutoría"
               />
               <button
                 disabled={!courseId || !tutorId || saving}
                 onClick={() => void assignTutor()}
-                className="mt-5 w-full rounded-xl bg-[#087DB5] px-4 py-3 text-sm font-bold text-white disabled:opacity-50"
+                className="mt-5 w-full rounded-xl bg-decom-blue px-4 py-3 text-sm font-bold text-white disabled:opacity-50"
               >
                 {saving ? "Guardando…" : "Asignar tutor al curso"}
               </button>
@@ -297,30 +297,30 @@ export default function CourseTutorAssignmentsPage() {
                 </p>
               )}
             </section>
-            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <section className="rounded-2xl border border-line bg-surface p-5 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-lg font-bold">Asignaciones del curso</h2>
-                <span className="text-xs text-slate-500">
+                <span className="text-xs text-muted-fg">
                   {activeAssignments.length} activas en total
                 </span>
               </div>
               {!assignedForCourse.length ? (
-                <p className="mt-5 rounded-xl bg-slate-50 p-5 text-sm text-slate-500">
+                <p className="mt-5 rounded-xl bg-surface-muted p-5 text-sm text-muted-fg">
                   Este curso aún no tiene asignaciones registradas.
                 </p>
               ) : (
                 <div className="mt-4 space-y-3">
                   {assignedForCourse.map((item) => (
-                    <article key={item.id} className="rounded-xl border border-slate-200 p-4">
+                    <article key={item.id} className="rounded-xl border border-line p-4">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
                           <p className="font-semibold">{tutorName(item)}</p>
-                          <p className="mt-1 text-xs text-slate-500">
+                          <p className="mt-1 text-xs text-muted-fg">
                             {item.status === "active" ? "Activa" : "Revocada"} ·{" "}
                             {new Date(item.assigned_at).toLocaleDateString("es-CO")}
                           </p>
                           {item.notes && (
-                            <p className="mt-2 text-xs text-slate-600">{item.notes}</p>
+                            <p className="mt-2 text-xs text-muted-fg">{item.notes}</p>
                           )}
                         </div>
                         {item.status === "active" && (

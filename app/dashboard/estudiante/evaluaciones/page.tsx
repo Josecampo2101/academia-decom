@@ -142,23 +142,23 @@ export default function StudentAssessmentsPage() {
 
   if (access === "checking")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#087DB5]/20 border-t-[#087DB5]" />
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-decom-blue/20 border-t-decom-blue" />
       </main>
     );
   if (access !== "allowed")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6">
-        <section className="max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center">
+      <main className="flex min-h-screen items-center justify-center bg-background px-6">
+        <section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center">
           <h1 className="text-xl font-bold">
             {access === "error" ? "No pudimos cargar tus evaluaciones" : "Acceso restringido"}
           </h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-fg">
             {notice || "Esta sección está habilitada para estudiantes con una asignación vigente."}
           </p>
           <button
             onClick={() => router.push("/dashboard/estudiante")}
-            className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white"
+            className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
           >
             Volver al panel
           </button>
@@ -167,20 +167,20 @@ export default function StudentAssessmentsPage() {
     );
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
-      <header className="border-b border-slate-200 bg-white">
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 md:px-8">
           <div>
-            <p className="text-xs font-extrabold tracking-[0.14em] text-[#087DB5]">
+            <p className="text-xs font-extrabold tracking-[0.14em] text-decom-blue-text">
               ACADEMIA DECOM
             </p>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-muted-fg">
               Evaluaciones y comprobación de aprendizaje
             </p>
           </div>
           <button
             onClick={() => router.push("/dashboard/estudiante")}
-            className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600"
+            className="rounded-xl border border-line px-4 py-2.5 text-xs font-semibold text-muted-fg"
           >
             ← Panel del estudiante
           </button>
@@ -188,11 +188,11 @@ export default function StudentAssessmentsPage() {
       </header>
       <div className="mx-auto max-w-6xl space-y-6 px-5 py-7 md:px-8">
         <section>
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#19A7A0]">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-decom-teal-text">
             Evaluación del aprendizaje
           </p>
           <h1 className="mt-2 text-2xl font-extrabold md:text-3xl">Mis evaluaciones</h1>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-2 text-sm leading-6 text-muted-fg">
             Aquí aparecen los instrumentos publicados para tus cursos matriculados. Tus intentos y
             resultados se sincronizan con la plataforma.
           </p>
@@ -202,17 +202,17 @@ export default function StudentAssessmentsPage() {
             {items.map((item) => (
               <article
                 key={item.id}
-                className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
+                className="rounded-3xl border border-line bg-surface p-5 shadow-sm"
               >
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[#19A7A0]">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-decom-teal-text">
                   {item.courseTitle}
                 </p>
                 <h2 className="mt-2 text-base font-bold">{item.title}</h2>
-                <p className="mt-2 text-xs leading-5 text-slate-500">
+                <p className="mt-2 text-xs leading-5 text-muted-fg">
                   {item.instructions ||
                     "Lee cuidadosamente cada pregunta y revisa tus respuestas antes de enviarlas."}
                 </p>
-                <div className="mt-4 flex flex-wrap gap-3 text-[11px] text-slate-400">
+                <div className="mt-4 flex flex-wrap gap-3 text-[11px] text-muted-fg">
                   <span>
                     {item.kind === "final"
                       ? "Examen final"
@@ -225,7 +225,7 @@ export default function StudentAssessmentsPage() {
                   {item.maxAttempts && <span>Máx. {item.maxAttempts} intentos</span>}
                 </div>
                 {item.latestAttempt && (
-                  <p className="mt-4 rounded-xl bg-[#F4F7FA] p-3 text-xs text-slate-600">
+                  <p className="mt-4 rounded-xl bg-surface-muted p-3 text-xs text-muted-fg">
                     {item.latestAttempt.status === "review_pending"
                       ? "En revisión manual"
                       : item.latestAttempt.passed
@@ -240,7 +240,7 @@ export default function StudentAssessmentsPage() {
                 )}
                 <button
                   onClick={() => router.push(`/dashboard/estudiante/evaluaciones/${item.id}`)}
-                  className="mt-4 w-full rounded-xl bg-[#087DB5] px-4 py-3 text-xs font-bold text-white"
+                  className="mt-4 w-full rounded-xl bg-decom-blue px-4 py-3 text-xs font-bold text-white"
                 >
                   Abrir evaluación →
                 </button>
@@ -248,9 +248,9 @@ export default function StudentAssessmentsPage() {
             ))}
           </div>
         ) : (
-          <section className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center">
+          <section className="rounded-3xl border border-dashed border-line bg-surface p-8 text-center">
             <h2 className="text-base font-bold">No tienes evaluaciones publicadas</h2>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-fg">
               Cuando el tutor o el editor publique una evaluación para tus cursos, aparecerá aquí.
             </p>
           </section>

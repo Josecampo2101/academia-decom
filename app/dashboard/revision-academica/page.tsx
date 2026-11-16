@@ -327,34 +327,34 @@ export default function AcademicReviewPage() {
   }
   if (loading)
     return (
-      <main className="grid min-h-screen place-items-center bg-[#F4F7FA] text-sm text-slate-500">
+      <main className="grid min-h-screen place-items-center bg-background text-sm text-muted-fg">
         Cargando revisión académica...
       </main>
     );
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
+    <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[.2em] text-[#087DB5]">
+            <p className="text-xs font-bold uppercase tracking-[.2em] text-decom-blue-text">
               Academia DECOM · Calidad académica
             </p>
             <h1 className="mt-2 text-3xl font-bold">Revisión de planificaciones</h1>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-fg">
               Valida las sesiones preparadas por tutores antes de aprobarlas.
             </p>
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => router.push("/dashboard/planificador")}
-              className="rounded-xl bg-[#087DB5] px-4 py-3 text-sm font-semibold text-white"
+              className="rounded-xl bg-decom-blue px-4 py-3 text-sm font-semibold text-white"
             >
               Abrir planner
             </button>
             <button
               onClick={() => router.push("/dashboard/espacio")}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold"
+              className="rounded-xl border border-line bg-surface px-4 py-3 text-sm font-semibold"
             >
               Mi espacio
             </button>
@@ -376,9 +376,9 @@ export default function AcademicReviewPage() {
             {notice}
           </div>
         )}
-        <section className="mt-7 flex flex-wrap items-end justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5">
+        <section className="mt-7 flex flex-wrap items-end justify-between gap-4 rounded-2xl border border-line bg-surface p-5">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+            <p className="text-xs font-bold uppercase tracking-wide text-muted-fg">
               Pendientes de revisión
             </p>
             <p className="mt-1 text-3xl font-bold">{filtered.length}</p>
@@ -388,7 +388,7 @@ export default function AcademicReviewPage() {
             <select
               value={districtId}
               onChange={(e) => setDistrictId(e.target.value)}
-              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"
+              className="mt-2 w-full rounded-xl border border-line bg-surface px-3 py-3 text-sm"
             >
               <option value="all">Todos mis distritos</option>
               {districts.map((d) => (
@@ -400,9 +400,9 @@ export default function AcademicReviewPage() {
           </label>
         </section>
         {!filtered.length ? (
-          <section className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
+          <section className="mt-6 rounded-2xl border border-dashed border-line bg-surface p-10 text-center">
             <h2 className="text-xl font-bold">No hay planificaciones pendientes</h2>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-fg">
               Cuando un tutor envíe una clase a revisión, aparecerá aquí con su estructura didáctica
               y sus observaciones.
             </p>
@@ -415,15 +415,15 @@ export default function AcademicReviewPage() {
               return (
                 <article
                   key={plan.id}
-                  className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+                  className="rounded-2xl border border-line bg-surface p-6 shadow-sm"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wide text-[#087DB5]">
+                      <p className="text-xs font-bold uppercase tracking-wide text-decom-blue-text">
                         {districtName(plan.district_id)} · {hierarchy(plan.lesson_id)}
                       </p>
                       <h2 className="mt-2 text-xl font-bold">{plan.session_title}</h2>
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-1 text-sm text-muted-fg">
                         {lessonTitle(plan.lesson_id)}
                         {courseModule ? " · " + courseModule.title : ""}
                       </p>
@@ -433,38 +433,38 @@ export default function AcademicReviewPage() {
                     </span>
                   </div>
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-xl bg-slate-50 p-4">
-                      <p className="text-xs font-semibold uppercase text-slate-500">Tema</p>
+                    <div className="rounded-xl bg-surface-muted p-4">
+                      <p className="text-xs font-semibold uppercase text-muted-fg">Tema</p>
                       <p className="mt-1 text-sm font-semibold">{plan.topic}</p>
                     </div>
-                    <div className="rounded-xl bg-slate-50 p-4">
-                      <p className="text-xs font-semibold uppercase text-slate-500">
+                    <div className="rounded-xl bg-surface-muted p-4">
+                      <p className="text-xs font-semibold uppercase text-muted-fg">
                         Preparado por
                       </p>
                       <p className="mt-1 text-sm font-semibold">{authorName(plan.created_by)}</p>
                     </div>
                   </div>
                   {plan.description && (
-                    <p className="mt-4 text-sm leading-6 text-slate-600">{plan.description}</p>
+                    <p className="mt-4 text-sm leading-6 text-muted-fg">{plan.description}</p>
                   )}
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     {plan.target_audience && (
-                      <div className="rounded-xl bg-slate-50 p-4">
-                        <p className="text-xs font-semibold uppercase text-slate-500">Público</p>
+                      <div className="rounded-xl bg-surface-muted p-4">
+                        <p className="text-xs font-semibold uppercase text-muted-fg">Público</p>
                         <p className="mt-1 text-sm">{plan.target_audience}</p>
                       </div>
                     )}
                     {plan.teaching_method && (
-                      <div className="rounded-xl bg-slate-50 p-4">
-                        <p className="text-xs font-semibold uppercase text-slate-500">
+                      <div className="rounded-xl bg-surface-muted p-4">
+                        <p className="text-xs font-semibold uppercase text-muted-fg">
                           Metodología
                         </p>
                         <p className="mt-1 text-sm">{plan.teaching_method}</p>
                       </div>
                     )}
                     {plan.learning_outcomes?.length > 0 && (
-                      <div className="rounded-xl bg-slate-50 p-4 sm:col-span-2">
-                        <p className="text-xs font-semibold uppercase text-slate-500">
+                      <div className="rounded-xl bg-surface-muted p-4 sm:col-span-2">
+                        <p className="text-xs font-semibold uppercase text-muted-fg">
                           Resultados de aprendizaje
                         </p>
                         <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
@@ -475,43 +475,43 @@ export default function AcademicReviewPage() {
                       </div>
                     )}
                     {plan.opening_activity && (
-                      <div className="rounded-xl border border-slate-100 p-4">
-                        <p className="text-xs font-semibold uppercase text-slate-500">Apertura</p>
+                      <div className="rounded-xl border border-line-soft p-4">
+                        <p className="text-xs font-semibold uppercase text-muted-fg">Apertura</p>
                         <p className="mt-1 whitespace-pre-wrap text-sm">{plan.opening_activity}</p>
                       </div>
                     )}
                     {plan.lesson_development && (
-                      <div className="rounded-xl border border-slate-100 p-4">
-                        <p className="text-xs font-semibold uppercase text-slate-500">Desarrollo</p>
+                      <div className="rounded-xl border border-line-soft p-4">
+                        <p className="text-xs font-semibold uppercase text-muted-fg">Desarrollo</p>
                         <p className="mt-1 whitespace-pre-wrap text-sm">
                           {plan.lesson_development}
                         </p>
                       </div>
                     )}
                     {plan.closing_activity && (
-                      <div className="rounded-xl border border-slate-100 p-4">
-                        <p className="text-xs font-semibold uppercase text-slate-500">Cierre</p>
+                      <div className="rounded-xl border border-line-soft p-4">
+                        <p className="text-xs font-semibold uppercase text-muted-fg">Cierre</p>
                         <p className="mt-1 whitespace-pre-wrap text-sm">{plan.closing_activity}</p>
                       </div>
                     )}
                     {plan.assessment_strategy && (
-                      <div className="rounded-xl border border-slate-100 p-4">
-                        <p className="text-xs font-semibold uppercase text-slate-500">Evaluación</p>
+                      <div className="rounded-xl border border-line-soft p-4">
+                        <p className="text-xs font-semibold uppercase text-muted-fg">Evaluación</p>
                         <p className="mt-1 whitespace-pre-wrap text-sm">
                           {plan.assessment_strategy}
                         </p>
                       </div>
                     )}
                     {plan.homework && (
-                      <div className="rounded-xl border border-slate-100 p-4 sm:col-span-2">
-                        <p className="text-xs font-semibold uppercase text-slate-500">
+                      <div className="rounded-xl border border-line-soft p-4 sm:col-span-2">
+                        <p className="text-xs font-semibold uppercase text-muted-fg">
                           Tarea / actividad posterior
                         </p>
                         <p className="mt-1 whitespace-pre-wrap text-sm">{plan.homework}</p>
                       </div>
                     )}
                   </div>
-                  <div className="mt-5 rounded-xl border border-slate-200 p-4">
+                  <div className="mt-5 rounded-xl border border-line p-4">
                     <h3 className="font-bold">Materiales adjuntos</h3>
                     {materials.filter((item) => item.lesson_id === plan.lesson_id).length ? (
                       <div className="mt-3 space-y-2">
@@ -520,19 +520,19 @@ export default function AcademicReviewPage() {
                           .map((item) => (
                             <div
                               key={item.id}
-                              className="flex flex-wrap items-start justify-between gap-3 rounded-lg bg-slate-50 p-3"
+                              className="flex flex-wrap items-start justify-between gap-3 rounded-lg bg-surface-muted p-3"
                             >
                               <div>
                                 <p className="text-sm font-semibold">{item.title}</p>
-                                <p className="mt-1 text-xs text-slate-500">
+                                <p className="mt-1 text-xs text-muted-fg">
                                   {item.material_type} ·{" "}
                                   {item.status === "published" ? "Publicado" : "Borrador"}
                                 </p>
                                 {item.description && (
-                                  <p className="mt-1 text-sm text-slate-600">{item.description}</p>
+                                  <p className="mt-1 text-sm text-muted-fg">{item.description}</p>
                                 )}
                                 {item.content && (
-                                  <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">
+                                  <p className="mt-2 whitespace-pre-wrap text-sm text-foreground">
                                     {item.content}
                                   </p>
                                 )}
@@ -542,7 +542,7 @@ export default function AcademicReviewPage() {
                                   onClick={() =>
                                     void openMaterial(item).catch((e) => setError(e.message))
                                   }
-                                  className="rounded-lg bg-[#087DB5] px-3 py-2 text-xs font-semibold text-white"
+                                  className="rounded-lg bg-decom-blue px-3 py-2 text-xs font-semibold text-white"
                                 >
                                   Abrir recurso
                                 </button>
@@ -551,12 +551,12 @@ export default function AcademicReviewPage() {
                           ))}
                       </div>
                     ) : (
-                      <p className="mt-2 text-sm text-slate-500">
+                      <p className="mt-2 text-sm text-muted-fg">
                         No hay materiales adjuntos a esta lección.
                       </p>
                     )}
                   </div>
-                  <div className="mt-4 flex flex-wrap gap-4 text-xs text-slate-500">
+                  <div className="mt-4 flex flex-wrap gap-4 text-xs text-muted-fg">
                     <span>
                       {plan.planned_for
                         ? new Date(plan.planned_for + "T12:00:00").toLocaleDateString("es-CO")
@@ -573,7 +573,7 @@ export default function AcademicReviewPage() {
                       }
                       rows={3}
                       placeholder="Indica qué debe corregir el tutor o deja una recomendación..."
-                      className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm font-normal"
+                      className="mt-2 w-full rounded-xl border border-line px-3 py-3 text-sm font-normal"
                     />
                   </label>
                   <div className="mt-4 flex flex-wrap justify-end gap-3">
@@ -587,7 +587,7 @@ export default function AcademicReviewPage() {
                     <button
                       disabled={busyId === plan.id}
                       onClick={() => void decide(plan, "approved")}
-                      className="rounded-xl bg-[#19A7A0] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                      className="rounded-xl bg-decom-teal px-4 py-3 text-sm font-semibold text-decom-navy disabled:opacity-50"
                     >
                       {busyId === plan.id ? "Guardando..." : "Aprobar planificación"}
                     </button>
@@ -597,10 +597,10 @@ export default function AcademicReviewPage() {
             })}
           </div>
         )}
-        <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+        <section className="mt-8 rounded-2xl border border-line bg-surface p-5 sm:p-7">
           <div>
             <h2 className="text-xl font-bold">Materiales de clases aprobadas</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-muted-fg">
               Cuando la lección, el módulo, el curso y el programa estén publicados, puedes
               habilitar sus recursos para los estudiantes.
             </p>
@@ -608,7 +608,7 @@ export default function AcademicReviewPage() {
           {!approvedPlans.some((plan) =>
             materials.some((item) => item.lesson_id === plan.lesson_id && item.status === "draft"),
           ) ? (
-            <p className="mt-4 rounded-xl border border-dashed border-slate-200 p-5 text-sm text-slate-500">
+            <p className="mt-4 rounded-xl border border-dashed border-line p-5 text-sm text-muted-fg">
               No hay materiales en borrador asociados a planificaciones aprobadas.
             </p>
           ) : (
@@ -619,20 +619,20 @@ export default function AcademicReviewPage() {
                 );
                 if (!pending.length) return null;
                 return (
-                  <article key={plan.id} className="rounded-xl border border-slate-100 p-4">
+                  <article key={plan.id} className="rounded-xl border border-line-soft p-4">
                     <p className="font-semibold">{plan.session_title}</p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-muted-fg">
                       {lessonTitle(plan.lesson_id)} · {hierarchy(plan.lesson_id)}
                     </p>
                     <div className="mt-3 space-y-2">
                       {pending.map((item) => (
                         <div
                           key={item.id}
-                          className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-slate-50 p-3"
+                          className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-surface-muted p-3"
                         >
                           <div>
                             <p className="text-sm font-semibold">{item.title}</p>
-                            <p className="text-xs text-slate-500">
+                            <p className="text-xs text-muted-fg">
                               {item.material_type} · {item.description ?? "Sin descripción"}
                             </p>
                           </div>
@@ -642,7 +642,7 @@ export default function AcademicReviewPage() {
                                 onClick={() =>
                                   void openMaterial(item).catch((e) => setError(e.message))
                                 }
-                                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold"
+                                className="rounded-lg border border-line bg-surface px-3 py-2 text-xs font-semibold"
                               >
                                 Vista previa
                               </button>
@@ -655,7 +655,7 @@ export default function AcademicReviewPage() {
                                   : ""
                               }
                               onClick={() => void publishMaterial(item)}
-                              className="rounded-lg bg-[#19A7A0] px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
+                              className="rounded-lg bg-decom-teal px-3 py-2 text-xs font-semibold text-decom-navy disabled:opacity-40"
                             >
                               {busyId === item.id ? "Publicando..." : "Publicar recurso"}
                             </button>

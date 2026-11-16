@@ -191,24 +191,24 @@ export default function TutorStudentDetailClient({ studentId }: { studentId: str
 
   if (access === "checking")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]">
-        <p className="text-sm text-slate-500">Verificando tu acceso...</p>
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-sm text-muted-fg">Verificando tu acceso...</p>
       </main>
     );
   if (access !== "allowed")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6">
-        <section className="max-w-md rounded-3xl border bg-white p-8 text-center">
-          <h1 className="text-xl font-bold text-[#102D4D]">
+      <main className="flex min-h-screen items-center justify-center bg-background px-6">
+        <section className="max-w-md rounded-3xl border bg-surface p-8 text-center">
+          <h1 className="text-xl font-bold text-foreground">
             {access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}
           </h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-fg">
             Esta ficha está habilitada para tutores autorizados.
           </p>
           <button
             type="button"
             onClick={() => router.push("/dashboard")}
-            className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white"
+            className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
           >
             Volver al panel
           </button>
@@ -217,16 +217,16 @@ export default function TutorStudentDetailClient({ studentId }: { studentId: str
     );
   if (!student)
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6">
-        <section className="max-w-md rounded-3xl border bg-white p-8 text-center">
-          <h1 className="text-xl font-bold text-[#102D4D]">Estudiante no encontrado</h1>
-          <p className="mt-2 text-sm text-slate-500">
+      <main className="flex min-h-screen items-center justify-center bg-background px-6">
+        <section className="max-w-md rounded-3xl border bg-surface p-8 text-center">
+          <h1 className="text-xl font-bold text-foreground">Estudiante no encontrado</h1>
+          <p className="mt-2 text-sm text-muted-fg">
             No existe una ficha de demostración para este registro.
           </p>
           <button
             type="button"
             onClick={() => router.push("/dashboard/tutor")}
-            className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white"
+            className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
           >
             Volver al panel del tutor
           </button>
@@ -235,19 +235,19 @@ export default function TutorStudentDetailClient({ studentId }: { studentId: str
     );
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
-      <header className="border-b border-slate-200 bg-white">
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 md:px-8">
           <div>
-            <p className="text-xs font-extrabold tracking-[0.14em] text-[#087DB5]">
+            <p className="text-xs font-extrabold tracking-[0.14em] text-decom-blue-text">
               ACADEMIA DECOM
             </p>
-            <p className="mt-1 text-xs text-slate-400">Seguimiento tutorial individual</p>
+            <p className="mt-1 text-xs text-muted-fg">Seguimiento tutorial individual</p>
           </div>
           <button
             type="button"
             onClick={() => router.push("/dashboard/tutor")}
-            className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600"
+            className="rounded-xl border border-line px-4 py-2.5 text-xs font-semibold text-muted-fg"
           >
             ← Panel del tutor
           </button>
@@ -256,11 +256,11 @@ export default function TutorStudentDetailClient({ studentId }: { studentId: str
       <div className="mx-auto max-w-6xl space-y-6 px-5 py-7 md:px-8 md:py-9">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#19A7A0]">
+            <p className="text-xs font-bold uppercase tracking-wider text-decom-teal-text">
               Ficha académica
             </p>
             <h1 className="mt-2 text-2xl font-extrabold">{student.name}</h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-muted-fg">
               {student.email} · {student.group}
             </p>
           </div>
@@ -278,26 +278,26 @@ export default function TutorStudentDetailClient({ studentId }: { studentId: str
             { label: "Actividades aprobadas", value: String(student.completed) },
             { label: "Pendientes", value: String(student.pending) },
           ].map((item) => (
-            <article key={item.label} className="rounded-2xl border border-slate-200 bg-white p-5">
-              <p className="text-xs font-semibold text-slate-400">{item.label}</p>
+            <article key={item.label} className="rounded-2xl border border-line bg-surface p-5">
+              <p className="text-xs font-semibold text-muted-fg">{item.label}</p>
               <p className="mt-2 text-2xl font-extrabold tabular-nums">{item.value}</p>
             </article>
           ))}
         </section>
         <section className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-          <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+          <article className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-6">
             <h2 className="text-lg font-bold">Progreso por curso</h2>
             <div className="mt-5 space-y-6">
               {student.courses.map((course) => (
                 <div key={course.name}>
                   <div className="flex flex-wrap justify-between gap-2">
                     <p className="text-sm font-bold">{course.name}</p>
-                    <span className="text-xs font-bold text-[#087DB5]">{course.progress}%</span>
+                    <span className="text-xs font-bold text-decom-blue-text">{course.progress}%</span>
                   </div>
-                  <p className="mt-1 text-xs text-slate-400">{course.detail}</p>
-                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
+                  <p className="mt-1 text-xs text-muted-fg">{course.detail}</p>
+                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-muted">
                     <div
-                      className="h-full rounded-full bg-[#19A7A0]"
+                      className="h-full rounded-full bg-decom-teal"
                       style={{ width: course.progress + "%" }}
                     />
                   </div>
@@ -305,28 +305,28 @@ export default function TutorStudentDetailClient({ studentId }: { studentId: str
               ))}
             </div>
           </article>
-          <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+          <article className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-6">
             <h2 className="text-lg font-bold">Alertas y acompañamiento</h2>
-            <p className="mt-1 text-xs text-slate-400">Última actividad: {student.lastActivity}</p>
+            <p className="mt-1 text-xs text-muted-fg">Última actividad: {student.lastActivity}</p>
             <div className="mt-4 space-y-3">
               {student.alerts.map((alert) => (
                 <p
                   key={alert}
-                  className="rounded-xl bg-[#F4F7FA] p-3 text-xs leading-5 text-slate-600"
+                  className="rounded-xl bg-surface-muted p-3 text-xs leading-5 text-muted-fg"
                 >
                   {alert}
                 </p>
               ))}
             </div>
-            <p className="mt-4 text-[11px] leading-5 text-slate-400">
+            <p className="mt-4 text-[11px] leading-5 text-muted-fg">
               Las alertas son ilustrativas. Las reglas de riesgo y seguimiento se definirán en el
               servicio académico.
             </p>
           </article>
         </section>
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+        <section className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-6">
           <h2 className="text-lg font-bold">Historial de actividad</h2>
-          <div className="mt-5 divide-y divide-slate-100">
+          <div className="mt-5 divide-y divide-line-soft">
             {student.history.map((item) => (
               <article
                 key={item.date + item.title}
@@ -334,21 +334,21 @@ export default function TutorStudentDetailClient({ studentId }: { studentId: str
               >
                 <div>
                   <p className="text-sm font-bold">{item.title}</p>
-                  <p className="mt-1 text-xs leading-5 text-slate-500">{item.detail}</p>
-                  <p className="mt-1 text-[11px] text-slate-400">{item.date}</p>
+                  <p className="mt-1 text-xs leading-5 text-muted-fg">{item.detail}</p>
+                  <p className="mt-1 text-[11px] text-muted-fg">{item.date}</p>
                 </div>
-                <span className="w-fit rounded-full bg-slate-100 px-3 py-1 text-[10px] font-semibold text-slate-600">
+                <span className="w-fit rounded-full bg-surface-muted px-3 py-1 text-[10px] font-semibold text-muted-fg">
                   {item.status}
                 </span>
               </article>
             ))}
           </div>
         </section>
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+        <section className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-6">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <h2 className="text-lg font-bold">Observaciones tutoriales</h2>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-muted-fg">
                 Notas temporales de esta sesión de demostración.
               </p>
             </div>
@@ -362,7 +362,7 @@ export default function TutorStudentDetailClient({ studentId }: { studentId: str
             rows={3}
             maxLength={1000}
             placeholder="Escribe una observación para probar el flujo de seguimiento..."
-            className="mt-4 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm leading-6 outline-none focus:border-[#087DB5]"
+            className="mt-4 w-full rounded-xl border border-line px-4 py-3 text-sm leading-6 outline-none focus:border-decom-blue"
           />
           <div className="mt-3 flex justify-end">
             <button
@@ -372,7 +372,7 @@ export default function TutorStudentDetailClient({ studentId }: { studentId: str
                 setNotes((current) => [note.trim(), ...current]);
                 setNote("");
               }}
-              className="rounded-xl bg-[#087DB5] px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-40"
+              className="rounded-xl bg-decom-blue px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-40"
             >
               Añadir nota temporal
             </button>
@@ -382,7 +382,7 @@ export default function TutorStudentDetailClient({ studentId }: { studentId: str
               {notes.map((item, index) => (
                 <p
                   key={index}
-                  className="rounded-xl bg-[#F4F7FA] p-3 text-xs leading-5 text-slate-600"
+                  className="rounded-xl bg-surface-muted p-3 text-xs leading-5 text-muted-fg"
                 >
                   {item}
                 </p>
@@ -390,7 +390,7 @@ export default function TutorStudentDetailClient({ studentId }: { studentId: str
             </div>
           )}
         </section>
-        <p className="text-[11px] leading-5 text-slate-400">
+        <p className="text-[11px] leading-5 text-muted-fg">
           Prototipo de interfaz: estudiantes, cursos, alertas e historial son ficticios. Las notas
           solo viven en el estado del navegador y desaparecen al salir. No se consulta información
           académica real.

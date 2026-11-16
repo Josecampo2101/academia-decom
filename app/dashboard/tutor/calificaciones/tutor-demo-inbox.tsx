@@ -79,18 +79,18 @@ export default function TutorDemoInbox() {
   }
 
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-7">
+    <section className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-7">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-base font-bold">Entregas del estudiante · conexión demo</h2>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-muted-fg">
             Registros enviados desde el formulario del estudiante en este navegador.
           </p>
         </div>
         <button
           type="button"
           onClick={refresh}
-          className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600"
+          className="rounded-xl border border-line px-3 py-2 text-xs font-semibold text-muted-fg"
         >
           Actualizar
         </button>
@@ -107,46 +107,46 @@ export default function TutorDemoInbox() {
                 setDecision(item.review?.decision ?? "Aprobar");
                 setNotice("");
               }}
-              className={`w-full rounded-2xl border p-3 text-left ${selected?.id === item.id ? "border-[#087DB5] bg-sky-50" : "border-slate-200"}`}
+              className={`w-full rounded-2xl border p-3 text-left ${selected?.id === item.id ? "border-decom-blue bg-sky-50" : "border-line"}`}
             >
               <span className="block text-xs font-bold">{item.activityTitle}</span>
-              <span className="mt-1 block text-[11px] text-slate-500">
+              <span className="mt-1 block text-[11px] text-muted-fg">
                 {item.studentName} · intento {item.attempts.length}
               </span>
-              <span className="mt-2 inline-flex rounded-full bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-600">
+              <span className="mt-2 inline-flex rounded-full bg-surface-muted px-2 py-1 text-[10px] font-semibold text-muted-fg">
                 {item.status}
               </span>
             </button>
           ))}
           {items.length === 0 && (
-            <p className="rounded-xl border border-dashed border-slate-200 p-5 text-center text-xs leading-5 text-slate-500">
+            <p className="rounded-xl border border-dashed border-line p-5 text-center text-xs leading-5 text-muted-fg">
               Todavía no hay envíos del estudiante en esta demostración. Envía una actividad desde
               el panel de estudiante usando este mismo navegador.
             </p>
           )}
         </div>
         {selected && (
-          <div className="rounded-2xl bg-[#F4F7FA] p-4">
+          <div className="rounded-2xl bg-surface-muted p-4">
             <p className="text-xs font-bold">
               {selected.studentName} · {selected.activityTitle}
             </p>
-            <p className="mt-1 text-[10px] text-slate-500">
+            <p className="mt-1 text-[10px] text-muted-fg">
               {selected.course} · {selected.attempts.length} intento(s)
             </p>
             {selected.attempts.map((attempt) => (
               <article
                 key={attempt.number}
-                className="mt-3 rounded-xl border border-slate-200 bg-white p-3"
+                className="mt-3 rounded-xl border border-line bg-surface p-3"
               >
-                <p className="text-[10px] font-bold text-slate-500">
+                <p className="text-[10px] font-bold text-muted-fg">
                   Intento {attempt.number} · {new Date(attempt.submittedAt).toLocaleString("es-CO")}
                 </p>
-                <p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-slate-700">
+                <p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-foreground">
                   {attempt.answer}
                 </p>
                 {attempt.referenceUrl && (
                   <a
-                    className="mt-2 block break-all text-xs text-[#087DB5] underline"
+                    className="mt-2 block break-all text-xs text-decom-blue-text underline"
                     href={attempt.referenceUrl}
                     target="_blank"
                     rel="noreferrer"
@@ -164,7 +164,7 @@ export default function TutorDemoInbox() {
                 id="demo-review-decision"
                 value={decision}
                 onChange={(event) => setDecision(event.target.value as DemoReviewDecision)}
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs"
+                className="mt-1 w-full rounded-xl border border-line bg-surface px-3 py-2 text-xs"
               >
                 <option>Aprobar</option>
                 <option>Solicitar ajustes</option>
@@ -181,14 +181,14 @@ export default function TutorDemoInbox() {
                 onChange={(event) => setFeedback(event.target.value)}
                 maxLength={2000}
                 rows={4}
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs"
+                className="mt-1 w-full rounded-xl border border-line bg-surface px-3 py-2 text-xs"
                 placeholder="Indica logros, ajustes necesarios o motivo de rechazo..."
               />
             </div>
             <button
               type="button"
               onClick={saveReview}
-              className="mt-3 rounded-xl bg-[#087DB5] px-4 py-2.5 text-xs font-semibold text-white"
+              className="mt-3 rounded-xl bg-decom-blue px-4 py-2.5 text-xs font-semibold text-white"
             >
               Guardar revisión demo
             </button>

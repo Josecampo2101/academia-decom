@@ -454,23 +454,23 @@ export default function AcademicActivitiesAdminPage() {
   }
   if (access === "checking")
     return (
-      <main className="grid min-h-screen place-items-center bg-[#F4F7FA] text-sm text-slate-500">
+      <main className="grid min-h-screen place-items-center bg-background text-sm text-muted-fg">
         Verificando permisos...
       </main>
     );
   if (access !== "allowed")
     return (
-      <main className="grid min-h-screen place-items-center bg-[#F4F7FA] p-5">
-        <section className="rounded-2xl bg-white p-7 text-center">
+      <main className="grid min-h-screen place-items-center bg-background p-5">
+        <section className="rounded-2xl bg-surface p-7 text-center">
           <h1 className="text-xl font-bold">
             {access === "error" ? "No fue posible verificar el acceso" : "Acceso restringido"}
           </h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-fg">
             Se requieren permisos de administración académica.
           </p>
           <button
             onClick={() => router.replace("/dashboard")}
-            className="mt-4 rounded-xl bg-[#087DB5] px-4 py-2 text-white"
+            className="mt-4 rounded-xl bg-decom-blue px-4 py-2 text-white"
           >
             Volver
           </button>
@@ -478,25 +478,25 @@ export default function AcademicActivitiesAdminPage() {
       </main>
     );
   return (
-    <main className="min-h-screen bg-[#F4F7FA] px-4 py-7 text-[#102D4D] sm:px-7 lg:px-10">
+    <main className="min-h-screen bg-background px-4 py-7 text-foreground sm:px-7 lg:px-10">
       <div className="mx-auto max-w-7xl">
-        <a href="/dashboard" className="text-xs font-semibold text-[#087DB5]">
+        <a href="/dashboard" className="text-xs font-semibold text-decom-blue-text">
           ← Volver al panel
         </a>
         <header className="mt-5 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-[#19A7A0]">
+            <p className="text-xs font-bold uppercase tracking-widest text-decom-teal-text">
               Planner académico
             </p>
             <h1 className="mt-2 text-3xl font-extrabold">Actividades y evaluaciones</h1>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-fg">
               Crea actividades reales vinculadas al programa, curso, módulo y lección.
             </p>
           </div>
           <button
             onClick={create}
             disabled={loading || !programs.length}
-            className="rounded-xl bg-[#087DB5] px-4 py-3 text-xs font-bold text-white disabled:opacity-50"
+            className="rounded-xl bg-decom-blue px-4 py-3 text-xs font-bold text-white disabled:opacity-50"
           >
             ＋ Nueva actividad
           </button>
@@ -529,24 +529,24 @@ export default function AcademicActivitiesAdminPage() {
             ["Publicadas", activities.filter((x) => x.status === "published").length],
             ["Asignaciones activas", activities.reduce((s, x) => s + x.assigned, 0)],
           ].map(([k, v]) => (
-            <article key={String(k)} className="rounded-2xl border border-slate-200 bg-white p-4">
-              <p className="text-xs text-slate-400">{k}</p>
+            <article key={String(k)} className="rounded-2xl border border-line bg-surface p-4">
+              <p className="text-xs text-muted-fg">{k}</p>
               <p className="mt-2 text-2xl font-extrabold">{v}</p>
             </article>
           ))}
         </section>
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+        <section className="mt-6 rounded-2xl border border-line bg-surface p-5">
           <div className="grid gap-3 md:grid-cols-[1fr_180px]">
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar actividad, curso o lección..."
-              className="rounded-xl border border-slate-200 px-3 py-3 text-sm"
+              className="rounded-xl border border-line px-3 py-3 text-sm"
             />
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
+              className="rounded-xl border border-line bg-surface px-3 py-3 text-xs"
             >
               <option value="all">Todos los estados</option>
               <option value="draft">Borradores</option>
@@ -555,21 +555,21 @@ export default function AcademicActivitiesAdminPage() {
             </select>
           </div>
           {loading ? (
-            <p className="py-12 text-center text-sm text-slate-400">Consultando Supabase...</p>
+            <p className="py-12 text-center text-sm text-muted-fg">Consultando Supabase...</p>
           ) : filtered.length ? (
             <div className="mt-5 space-y-3">
               {filtered.map((x) => (
-                <article key={x.id} className="rounded-xl border border-slate-100 p-4">
+                <article key={x.id} className="rounded-xl border border-line-soft p-4">
                   <div className="flex flex-wrap justify-between gap-3">
                     <div className="min-w-0">
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold">
+                      <span className="rounded-full bg-surface-muted px-3 py-1 text-[10px] font-bold">
                         {label(x.status)}
                       </span>
                       <h2 className="mt-3 text-sm font-bold">{x.title}</h2>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-muted-fg">
                         {x.courseTitle} · {x.moduleTitle} · {x.lessonTitle}
                       </p>
-                      <p className="mt-2 text-xs text-slate-400">
+                      <p className="mt-2 text-xs text-muted-fg">
                         {x.total_points} puntos · {x.max_attempts} intentos · {x.assigned}{" "}
                         asignaciones
                       </p>
@@ -587,7 +587,7 @@ export default function AcademicActivitiesAdminPage() {
                             <button
                               disabled={saving}
                               onClick={() => void publish(x)}
-                              className="rounded-lg bg-[#087DB5] px-3 py-2 text-xs font-bold text-white"
+                              className="rounded-lg bg-decom-blue px-3 py-2 text-xs font-bold text-white"
                             >
                               Publicar
                             </button>
@@ -609,7 +609,7 @@ export default function AcademicActivitiesAdminPage() {
               ))}
             </div>
           ) : (
-            <p className="py-12 text-center text-sm text-slate-400">
+            <p className="py-12 text-center text-sm text-muted-fg">
               No hay actividades registradas. Crea el primer borrador desde el catálogo académico.
             </p>
           )}
@@ -619,11 +619,11 @@ export default function AcademicActivitiesAdminPage() {
             <section
               role="dialog"
               aria-modal="true"
-              className="max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-3xl bg-white p-5 sm:rounded-3xl sm:p-7"
+              className="max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-3xl bg-surface p-5 sm:rounded-3xl sm:p-7"
             >
               <div className="flex justify-between">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#19A7A0]">
+                  <p className="text-xs font-bold uppercase tracking-wider text-decom-teal-text">
                     Editor académico
                   </p>
                   <h2 className="mt-1 text-xl font-extrabold">
@@ -635,7 +635,7 @@ export default function AcademicActivitiesAdminPage() {
                 </button>
               </div>
               <form onSubmit={save} className="mt-5 space-y-4">
-                <section className="rounded-2xl bg-slate-50 p-4">
+                <section className="rounded-2xl bg-surface-muted p-4">
                   <h3 className="text-sm font-bold">1. Ubicación curricular</h3>
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
                     <label className="text-xs font-semibold">
@@ -652,7 +652,7 @@ export default function AcademicActivitiesAdminPage() {
                             lesson_id: "",
                           }))
                         }
-                        className="mt-1 w-full rounded-xl border bg-white p-3"
+                        className="mt-1 w-full rounded-xl border bg-surface p-3"
                       >
                         {programs.map((x) => (
                           <option key={x.id} value={x.id}>
@@ -674,7 +674,7 @@ export default function AcademicActivitiesAdminPage() {
                             lesson_id: "",
                           }))
                         }
-                        className="mt-1 w-full rounded-xl border bg-white p-3"
+                        className="mt-1 w-full rounded-xl border bg-surface p-3"
                       >
                         <option value="">Selecciona</option>
                         {courseOptions.map((x) => (
@@ -692,7 +692,7 @@ export default function AcademicActivitiesAdminPage() {
                         onChange={(e) =>
                           setForm((v) => ({ ...v, module_id: e.target.value, lesson_id: "" }))
                         }
-                        className="mt-1 w-full rounded-xl border bg-white p-3"
+                        className="mt-1 w-full rounded-xl border bg-surface p-3"
                       >
                         <option value="">Selecciona</option>
                         {moduleOptions.map((x) => (
@@ -708,7 +708,7 @@ export default function AcademicActivitiesAdminPage() {
                         required
                         value={form.lesson_id}
                         onChange={(e) => setForm((v) => ({ ...v, lesson_id: e.target.value }))}
-                        className="mt-1 w-full rounded-xl border bg-white p-3"
+                        className="mt-1 w-full rounded-xl border bg-surface p-3"
                       >
                         <option value="">Selecciona</option>
                         {lessonOptions.map((x) => (
@@ -719,7 +719,7 @@ export default function AcademicActivitiesAdminPage() {
                       </select>
                     </label>
                   </div>
-                  <p className="mt-2 text-[10px] text-slate-400">
+                  <p className="mt-2 text-[10px] text-muted-fg">
                     Puedes planificar sobre contenido en borrador; para publicar, programa, curso,
                     módulo y lección deben estar publicados.
                   </p>
@@ -772,7 +772,7 @@ export default function AcademicActivitiesAdminPage() {
                             response_type: e.target.value as typeof blank.response_type,
                           }))
                         }
-                        className="mt-1 w-full rounded-xl border bg-white p-3"
+                        className="mt-1 w-full rounded-xl border bg-surface p-3"
                       >
                         <option value="text">Respuesta escrita</option>
                         <option value="file">Archivo adjunto</option>
@@ -818,11 +818,11 @@ export default function AcademicActivitiesAdminPage() {
                     </label>
                   </div>
                 </section>
-                <section className="rounded-2xl bg-slate-50 p-4">
+                <section className="rounded-2xl bg-surface-muted p-4">
                   <div className="flex items-center justify-between gap-2">
                     <div>
                       <h3 className="text-sm font-bold">4. Rúbrica de evaluación</h3>
-                      <p className="mt-1 text-[11px] text-slate-500">
+                      <p className="mt-1 text-[11px] text-muted-fg">
                         Los criterios deben sumar el puntaje total.
                       </p>
                     </div>
@@ -834,14 +834,14 @@ export default function AcademicActivitiesAdminPage() {
                           { title: "", description: "", max_points: 10, sort_order: v.length },
                         ])
                       }
-                      className="rounded-lg border bg-white px-3 py-2 text-xs font-bold"
+                      className="rounded-lg border bg-surface px-3 py-2 text-xs font-bold"
                     >
                       ＋ Criterio
                     </button>
                   </div>
                   <div className="mt-3 space-y-3">
                     {criteria.map((x, i) => (
-                      <div key={x.id ?? i} className="rounded-xl border bg-white p-3">
+                      <div key={x.id ?? i} className="rounded-xl border bg-surface p-3">
                         <div className="grid gap-2 sm:grid-cols-[1fr_110px_auto]">
                           <input
                             required
@@ -907,7 +907,7 @@ export default function AcademicActivitiesAdminPage() {
                   </button>
                   <button
                     disabled={saving}
-                    className="rounded-xl bg-[#087DB5] px-5 py-3 text-xs font-bold text-white disabled:opacity-50"
+                    className="rounded-xl bg-decom-blue px-5 py-3 text-xs font-bold text-white disabled:opacity-50"
                   >
                     {saving ? "Guardando..." : "Guardar borrador"}
                   </button>

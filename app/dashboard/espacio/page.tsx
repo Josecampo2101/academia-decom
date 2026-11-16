@@ -53,10 +53,10 @@ function Metric({
   detail: string;
 }) {
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-3 text-3xl font-bold text-[#102D4D]">{value}</p>
-      <p className="mt-1 text-xs text-slate-500">{detail}</p>
+    <article className="rounded-2xl border border-line bg-surface p-5 shadow-sm">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-fg">{label}</p>
+      <p className="mt-3 text-3xl font-bold text-foreground">{value}</p>
+      <p className="mt-1 text-xs text-muted-fg">{detail}</p>
     </article>
   );
 }
@@ -228,31 +228,31 @@ export default function RoleWorkspacePage() {
 
   if (loading)
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] text-sm text-slate-500">
+      <main className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-fg">
         Preparando tu espacio de trabajo...
       </main>
     );
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
+    <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#087DB5] text-xl font-black text-white">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-decom-blue text-xl font-black text-white">
               D
             </div>
             <div>
               <p className="text-sm font-extrabold tracking-[0.14em]">ACADEMIA DECOM</p>
-              <p className="text-xs text-slate-500">Centro de trabajo por perfil</p>
+              <p className="text-xs text-muted-fg">Centro de trabajo por perfil</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="hidden max-w-64 truncate text-xs text-slate-500 sm:block">
+            <span className="hidden max-w-64 truncate text-xs text-muted-fg sm:block">
               {email}
             </span>
             <button
               onClick={() => router.push("/dashboard")}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold hover:border-[#087DB5]"
+              className="rounded-xl border border-line bg-surface px-4 py-2.5 text-sm font-semibold hover:border-decom-blue"
             >
               Panel principal
             </button>
@@ -268,8 +268,8 @@ export default function RoleWorkspacePage() {
           </div>
         )}
 
-        <section className="mt-8 overflow-hidden rounded-3xl bg-[#102D4D] px-6 py-9 text-white sm:px-10">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#55D1C4]">
+        <section className="mt-8 overflow-hidden rounded-3xl bg-decom-navy px-6 py-9 text-white sm:px-10">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-decom-teal-light">
             Espacio personalizado
           </p>
           <h1 className="mt-3 text-3xl font-bold sm:text-4xl">
@@ -296,7 +296,7 @@ export default function RoleWorkspacePage() {
           <section className="mt-7">
             <div className="mb-4">
               <h2 className="text-xl font-bold">Mi formación</h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-muted-fg">
                 Cursos que te han asignado y estado de tu matrícula.
               </p>
             </div>
@@ -324,16 +324,16 @@ export default function RoleWorkspacePage() {
                   return (
                     <article
                       key={e.id}
-                      className="rounded-2xl border border-slate-200 bg-white p-5"
+                      className="rounded-2xl border border-line bg-surface p-5"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
                           <h3 className="font-bold">{course?.title ?? "Curso asignado"}</h3>
-                          <p className="mt-1 text-sm text-slate-500">
+                          <p className="mt-1 text-sm text-muted-fg">
                             {course?.description ?? "Descripción pendiente"}
                           </p>
                         </div>
-                        <span className="rounded-full bg-sky-50 px-3 py-1.5 text-xs font-bold text-[#087DB5]">
+                        <span className="rounded-full bg-sky-50 px-3 py-1.5 text-xs font-bold text-decom-blue-text">
                           {e.status === "active"
                             ? "En curso"
                             : e.status === "completed"
@@ -345,9 +345,9 @@ export default function RoleWorkspacePage() {
                   );
                 })
               ) : (
-                <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-7 text-center">
+                <div className="rounded-2xl border border-dashed border-line bg-surface p-7 text-center">
                   <p className="font-semibold">Todavía no tienes cursos asignados.</p>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-muted-fg">
                     Cuando la dirección académica registre tu matrícula, aparecerá aquí tu ruta de
                     aprendizaje.
                   </p>
@@ -357,13 +357,13 @@ export default function RoleWorkspacePage() {
             <div className="mt-4 flex flex-wrap gap-3">
               <button
                 onClick={() => router.push("/dashboard/formacion")}
-                className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white hover:bg-[#066895]"
+                className="rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white hover:bg-decom-blue-hover"
               >
                 Abrir mi formación
               </button>
               <button
                 onClick={() => router.push("/dashboard/estudiante/evaluaciones")}
-                className="rounded-xl border border-[#087DB5] bg-white px-5 py-3 text-sm font-semibold text-[#087DB5] hover:bg-sky-50"
+                className="rounded-xl border border-decom-blue bg-surface px-5 py-3 text-sm font-semibold text-decom-blue-text hover:bg-sky-50"
               >
                 Mis evaluaciones
               </button>
@@ -377,7 +377,7 @@ export default function RoleWorkspacePage() {
               <h2 className="text-xl font-bold">
                 {isNational ? "Resumen nacional" : "Gestión del distrito"}
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-muted-fg">
                 Indicadores consultados desde los registros autorizados por Supabase.
               </p>
             </div>
@@ -407,48 +407,48 @@ export default function RoleWorkspacePage() {
             <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               <button
                 onClick={() => router.push("/dashboard/congregaciones")}
-                className="rounded-2xl border border-slate-200 bg-white p-5 text-left hover:border-[#087DB5]"
+                className="rounded-2xl border border-line bg-surface p-5 text-left hover:border-decom-blue"
               >
-                <span className="text-xs font-bold uppercase tracking-wide text-[#087DB5]">
+                <span className="text-xs font-bold uppercase tracking-wide text-decom-blue-text">
                   Administración territorial
                 </span>
                 <h3 className="mt-2 font-bold">Congregaciones e integrantes</h3>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-muted-fg">
                   Consultar y gestionar los registros según el alcance del distrito.
                 </p>
               </button>
               <button
                 onClick={() => router.push("/dashboard/reubicaciones")}
-                className="rounded-2xl border border-slate-200 bg-white p-5 text-left hover:border-[#087DB5]"
+                className="rounded-2xl border border-line bg-surface p-5 text-left hover:border-decom-blue"
               >
-                <span className="text-xs font-bold uppercase tracking-wide text-[#087DB5]">
+                <span className="text-xs font-bold uppercase tracking-wide text-decom-blue-text">
                   Operación distrital
                 </span>
                 <h3 className="mt-2 font-bold">Reubicación de creyentes</h3>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-muted-fg">
                   Traslados, historial y revisión de responsabilidades.
                 </p>
               </button>
               <button
                 onClick={() => router.push("/dashboard/matriculas")}
-                className="rounded-2xl border border-slate-200 bg-white p-5 text-left hover:border-[#087DB5]"
+                className="rounded-2xl border border-line bg-surface p-5 text-left hover:border-decom-blue"
               >
-                <span className="text-xs font-bold uppercase tracking-wide text-[#087DB5]">
+                <span className="text-xs font-bold uppercase tracking-wide text-decom-blue-text">
                   Gestión académica
                 </span>
                 <h3 className="mt-2 font-bold">Matrículas de estudiantes</h3>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-muted-fg">
                   Asignar cursos publicados y consultar el estado de cada matrícula.
                 </p>
               </button>
             </div>
-            <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5">
+            <div className="mt-4 rounded-2xl border border-line bg-surface p-5">
               <h3 className="font-bold">Distritos bajo tu alcance</h3>
               <div className="mt-3 flex flex-wrap gap-2">
                 {districts.map((d) => (
                   <span
                     key={d.id}
-                    className="rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700"
+                    className="rounded-full bg-surface-muted px-3 py-2 text-xs font-semibold text-foreground"
                   >
                     {d.name}
                   </span>
@@ -467,18 +467,18 @@ export default function RoleWorkspacePage() {
             "national_admin",
           ].includes(r.role_key),
         ) && (
-          <section className="mt-7 rounded-2xl border border-[#19A7A0]/30 bg-white p-6">
-            <p className="text-xs font-bold uppercase tracking-wide text-[#138B84]">
+          <section className="mt-7 rounded-2xl border border-decom-teal/30 bg-surface p-6">
+            <p className="text-xs font-bold uppercase tracking-wide text-decom-teal-text">
               Diseño de experiencias de aprendizaje
             </p>
             <h2 className="mt-2 text-xl font-bold">Planner académico y creación de clases</h2>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-fg">
               Estructura sesiones, define temas y resultados de aprendizaje, organiza la secuencia
               didáctica y adjunta documentos, presentaciones, imágenes, audio, video o guías.
             </p>
             <button
               onClick={() => router.push("/dashboard/planificador")}
-              className="mt-4 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white"
+              className="mt-4 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
             >
               Abrir planner académico
             </button>
@@ -486,25 +486,25 @@ export default function RoleWorkspacePage() {
         )}
 
         {roles.some((r) => r.role_key === "academic_editor") && (
-          <section className="mt-7 rounded-2xl border border-slate-200 bg-white p-6">
-            <p className="text-xs font-bold uppercase tracking-wide text-[#087DB5]">
+          <section className="mt-7 rounded-2xl border border-line bg-surface p-6">
+            <p className="text-xs font-bold uppercase tracking-wide text-decom-blue-text">
               Contenido y currículo
             </p>
             <h2 className="mt-2 text-xl font-bold">Administración del catálogo académico</h2>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-fg">
               Crea programas, cursos, módulos y lecciones; los cambios se mantienen como borradores
               hasta su publicación autorizada.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <button
                 onClick={() => router.push("/dashboard/administracion/catalogo")}
-                className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white"
+                className="rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
               >
                 Abrir editor académico
               </button>
               <button
                 onClick={() => router.push("/dashboard/revision-academica")}
-                className="rounded-xl border border-[#087DB5] bg-white px-5 py-3 text-sm font-semibold text-[#087DB5]"
+                className="rounded-xl border border-decom-blue bg-surface px-5 py-3 text-sm font-semibold text-decom-blue-text"
               >
                 Revisar planificaciones
               </button>
@@ -513,37 +513,37 @@ export default function RoleWorkspacePage() {
         )}
 
         {isNational && (
-          <section className="mt-7 rounded-2xl border border-[#19A7A0]/30 bg-[#19A7A0]/5 p-6">
-            <p className="text-xs font-bold uppercase tracking-wide text-[#138B84]">
+          <section className="mt-7 rounded-2xl border border-decom-teal/30 bg-decom-teal/5 p-6">
+            <p className="text-xs font-bold uppercase tracking-wide text-decom-teal-text">
               Control global
             </p>
             <h2 className="mt-2 text-xl font-bold">Administración nacional</h2>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className="mt-2 text-sm text-muted-fg">
               Tu rol tiene alcance global. La gestión de roles, configuración institucional y
               publicación académica debe permanecer restringida a esta autorización.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <button
                 onClick={() => router.push("/dashboard")}
-                className="rounded-xl bg-[#102D4D] px-5 py-3 text-sm font-semibold text-white"
+                className="rounded-xl bg-decom-navy px-5 py-3 text-sm font-semibold text-white"
               >
                 Panel de administración
               </button>
               <button
                 onClick={() => router.push("/dashboard/administracion/catalogo")}
-                className="rounded-xl border border-[#087DB5] bg-white px-5 py-3 text-sm font-semibold text-[#087DB5]"
+                className="rounded-xl border border-decom-blue bg-surface px-5 py-3 text-sm font-semibold text-decom-blue-text"
               >
                 Catálogo académico
               </button>
               <button
                 onClick={() => router.push("/dashboard/revision-academica")}
-                className="rounded-xl border border-[#087DB5] bg-white px-5 py-3 text-sm font-semibold text-[#087DB5]"
+                className="rounded-xl border border-decom-blue bg-surface px-5 py-3 text-sm font-semibold text-decom-blue-text"
               >
                 Revisión académica
               </button>
               <button
                 onClick={() => router.push("/dashboard/matriculas")}
-                className="rounded-xl border border-[#087DB5] bg-white px-5 py-3 text-sm font-semibold text-[#087DB5]"
+                className="rounded-xl border border-decom-blue bg-surface px-5 py-3 text-sm font-semibold text-decom-blue-text"
               >
                 Matrículas
               </button>
@@ -552,22 +552,22 @@ export default function RoleWorkspacePage() {
         )}
 
         {roles.some((r) => r.role_key === "tutor") && (
-          <section className="mt-7 rounded-2xl border border-slate-200 bg-white p-6">
+          <section className="mt-7 rounded-2xl border border-line bg-surface p-6">
             <h2 className="text-xl font-bold">Acompañamiento tutorial</h2>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-fg">
               Consulta tus planificaciones, identifica las que requieren ajustes y continúa
               preparando clases y materiales.
             </p>
             <button
               onClick={() => router.push("/dashboard/tutor")}
-              className="mt-4 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white"
+              className="mt-4 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
             >
               Abrir espacio del tutor
             </button>
           </section>
         )}
 
-        <footer className="py-9 text-center text-xs text-slate-400">
+        <footer className="py-9 text-center text-xs text-muted-fg">
           Academia DECOM · Formación para comunicar con propósito.
         </footer>
       </div>

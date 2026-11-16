@@ -215,24 +215,24 @@ export default function ManualAssessmentReviewInbox() {
   return (
     <section className="space-y-5">
       <div className="grid gap-3 sm:grid-cols-3">
-        <article className="rounded-2xl border border-slate-200 bg-white p-4">
-          <p className="text-xs text-slate-400">Intentos cargados</p>
+        <article className="rounded-2xl border border-line bg-surface p-4">
+          <p className="text-xs text-muted-fg">Intentos cargados</p>
           <p className="mt-2 text-2xl font-extrabold">{items.length}</p>
         </article>
-        <article className="rounded-2xl border border-slate-200 bg-white p-4">
-          <p className="text-xs text-slate-400">Respuestas pendientes</p>
+        <article className="rounded-2xl border border-line bg-surface p-4">
+          <p className="text-xs text-muted-fg">Respuestas pendientes</p>
           <p className="mt-2 text-2xl font-extrabold">{pendingCount}</p>
         </article>
-        <article className="rounded-2xl border border-slate-200 bg-white p-4">
-          <p className="text-xs text-slate-400">Respuestas revisadas</p>
+        <article className="rounded-2xl border border-line bg-surface p-4">
+          <p className="text-xs text-muted-fg">Respuestas revisadas</p>
           <p className="mt-2 text-2xl font-extrabold">{reviewedCount}</p>
         </article>
       </div>
-      <div className="rounded-3xl border border-slate-200 bg-white p-5 md:p-7">
+      <div className="rounded-3xl border border-line bg-surface p-5 md:p-7">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-base font-bold">Respuestas cortas por revisar</h2>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted-fg">
               Bandeja sincronizada con intentos reales de estudiantes.
             </p>
           </div>
@@ -240,7 +240,7 @@ export default function ManualAssessmentReviewInbox() {
             type="button"
             onClick={() => void refresh()}
             disabled={loading}
-            className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600"
+            className="rounded-xl border border-line px-3 py-2 text-xs font-semibold text-muted-fg"
           >
             {loading ? "Actualizando..." : "Actualizar bandeja"}
           </button>
@@ -252,7 +252,7 @@ export default function ManualAssessmentReviewInbox() {
               type="button"
               aria-pressed={filter === value}
               onClick={() => setFilter(value)}
-              className={`rounded-full px-3 py-2 text-xs font-semibold ${filter === value ? "bg-[#087DB5] text-white" : "bg-slate-100 text-slate-500"}`}
+              className={`rounded-full px-3 py-2 text-xs font-semibold ${filter === value ? "bg-decom-blue text-white" : "bg-surface-muted text-muted-fg"}`}
             >
               {value}
             </button>
@@ -266,16 +266,16 @@ export default function ManualAssessmentReviewInbox() {
                 type="button"
                 onClick={() => chooseAttempt(item)}
                 aria-pressed={selectedId === item.attempt.id}
-                className={`w-full rounded-2xl border p-4 text-left ${selectedId === item.attempt.id ? "border-[#087DB5] bg-sky-50" : "border-slate-200 hover:border-slate-300"}`}
+                className={`w-full rounded-2xl border p-4 text-left ${selectedId === item.attempt.id ? "border-decom-blue bg-sky-50" : "border-line hover:border-line"}`}
               >
                 <span className="block text-xs font-bold">{item.studentLabel}</span>
-                <span className="mt-1 block text-[11px] text-slate-500">
+                <span className="mt-1 block text-[11px] text-muted-fg">
                   {item.assessmentTitle}
                 </span>
-                <span className="mt-1 block text-[10px] text-slate-400">
+                <span className="mt-1 block text-[10px] text-muted-fg">
                   {item.courseTitle} · Intento {item.attempt.attempt_number}
                 </span>
-                <span className="mt-2 block text-[10px] text-slate-500">
+                <span className="mt-2 block text-[10px] text-muted-fg">
                   {item.attempt.manual_pending} pendiente(s) ·{" "}
                   {item.responses.filter((response) => response.awarded_points !== null).length}{" "}
                   revisada(s)
@@ -283,58 +283,58 @@ export default function ManualAssessmentReviewInbox() {
               </button>
             ))}
             {loading && (
-              <p className="p-5 text-center text-xs text-slate-500">Cargando intentos...</p>
+              <p className="p-5 text-center text-xs text-muted-fg">Cargando intentos...</p>
             )}
             {!loading && visibleItems.length === 0 && (
-              <p className="rounded-xl border border-dashed border-slate-200 p-5 text-center text-xs text-slate-500">
+              <p className="rounded-xl border border-dashed border-line p-5 text-center text-xs text-muted-fg">
                 No hay intentos para este filtro.
               </p>
             )}
           </div>
           {selected && (
-            <div className="rounded-2xl bg-[#F4F7FA] p-4 md:p-5">
+            <div className="rounded-2xl bg-surface-muted p-4 md:p-5">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <h3 className="text-sm font-bold">{selected.studentLabel}</h3>
-                  <p className="mt-1 text-[10px] text-slate-500">
+                  <p className="mt-1 text-[10px] text-muted-fg">
                     {selected.assessmentTitle} · {selected.courseTitle}
                   </p>
-                  <p className="mt-1 text-[10px] text-slate-500">
+                  <p className="mt-1 text-[10px] text-muted-fg">
                     Enviado {new Date(selected.attempt.submitted_at).toLocaleString("es-CO")}
                   </p>
                 </div>
-                <span className="rounded-full bg-white px-3 py-1 text-[10px] font-bold text-slate-600">
+                <span className="rounded-full bg-surface px-3 py-1 text-[10px] font-bold text-muted-fg">
                   {selected.attempt.status === "review_pending" ? "Pendiente" : "Calificado"}
                 </span>
               </div>
-              <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              <div className="mt-4 rounded-xl border border-line bg-surface p-4">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-fg">
                   Puntaje objetivo
                 </p>
                 <p className="mt-1 text-lg font-extrabold">
                   {selected.attempt.objective_earned}/{selected.attempt.total_possible} puntos
                   posibles
                 </p>
-                <p className="mt-1 text-[10px] text-slate-500">
+                <p className="mt-1 text-[10px] text-muted-fg">
                   Respuestas abiertas pendientes: {selected.attempt.manual_pending}
                 </p>
               </div>
               {selectedResponse ? (
                 <div className="mt-4 space-y-3">
-                  <div className="rounded-xl border border-slate-200 bg-white p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <div className="rounded-xl border border-line bg-surface p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-fg">
                       Pregunta
                     </p>
-                    <p className="mt-2 text-sm font-semibold text-slate-700">
+                    <p className="mt-2 text-sm font-semibold text-foreground">
                       {selectedResponse.prompt}
                     </p>
-                    <p className="mt-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <p className="mt-3 text-[10px] font-bold uppercase tracking-wider text-muted-fg">
                       Respuesta del estudiante
                     </p>
-                    <pre className="mt-2 whitespace-pre-wrap break-words font-sans text-sm leading-6 text-slate-700">
+                    <pre className="mt-2 whitespace-pre-wrap break-words font-sans text-sm leading-6 text-foreground">
                       {answerText(selectedResponse.answer)}
                     </pre>
-                    <p className="mt-3 text-[10px] text-slate-400">
+                    <p className="mt-3 text-[10px] text-muted-fg">
                       Puntaje máximo: {selectedResponse.points}
                     </p>
                   </div>
@@ -347,7 +347,7 @@ export default function ManualAssessmentReviewInbox() {
                       step="0.01"
                       value={score}
                       onChange={(event) => setScore(event.target.value)}
-                      className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm"
+                      className="mt-1 w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-sm"
                     />
                   </label>
                   <label className="block">
@@ -358,9 +358,9 @@ export default function ManualAssessmentReviewInbox() {
                       maxLength={2000}
                       rows={4}
                       placeholder="Explica los aciertos y aspectos por mejorar..."
-                      className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs leading-5"
+                      className="mt-1 w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-xs leading-5"
                     />
-                    <span className="mt-1 block text-right text-[10px] text-slate-400">
+                    <span className="mt-1 block text-right text-[10px] text-muted-fg">
                       {feedback.length}/2000
                     </span>
                   </label>
@@ -373,7 +373,7 @@ export default function ManualAssessmentReviewInbox() {
                       Number(score) < 0 ||
                       Number(score) > selectedResponse.points
                     }
-                    className="rounded-xl bg-[#087DB5] px-4 py-3 text-xs font-bold text-white disabled:opacity-50"
+                    className="rounded-xl bg-decom-blue px-4 py-3 text-xs font-bold text-white disabled:opacity-50"
                   >
                     {saving ? "Guardando..." : "Guardar revisión"}
                   </button>
@@ -388,13 +388,13 @@ export default function ManualAssessmentReviewInbox() {
                     .map((response) => (
                       <article
                         key={response.id}
-                        className="rounded-xl border border-slate-200 bg-white p-3"
+                        className="rounded-xl border border-line bg-surface p-3"
                       >
                         <p className="text-xs font-bold">{response.prompt}</p>
-                        <p className="mt-1 text-xs text-slate-600">
+                        <p className="mt-1 text-xs text-muted-fg">
                           {response.awarded_points}/{response.points} puntos
                         </p>
-                        <p className="mt-2 text-xs leading-5 text-slate-500">{response.feedback}</p>
+                        <p className="mt-2 text-xs leading-5 text-muted-fg">{response.feedback}</p>
                       </article>
                     ))}
                 </div>

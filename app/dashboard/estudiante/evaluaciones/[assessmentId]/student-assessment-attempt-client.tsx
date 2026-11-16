@@ -188,24 +188,24 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
 
   if (loading)
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#087DB5]/20 border-t-[#087DB5]" />
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-decom-blue/20 border-t-decom-blue" />
       </main>
     );
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
-      <header className="border-b border-slate-200 bg-white">
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-5 py-4">
           <div>
-            <p className="text-xs font-extrabold tracking-[0.14em] text-[#087DB5]">
+            <p className="text-xs font-extrabold tracking-[0.14em] text-decom-blue-text">
               ACADEMIA DECOM
             </p>
-            <p className="mt-1 text-xs text-slate-400">Evaluación académica</p>
+            <p className="mt-1 text-xs text-muted-fg">Evaluación académica</p>
           </div>
           <button
             onClick={() => router.push("/dashboard/estudiante/evaluaciones")}
-            className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold"
+            className="rounded-xl border border-line px-4 py-2.5 text-xs font-semibold"
           >
             Volver a mis evaluaciones
           </button>
@@ -214,7 +214,7 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
       <div className="mx-auto max-w-4xl space-y-5 px-5 py-7 md:px-8">
         {assessment ? (
           <>
-            <section className="rounded-3xl bg-[#102D4D] p-6 text-white md:p-8">
+            <section className="rounded-3xl bg-decom-navy p-6 text-white md:p-8">
               <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider">
                 {assessment.assessment_type === "final"
                   ? "Examen final"
@@ -235,7 +235,7 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
               </div>
             </section>
             {result ? (
-              <section className="rounded-3xl border border-slate-200 bg-white p-6">
+              <section className="rounded-3xl border border-line bg-surface p-6">
                 <h2 className="text-lg font-bold">
                   {result.status === "review_pending"
                     ? "En revisión manual"
@@ -243,7 +243,7 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
                       ? "Evaluación aprobada"
                       : "Intento calificado"}
                 </h2>
-                <p className="mt-2 text-sm text-slate-500">
+                <p className="mt-2 text-sm text-muted-fg">
                   {result.score_percent === null
                     ? `${result.manual_pending} respuesta(s) esperan revisión del tutor.`
                     : `Resultado: ${result.score_percent}% · intento ${result.attempt_number}`}
@@ -256,16 +256,16 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
                 )}
                 <button
                   onClick={() => setResult(null)}
-                  className="mt-5 rounded-xl bg-[#087DB5] px-4 py-3 text-xs font-bold text-white"
+                  className="mt-5 rounded-xl bg-decom-blue px-4 py-3 text-xs font-bold text-white"
                 >
                   Volver a mis evaluaciones
                 </button>
               </section>
             ) : (
               <form onSubmit={submit} className="space-y-4">
-                <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs">
+                <div className="flex items-center justify-between rounded-xl border border-line bg-surface px-4 py-3 text-xs">
                   <span className="font-semibold">Progreso de respuestas</span>
-                  <span className="tabular-nums text-slate-500">
+                  <span className="tabular-nums text-muted-fg">
                     {answered}/{questions.length}
                   </span>
                 </div>
@@ -278,13 +278,13 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
                   return (
                     <article
                       key={question.id}
-                      className="rounded-3xl border border-slate-200 bg-white p-5 md:p-7"
+                      className="rounded-3xl border border-line bg-surface p-5 md:p-7"
                     >
                       <div className="flex items-center justify-between gap-3">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#087DB5]">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-decom-blue-text">
                           Pregunta {index + 1}
                         </span>
-                        <span className="text-[10px] text-slate-400">
+                        <span className="text-[10px] text-muted-fg">
                           {question.points} punto(s)
                         </span>
                       </div>
@@ -300,14 +300,14 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
                           rows={4}
                           maxLength={4000}
                           placeholder="Escribe tu respuesta..."
-                          className="mt-4 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"
+                          className="mt-4 w-full rounded-xl border border-line px-3 py-3 text-sm"
                         />
                       ) : (
                         <div className="mt-4 space-y-2">
                           {options.map((option) => (
                             <label
                               key={option}
-                              className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-100 p-3 text-sm text-slate-600 hover:bg-slate-50"
+                              className="flex cursor-pointer items-start gap-3 rounded-xl border border-line-soft p-3 text-sm text-muted-fg hover:bg-surface-muted"
                             >
                               <input
                                 type={isMulti ? "checkbox" : "radio"}
@@ -323,7 +323,7 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
                                     ? toggleMultiple(question.id, option)
                                     : setSingle(question.id, option)
                                 }
-                                className="mt-0.5 h-4 w-4 accent-[#087DB5]"
+                                className="mt-0.5 h-4 w-4 accent-decom-blue"
                               />
                               {option}
                             </label>
@@ -335,20 +335,20 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
                 })}
                 <button
                   disabled={saving || questions.length === 0}
-                  className="w-full rounded-xl bg-[#087DB5] px-5 py-4 text-sm font-bold text-white disabled:opacity-50"
+                  className="w-full rounded-xl bg-decom-blue px-5 py-4 text-sm font-bold text-white disabled:opacity-50"
                 >
                   {saving ? "Enviando..." : "Enviar evaluación"}
                 </button>
               </form>
             )}
             {attempts.length > 0 && (
-              <section className="rounded-3xl border border-slate-200 bg-white p-5">
+              <section className="rounded-3xl border border-line bg-surface p-5">
                 <h2 className="text-sm font-bold">Historial de intentos</h2>
                 <div className="mt-3 space-y-2">
                   {attempts.map((attempt) => (
                     <div
                       key={attempt.id}
-                      className="flex flex-wrap justify-between gap-2 rounded-xl bg-[#F4F7FA] p-3 text-xs"
+                      className="flex flex-wrap justify-between gap-2 rounded-xl bg-surface-muted p-3 text-xs"
                     >
                       <span>
                         Intento {attempt.attempt_number} ·{" "}
@@ -368,14 +368,14 @@ export default function StudentAssessmentAttemptClient({ assessmentId }: { asses
             )}
           </>
         ) : (
-          <section className="rounded-3xl border border-slate-200 bg-white p-8 text-center">
+          <section className="rounded-3xl border border-line bg-surface p-8 text-center">
             <h1 className="text-lg font-bold">Evaluación no disponible</h1>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-fg">
               {notice || "No se pudo cargar el instrumento solicitado."}
             </p>
             <button
               onClick={() => router.push("/dashboard/estudiante/evaluaciones")}
-              className="mt-5 rounded-xl bg-[#087DB5] px-4 py-3 text-xs font-bold text-white"
+              className="mt-5 rounded-xl bg-decom-blue px-4 py-3 text-xs font-bold text-white"
             >
               Volver
             </button>

@@ -287,24 +287,24 @@ export default function TutorAssessmentWorkflowPage() {
   }
   if (access === "checking" || loading)
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#087DB5]/20 border-t-[#087DB5]" />
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-decom-blue/20 border-t-decom-blue" />
       </main>
     );
   if (access !== "allowed")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6">
-        <section className="max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center">
-          <h1 className="text-xl font-bold text-[#102D4D]">
+      <main className="flex min-h-screen items-center justify-center bg-background px-6">
+        <section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center">
+          <h1 className="text-xl font-bold text-foreground">
             {access === "denied" ? "Acceso restringido" : "No fue posible abrir la bandeja"}
           </h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-fg">
             {error || "Este espacio está habilitado para tutores con asignación vigente."}
           </p>
           <button
             type="button"
             onClick={() => router.push("/dashboard/tutor")}
-            className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white"
+            className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
           >
             Volver a tutoría
           </button>
@@ -312,25 +312,25 @@ export default function TutorAssessmentWorkflowPage() {
       </main>
     );
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
-      <header className="border-b border-slate-200 bg-white">
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-5 py-4 md:px-8">
           <div>
             <p className="text-sm font-extrabold tracking-wide">ACADEMIA DECOM</p>
-            <p className="text-xs text-slate-400">Revisión y evaluación de actividades</p>
+            <p className="text-xs text-muted-fg">Revisión y evaluación de actividades</p>
           </div>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => void load()}
-              className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600"
+              className="rounded-xl border border-line px-3 py-2 text-xs font-semibold text-muted-fg"
             >
               Actualizar
             </button>
             <button
               type="button"
               onClick={() => router.push("/dashboard/tutor")}
-              className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600"
+              className="rounded-xl border border-line px-3 py-2 text-xs font-semibold text-muted-fg"
             >
               Volver a tutoría
             </button>
@@ -339,11 +339,11 @@ export default function TutorAssessmentWorkflowPage() {
       </header>
       <div className="mx-auto max-w-[1500px] space-y-6 px-5 py-7 md:px-8">
         <section>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#19A7A0]">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-decom-teal-text">
             Acompañamiento y evaluación
           </p>
           <h1 className="mt-2 text-2xl font-extrabold md:text-3xl">Revisión de entregas</h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-fg">
             Las entregas y calificaciones de esta bandeja provienen de Supabase.
           </p>
         </section>
@@ -355,8 +355,8 @@ export default function TutorAssessmentWorkflowPage() {
               value: new Set(items.map((item) => item.activity_id)).size,
             },
           ].map((x) => (
-            <article key={x.label} className="rounded-2xl border border-slate-200 bg-white p-5">
-              <p className="text-xs text-slate-400">{x.label}</p>
+            <article key={x.label} className="rounded-2xl border border-line bg-surface p-5">
+              <p className="text-xs text-muted-fg">{x.label}</p>
               <p className="mt-2 text-3xl font-extrabold">{x.value}</p>
             </article>
           ))}
@@ -372,16 +372,16 @@ export default function TutorAssessmentWorkflowPage() {
           </p>
         )}
         <section className="grid items-start gap-5 xl:grid-cols-[minmax(290px,0.8fr)_minmax(0,1.7fr)]">
-          <aside className="rounded-3xl border border-slate-200 bg-white p-5">
+          <aside className="rounded-3xl border border-line bg-surface p-5">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold">Bandeja de entregas</h2>
-              <span className="text-xs text-slate-400">{visible.length}</span>
+              <span className="text-xs text-muted-fg">{visible.length}</span>
             </div>
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar estudiante o actividad..."
-              className="mt-4 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+              className="mt-4 w-full rounded-xl border border-line px-3 py-2.5 text-sm"
             />
             <div className="mt-3 flex flex-wrap gap-2">
               {["Todas", "Pendientes"].map((x) => (
@@ -389,7 +389,7 @@ export default function TutorAssessmentWorkflowPage() {
                   key={x}
                   type="button"
                   onClick={() => setFilter(x)}
-                  className={`rounded-full px-3 py-1.5 text-[11px] font-semibold ${filter === x ? "bg-[#087DB5] text-white" : "bg-slate-100 text-slate-500"}`}
+                  className={`rounded-full px-3 py-1.5 text-[11px] font-semibold ${filter === x ? "bg-decom-blue text-white" : "bg-surface-muted text-muted-fg"}`}
                 >
                   {x}
                 </button>
@@ -401,17 +401,17 @@ export default function TutorAssessmentWorkflowPage() {
                   key={item.id}
                   type="button"
                   onClick={() => choose(item)}
-                  className={`w-full rounded-2xl border p-4 text-left ${selected?.id === item.id ? "border-[#087DB5] bg-sky-50/70" : "border-slate-100"}`}
+                  className={`w-full rounded-2xl border p-4 text-left ${selected?.id === item.id ? "border-decom-blue bg-sky-50/70" : "border-line-soft"}`}
                 >
                   <span className="block text-xs font-bold">{item.academic_activities.title}</span>
-                  <span className="mt-1 block text-[11px] text-slate-500">{item.studentName}</span>
-                  <span className="mt-2 inline-flex rounded-full bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-600">
+                  <span className="mt-1 block text-[11px] text-muted-fg">{item.studentName}</span>
+                  <span className="mt-2 inline-flex rounded-full bg-surface-muted px-2 py-1 text-[10px] font-semibold text-muted-fg">
                     {statusLabel[item.status] ?? item.status} · intento {item.attempt_number}
                   </span>
                 </button>
               ))}
               {visible.length === 0 && (
-                <p className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-400">
+                <p className="rounded-xl border border-dashed border-line p-6 text-center text-xs text-muted-fg">
                   No hay entregas para este filtro.
                 </p>
               )}
@@ -419,14 +419,14 @@ export default function TutorAssessmentWorkflowPage() {
           </aside>
           {selected ? (
             <div className="space-y-5">
-              <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-7">
+              <section className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-7">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-[#19A7A0]">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-decom-teal-text">
                       Intento {selected.attempt_number}
                     </p>
                     <h2 className="mt-2 text-xl font-bold">{selected.academic_activities.title}</h2>
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 text-sm text-muted-fg">
                       {selected.studentName} ·{" "}
                       {selected.academic_activities.courses?.title ?? "Curso"}
                     </p>
@@ -435,12 +435,12 @@ export default function TutorAssessmentWorkflowPage() {
                     {statusLabel[selected.status] ?? selected.status}
                   </span>
                 </div>
-                <div className="mt-5 rounded-2xl bg-[#F4F7FA] p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <div className="mt-5 rounded-2xl bg-surface-muted p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-fg">
                     Respuesta del estudiante
                   </p>
                   {selected.response_text && (
-                    <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                    <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-foreground">
                       {selected.response_text}
                     </p>
                   )}
@@ -449,23 +449,23 @@ export default function TutorAssessmentWorkflowPage() {
                       href={selected.external_url}
                       target="_blank"
                       rel="noreferrer"
-                      className="mt-3 block break-all text-sm text-[#087DB5] underline"
+                      className="mt-3 block break-all text-sm text-decom-blue-text underline"
                     >
                       Abrir enlace enviado
                     </a>
                   )}
                   {!selected.response_text && !selected.external_url && (
-                    <p className="mt-2 text-xs text-slate-400">
+                    <p className="mt-2 text-xs text-muted-fg">
                       La entrega contiene archivos adjuntos.
                     </p>
                   )}
-                  <p className="mt-3 text-[11px] text-slate-400">
+                  <p className="mt-3 text-[11px] text-muted-fg">
                     Recibida:{" "}
                     {selected.submitted_at
                       ? new Date(selected.submitted_at).toLocaleString("es-CO")
                       : "Fecha no disponible"}
                   </p>
-                  <p className="mt-1 text-[11px] text-slate-400">
+                  <p className="mt-1 text-[11px] text-muted-fg">
                     Fecha límite:{" "}
                     {selected.academic_activities.due_at
                       ? new Date(selected.academic_activities.due_at).toLocaleString("es-CO")
@@ -479,7 +479,7 @@ export default function TutorAssessmentWorkflowPage() {
                       key={file.id}
                       type="button"
                       onClick={() => void openAttachment(file)}
-                      className="mr-2 mt-3 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-[#087DB5] underline"
+                      className="mr-2 mt-3 rounded-lg border border-line px-3 py-2 text-xs font-semibold text-decom-blue-text underline"
                     >
                       Ver archivo: {file.file_name}
                     </button>
@@ -487,13 +487,13 @@ export default function TutorAssessmentWorkflowPage() {
                 <div className="mt-6 flex items-center justify-between gap-3">
                   <div>
                     <h3 className="text-sm font-bold">Rúbrica de evaluación</h3>
-                    <p className="mt-1 text-xs text-slate-400">
+                    <p className="mt-1 text-xs text-muted-fg">
                       Califica cada criterio sin exceder su máximo.
                     </p>
                   </div>
                   <div className="rounded-2xl bg-[#EAF5F8] px-4 py-2 text-right">
-                    <p className="text-[10px] font-semibold uppercase text-slate-500">Puntaje</p>
-                    <p className="text-xl font-extrabold text-[#087DB5]">
+                    <p className="text-[10px] font-semibold uppercase text-muted-fg">Puntaje</p>
+                    <p className="text-xl font-extrabold text-decom-blue-text">
                       {total} / {max}
                     </p>
                   </div>
@@ -502,16 +502,16 @@ export default function TutorAssessmentWorkflowPage() {
                   selectedCriteria.map((c) => (
                     <div
                       key={c.id}
-                      className="mt-3 grid gap-3 rounded-2xl border border-slate-100 p-4 sm:grid-cols-[1fr_110px]"
+                      className="mt-3 grid gap-3 rounded-2xl border border-line-soft p-4 sm:grid-cols-[1fr_110px]"
                     >
                       <div>
                         <p className="text-sm font-semibold">{c.title}</p>
                         {c.description && (
-                          <p className="mt-1 text-xs text-slate-500">{c.description}</p>
+                          <p className="mt-1 text-xs text-muted-fg">{c.description}</p>
                         )}
-                        <p className="mt-2 text-[10px] text-slate-400">Máximo: {c.max_points}</p>
+                        <p className="mt-2 text-[10px] text-muted-fg">Máximo: {c.max_points}</p>
                       </div>
-                      <label className="text-[10px] font-semibold text-slate-500">
+                      <label className="text-[10px] font-semibold text-muted-fg">
                         Puntos
                         <input
                           type="number"
@@ -528,7 +528,7 @@ export default function TutorAssessmentWorkflowPage() {
                               ),
                             }))
                           }
-                          className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold"
+                          className="mt-1 w-full rounded-xl border border-line px-3 py-2 text-sm font-bold"
                         />
                       </label>
                     </div>
@@ -543,7 +543,7 @@ export default function TutorAssessmentWorkflowPage() {
                       step="0.01"
                       value={overall}
                       onChange={(e) => setOverall(e.target.value)}
-                      className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+                      className="mt-2 w-full rounded-xl border border-line px-3 py-2.5 text-sm"
                     />
                   </label>
                 )}
@@ -555,21 +555,21 @@ export default function TutorAssessmentWorkflowPage() {
                     rows={4}
                     maxLength={4000}
                     placeholder="Describe los logros y, si corresponde, los ajustes necesarios..."
-                    className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm leading-6"
+                    className="mt-2 w-full rounded-xl border border-line px-4 py-3 text-sm leading-6"
                   />
                 </label>
                 <div className="mt-5 grid gap-2 sm:grid-cols-2">
                   <button
                     type="button"
                     onClick={() => setDecision("graded")}
-                    className={`rounded-xl border px-4 py-3 text-xs font-semibold ${decision === "graded" ? "border-[#087DB5] bg-sky-50 text-[#087DB5]" : "border-slate-200 text-slate-500"}`}
+                    className={`rounded-xl border px-4 py-3 text-xs font-semibold ${decision === "graded" ? "border-decom-blue bg-sky-50 text-decom-blue-text" : "border-line text-muted-fg"}`}
                   >
                     Calificar entrega
                   </button>
                   <button
                     type="button"
                     onClick={() => setDecision("changes_requested")}
-                    className={`rounded-xl border px-4 py-3 text-xs font-semibold ${decision === "changes_requested" ? "border-amber-300 bg-amber-50 text-amber-800" : "border-slate-200 text-slate-500"}`}
+                    className={`rounded-xl border px-4 py-3 text-xs font-semibold ${decision === "changes_requested" ? "border-amber-300 bg-amber-50 text-amber-800" : "border-line text-muted-fg"}`}
                   >
                     Solicitar ajustes
                   </button>
@@ -578,7 +578,7 @@ export default function TutorAssessmentWorkflowPage() {
                   type="button"
                   disabled={busy}
                   onClick={() => void saveReview()}
-                  className="mt-4 w-full rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                  className="mt-4 w-full rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
                 >
                   {busy
                     ? "Guardando..."
@@ -587,7 +587,7 @@ export default function TutorAssessmentWorkflowPage() {
                       : "Enviar solicitud de ajustes"}
                 </button>
               </section>
-              <section className="rounded-3xl border border-slate-200 bg-white p-5">
+              <section className="rounded-3xl border border-line bg-surface p-5">
                 <h3 className="text-sm font-bold">Historial de revisiones</h3>
                 {history.filter((x) => x.submission_id === selected.id).length ? (
                   history
@@ -596,7 +596,7 @@ export default function TutorAssessmentWorkflowPage() {
                         (x as Review & { submission_id?: string }).submission_id === selected.id,
                     )
                     .map((item) => (
-                      <article key={item.id} className="mt-3 border-l-2 border-[#19A7A0] pl-3">
+                      <article key={item.id} className="mt-3 border-l-2 border-decom-teal pl-3">
                         <p className="text-xs font-bold">
                           {statusLabel[item.status] ?? "Calificada"} · intento {item.attempt_number}
                         </p>
@@ -604,22 +604,22 @@ export default function TutorAssessmentWorkflowPage() {
                           <p className="mt-1 text-xs">{item.awarded_points} puntos</p>
                         )}
                         {item.feedback && (
-                          <p className="mt-1 whitespace-pre-wrap text-xs text-slate-500">
+                          <p className="mt-1 whitespace-pre-wrap text-xs text-muted-fg">
                             {item.feedback}
                           </p>
                         )}
-                        <p className="mt-1 text-[10px] text-slate-400">
+                        <p className="mt-1 text-[10px] text-muted-fg">
                           {new Date(item.reviewed_at).toLocaleString("es-CO")}
                         </p>
                       </article>
                     ))
                 ) : (
-                  <p className="mt-3 text-xs text-slate-400">No hay revisiones anteriores.</p>
+                  <p className="mt-3 text-xs text-muted-fg">No hay revisiones anteriores.</p>
                 )}
               </section>
             </div>
           ) : (
-            <section className="rounded-3xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-400">
+            <section className="rounded-3xl border border-line bg-surface p-12 text-center text-sm text-muted-fg">
               Selecciona una entrega para revisarla.
             </section>
           )}

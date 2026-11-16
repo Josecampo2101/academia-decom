@@ -203,20 +203,20 @@ export default function LessonViewerClient({ lessonId }: { lessonId: string }) {
 
   if (access === "checking") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#087DB5]/20 border-t-[#087DB5]" />
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-decom-blue/20 border-t-decom-blue" />
       </main>
     );
   }
 
   if (access !== "allowed") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6">
-        <section className="max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center">
-          <h1 className="text-xl font-bold text-[#102D4D]">
+      <main className="flex min-h-screen items-center justify-center bg-background px-6">
+        <section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center">
+          <h1 className="text-xl font-bold text-foreground">
             {access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}
           </h1>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-2 text-sm leading-6 text-muted-fg">
             {access === "error"
               ? "Intenta nuevamente."
               : "Esta lección está disponible para estudiantes con una asignación vigente."}
@@ -224,7 +224,7 @@ export default function LessonViewerClient({ lessonId }: { lessonId: string }) {
           <button
             type="button"
             onClick={() => router.push("/dashboard/estudiante")}
-            className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white"
+            className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
           >
             Volver al panel
           </button>
@@ -235,16 +235,16 @@ export default function LessonViewerClient({ lessonId }: { lessonId: string }) {
 
   if (!lesson) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6">
-        <section className="max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center">
-          <h1 className="text-xl font-bold text-[#102D4D]">Lección no encontrada</h1>
-          <p className="mt-2 text-sm text-slate-500">
+      <main className="flex min-h-screen items-center justify-center bg-background px-6">
+        <section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center">
+          <h1 className="text-xl font-bold text-foreground">Lección no encontrada</h1>
+          <p className="mt-2 text-sm text-muted-fg">
             El contenido solicitado no está disponible en esta versión de demostración.
           </p>
           <button
             type="button"
             onClick={() => router.push("/dashboard/estudiante/formacion")}
-            className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white"
+            className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
           >
             Volver a Mi formación
           </button>
@@ -254,27 +254,27 @@ export default function LessonViewerClient({ lessonId }: { lessonId: string }) {
   }
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
-      <header className="border-b border-slate-200 bg-white">
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-4 md:px-8">
           <div>
-            <p className="text-xs font-extrabold tracking-[0.14em] text-[#087DB5]">
+            <p className="text-xs font-extrabold tracking-[0.14em] text-decom-blue-text">
               ACADEMIA DECOM
             </p>
-            <p className="mt-1 text-xs text-slate-400">Aula virtual · {displayName}</p>
+            <p className="mt-1 text-xs text-muted-fg">Aula virtual · {displayName}</p>
           </div>
           <button
             type="button"
             onClick={() => router.push("/dashboard/estudiante/formacion")}
-            className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+            className="rounded-xl border border-line px-4 py-2.5 text-xs font-semibold text-muted-fg hover:bg-surface-muted"
           >
             ← Mi formación
           </button>
         </div>
       </header>
       <div className="mx-auto grid max-w-6xl gap-6 px-5 py-7 pb-12 md:px-8 md:py-9 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <article className="min-w-0 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-9">
-          <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-400">
+        <article className="min-w-0 rounded-3xl border border-line bg-surface p-6 shadow-sm md:p-9">
+          <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-muted-fg">
             <span>{lesson.module}</span>
             <span>·</span>
             <span>{lesson.duration}</span>
@@ -284,23 +284,23 @@ export default function LessonViewerClient({ lessonId }: { lessonId: string }) {
           </div>
           <h1 className="mt-5 text-2xl font-extrabold leading-tight md:text-3xl">{lesson.title}</h1>
           <div className="mt-6 rounded-2xl bg-[#EAF5FA] p-5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#087DB5]">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-decom-blue-text">
               Objetivo de aprendizaje
             </p>
             <p className="mt-2 text-sm leading-6 text-[#244A63]">{lesson.objective}</p>
           </div>
           <div className="prose prose-slate mt-7 max-w-none">
             {lesson.paragraphs.map((paragraph, index) => (
-              <p key={index} className="mb-5 text-sm leading-8 text-slate-600">
+              <p key={index} className="mb-5 text-sm leading-8 text-muted-fg">
                 {paragraph}
               </p>
             ))}
           </div>
-          <section className="mt-8 rounded-2xl border border-slate-200 p-5">
+          <section className="mt-8 rounded-2xl border border-line p-5">
             <h2 className="text-sm font-bold">Ideas clave</h2>
             <ul className="mt-4 space-y-3">
               {lesson.keyPoints.map((point) => (
-                <li key={point} className="flex gap-3 text-sm leading-6 text-slate-600">
+                <li key={point} className="flex gap-3 text-sm leading-6 text-muted-fg">
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-50 text-xs font-bold text-teal-700">
                     ✓
                   </span>
@@ -309,18 +309,18 @@ export default function LessonViewerClient({ lessonId }: { lessonId: string }) {
               ))}
             </ul>
           </section>
-          <section className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5">
+          <section className="mt-8 rounded-2xl border border-dashed border-line bg-surface-muted p-5">
             <h2 className="text-sm font-bold">Comprobación de lectura</h2>
-            <p className="mt-1 text-xs leading-5 text-slate-500">
+            <p className="mt-1 text-xs leading-5 text-muted-fg">
               Esta interacción solo sirve para probar la interfaz. No registra progreso académico en
               el servidor.
             </p>
-            <label className="mt-4 flex items-start gap-3 text-sm text-slate-600">
+            <label className="mt-4 flex items-start gap-3 text-sm text-muted-fg">
               <input
                 type="checkbox"
                 checked={acknowledged}
                 onChange={(event) => setAcknowledged(event.target.checked)}
-                className="mt-1 h-4 w-4 accent-[#087DB5]"
+                className="mt-1 h-4 w-4 accent-decom-blue"
               />
               He revisado el contenido y las ideas clave de esta lección.
             </label>
@@ -330,12 +330,12 @@ export default function LessonViewerClient({ lessonId }: { lessonId: string }) {
               </p>
             )}
           </section>
-          <div className="mt-8 flex flex-col justify-between gap-3 border-t border-slate-100 pt-6 sm:flex-row">
+          <div className="mt-8 flex flex-col justify-between gap-3 border-t border-line-soft pt-6 sm:flex-row">
             {lesson.previous ? (
               <button
                 type="button"
                 onClick={() => router.push(`/dashboard/estudiante/leccion/${lesson.previous}`)}
-                className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                className="rounded-xl border border-line px-4 py-3 text-sm font-semibold text-muted-fg hover:bg-surface-muted"
               >
                 ← Lección anterior
               </button>
@@ -346,7 +346,7 @@ export default function LessonViewerClient({ lessonId }: { lessonId: string }) {
               <button
                 type="button"
                 onClick={() => router.push(`/dashboard/estudiante/actividades/${lesson.activity}`)}
-                className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white hover:bg-[#066a9b]"
+                className="rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white hover:bg-decom-blue-hover"
               >
                 Ir a la actividad →
               </button>
@@ -354,7 +354,7 @@ export default function LessonViewerClient({ lessonId }: { lessonId: string }) {
               <button
                 type="button"
                 onClick={() => router.push(`/dashboard/estudiante/leccion/${lesson.next}`)}
-                className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white hover:bg-[#066a9b]"
+                className="rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white hover:bg-decom-blue-hover"
               >
                 Siguiente lección →
               </button>
@@ -362,7 +362,7 @@ export default function LessonViewerClient({ lessonId }: { lessonId: string }) {
               <button
                 type="button"
                 onClick={() => router.push("/dashboard/estudiante/formacion")}
-                className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white"
+                className="rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
               >
                 Volver al curso
               </button>
@@ -370,21 +370,21 @@ export default function LessonViewerClient({ lessonId }: { lessonId: string }) {
           </div>
         </article>
         <aside className="space-y-4">
-          <section className="rounded-3xl border border-slate-200 bg-white p-5">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <section className="rounded-3xl border border-line bg-surface p-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-fg">
               Tu sesión
             </p>
             <h2 className="mt-2 text-sm font-bold">Lección de aprendizaje</h2>
-            <p className="mt-2 text-xs leading-5 text-slate-500">
+            <p className="mt-2 text-xs leading-5 text-muted-fg">
               Dedica el tiempo necesario a comprender el contenido. Puedes volver a esta ruta cuando
               lo necesites.
             </p>
-            <div className="mt-4 rounded-xl bg-[#F4F7FA] p-3">
-              <p className="text-[10px] font-semibold text-slate-400">DURACIÓN ESTIMADA</p>
+            <div className="mt-4 rounded-xl bg-surface-muted p-3">
+              <p className="text-[10px] font-semibold text-muted-fg">DURACIÓN ESTIMADA</p>
               <p className="mt-1 text-sm font-bold">{lesson.duration}</p>
             </div>
           </section>
-          <section className="rounded-3xl bg-[#102D4D] p-5 text-white">
+          <section className="rounded-3xl bg-decom-navy p-5 text-white">
             <span className="text-xl">✦</span>
             <h2 className="mt-3 text-sm font-bold">Aprender para servir</h2>
             <p className="mt-2 text-xs leading-5 text-white/70">

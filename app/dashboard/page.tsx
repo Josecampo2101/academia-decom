@@ -647,11 +647,11 @@ export default function DashboardPage() {
 
   const dark = resolvedTheme === "dark";
 
-  const surface = dark ? "bg-[#1C2B3D]" : "bg-white";
-  const background = dark ? "bg-[#101B2A]" : "bg-[#F4F7FA]";
-  const primaryText = dark ? "text-white" : "text-[#102D4D]";
-  const secondaryText = dark ? "text-slate-400" : "text-slate-500";
-  const borderColor = dark ? "border-slate-700" : "border-slate-100";
+  const surface = dark ? "bg-[#1C2B3D]" : "bg-surface";
+  const background = dark ? "bg-[#101B2A]" : "bg-surface-muted";
+  const primaryText = dark ? "text-white" : "text-foreground";
+  const secondaryText = dark ? "text-muted-fg" : "text-muted-fg";
+  const borderColor = dark ? "border-slate-700" : "border-line-soft";
 
   const filteredAreas = areas.filter((area) => {
     const matchesSearch = area.name
@@ -672,7 +672,7 @@ export default function DashboardPage() {
     return (
       <main className={`flex min-h-screen items-center justify-center ${background}`}>
         <div className="text-center">
-          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-[#087DB5]/20 border-t-[#087DB5]" />
+          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-decom-blue/20 border-t-decom-blue" />
           <p className={secondaryText}>Verificando tu sesión...</p>
         </div>
       </main>
@@ -713,7 +713,7 @@ export default function DashboardPage() {
                 onClick={() => setSidebarCollapsed((value) => !value)}
                 aria-label={sidebarCollapsed ? "Expandir menú" : "Contraer menú"}
                 title={sidebarCollapsed ? "Expandir menú" : "Contraer menú"}
-                className={`hidden rounded-lg p-2 transition hover:bg-[#087DB5]/10 lg:inline-flex ${secondaryText}`}
+                className={`hidden rounded-lg p-2 transition hover:bg-decom-blue/10 lg:inline-flex ${secondaryText}`}
               >
                 {sidebarCollapsed ? (
                   <ChevronRight className="h-4 w-4" />
@@ -732,7 +732,7 @@ export default function DashboardPage() {
             <a
               href="/dashboard"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 rounded-xl bg-[#087DB5]/10 px-4 py-3 text-sm font-semibold text-[#087DB5]"
+              className="flex items-center gap-3 rounded-xl bg-decom-blue/10 px-4 py-3 text-sm font-semibold text-decom-blue-text"
             >
               <Home className="h-5 w-5 shrink-0" aria-hidden="true" />
               {!sidebarCollapsed && <span>Inicio</span>}
@@ -752,7 +752,7 @@ export default function DashboardPage() {
                     ? module.description
                     : "No tienes un perfil académico habilitado para este módulo"
                 }
-                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] disabled:cursor-not-allowed disabled:opacity-50 ${secondaryText}`}
+                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition hover:bg-decom-blue/10 hover:text-decom-blue-text disabled:cursor-not-allowed disabled:opacity-50 ${secondaryText}`}
               >
                 <module.icon className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>{module.name}</span>}
@@ -768,7 +768,7 @@ export default function DashboardPage() {
             <div
               className={`mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm ${
                 isNationalAdmin
-                  ? "bg-[#087DB5]/10 font-semibold text-[#087DB5]"
+                  ? "bg-decom-blue/10 font-semibold text-decom-blue-text"
                   : `${secondaryText} opacity-50`
               }`}
             >
@@ -780,7 +780,7 @@ export default function DashboardPage() {
               <a
                 href="/dashboard/administracion/tutores"
                 onClick={() => setMobileMenuOpen(false)}
-                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
+                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-muted-fg transition hover:bg-decom-blue/10 hover:text-decom-blue-text dark:hover:bg-decom-blue/20 dark:hover:text-decom-teal-text"
               >
                 <Users className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>Asignación de tutores</span>}
@@ -791,7 +791,7 @@ export default function DashboardPage() {
               <a
                 href="/dashboard/administracion/actividades"
                 onClick={() => setMobileMenuOpen(false)}
-                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
+                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-muted-fg transition hover:bg-decom-blue/10 hover:text-decom-blue-text dark:hover:bg-decom-blue/20 dark:hover:text-decom-teal-text"
               >
                 <ClipboardCheck className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>Actividades y evaluaciones</span>}
@@ -802,7 +802,7 @@ export default function DashboardPage() {
               <a
                 href="/dashboard/administracion/catalogo"
                 onClick={() => setMobileMenuOpen(false)}
-                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
+                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-muted-fg transition hover:bg-decom-blue/10 hover:text-decom-blue-text dark:hover:bg-decom-blue/20 dark:hover:text-decom-teal-text"
               >
                 <BookOpen className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>Catálogo académico</span>}
@@ -813,7 +813,7 @@ export default function DashboardPage() {
               <a
                 href="/dashboard/administracion/biblioteca"
                 onClick={() => setMobileMenuOpen(false)}
-                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
+                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-muted-fg transition hover:bg-decom-blue/10 hover:text-decom-blue-text dark:hover:bg-decom-blue/20 dark:hover:text-decom-teal-text"
               >
                 <Library className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>Administrar biblioteca</span>}
@@ -824,7 +824,7 @@ export default function DashboardPage() {
               <a
                 href="/dashboard/invitaciones"
                 onClick={() => setMobileMenuOpen(false)}
-                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
+                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-muted-fg transition hover:bg-decom-blue/10 hover:text-decom-blue-text dark:hover:bg-decom-blue/20 dark:hover:text-decom-teal-text"
               >
                 <Mail className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>Invitaciones</span>}
@@ -836,7 +836,7 @@ export default function DashboardPage() {
               <a
                 href="/dashboard/reubicaciones"
                 onClick={() => setMobileMenuOpen(false)}
-                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-[#087DB5]/10 hover:text-[#087DB5] dark:text-slate-300 dark:hover:bg-[#087DB5]/20 dark:hover:text-[#19A7A0]"
+                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-muted-fg transition hover:bg-decom-blue/10 hover:text-decom-blue-text dark:hover:bg-decom-blue/20 dark:hover:text-decom-teal-text"
               >
                 <ArrowLeftRight className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {!sidebarCollapsed && <span>Reubicación de creyentes</span>}
@@ -855,7 +855,7 @@ export default function DashboardPage() {
             )}
 
             {!sidebarCollapsed && (
-              <p className="mt-1 text-xs font-semibold text-[#087DB5]">{roleName}</p>
+              <p className="mt-1 text-xs font-semibold text-decom-blue-text">{roleName}</p>
             )}
 
             <button
@@ -911,7 +911,7 @@ export default function DashboardPage() {
                           : "Automático"
                     }
                     className={`rounded-lg px-2.5 py-2 text-sm ${
-                      theme === item ? "bg-[#087DB5] text-white" : secondaryText
+                      theme === item ? "bg-decom-blue text-white" : secondaryText
                     }`}
                   >
                     {item === "light" ? (
@@ -929,9 +929,9 @@ export default function DashboardPage() {
                 type="button"
                 onClick={() => router.push("/dashboard/perfil")}
                 title="Editar perfil institucional"
-                className="inline-flex min-w-0 items-center gap-2 rounded-xl bg-[#087DB5]/10 px-2.5 py-2 text-sm font-semibold text-[#087DB5] transition hover:bg-[#087DB5]/15"
+                className="inline-flex min-w-0 items-center gap-2 rounded-xl bg-decom-blue/10 px-2.5 py-2 text-sm font-semibold text-decom-blue-text transition hover:bg-decom-blue/15"
               >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#087DB5]/15">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-decom-blue/15">
                   {avatarUrl ? (
                     <Image
                       src={avatarUrl}
@@ -961,12 +961,12 @@ export default function DashboardPage() {
           {/* PANEL */}
           <div className="mx-auto max-w-7xl p-5 md:p-8">
             {/* BIENVENIDA */}
-            <section className="relative overflow-hidden rounded-2xl bg-[#102D4D] p-7 text-white md:p-10">
+            <section className="relative overflow-hidden rounded-2xl bg-decom-navy p-7 text-white md:p-10">
               <div className="absolute -right-16 -top-24 h-72 w-72 rounded-full border border-white/10" />
               <div className="absolute -bottom-40 right-32 h-72 w-72 rounded-full border border-white/10" />
 
               <div className="relative z-10">
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#19A7A0]">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-decom-teal-text">
                   Formación institucional
                 </p>
 
@@ -1007,7 +1007,7 @@ export default function DashboardPage() {
               <blockquote className="mt-4 text-base font-semibold leading-7">
                 «{dailyVerse.text}»
               </blockquote>
-              <p className="mt-2 text-sm font-bold text-[#087DB5]">{dailyVerse.reference}</p>
+              <p className="mt-2 text-sm font-bold text-decom-blue-text">{dailyVerse.reference}</p>
             </section>
 
             {/* PERFIL */}
@@ -1023,7 +1023,7 @@ export default function DashboardPage() {
                 </div>
 
                 {isNationalAdmin && (
-                  <span className="rounded-full bg-[#087DB5]/10 px-3 py-2 text-xs font-bold text-[#087DB5]">
+                  <span className="rounded-full bg-decom-blue/10 px-3 py-2 text-xs font-bold text-decom-blue-text">
                     Administración nacional
                   </span>
                 )}
@@ -1053,7 +1053,7 @@ export default function DashboardPage() {
                         ? "bg-red-100 text-red-700"
                         : permissionResult === "error"
                           ? "bg-amber-100 text-amber-700"
-                          : "bg-slate-100 text-slate-600"
+                          : "bg-surface-muted text-muted-fg"
                   }`}
                 >
                   {permissionResult === "authorized"
@@ -1072,7 +1072,7 @@ export default function DashboardPage() {
               <section className={`${surface} mt-7 rounded-2xl border ${borderColor} p-5 md:p-7`}>
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-[#087DB5]">
+                    <p className="text-xs font-bold uppercase tracking-wider text-decom-blue-text">
                       Administración académica
                     </p>
 
@@ -1083,9 +1083,9 @@ export default function DashboardPage() {
                     </p>
                   </div>
 
-                  <div className="rounded-xl bg-[#087DB5]/10 px-5 py-3">
-                    <p className="text-xs font-semibold text-[#087DB5]">Áreas registradas</p>
-                    <p className="mt-1 text-2xl font-bold text-[#087DB5]">{areas.length}</p>
+                  <div className="rounded-xl bg-decom-blue/10 px-5 py-3">
+                    <p className="text-xs font-semibold text-decom-blue-text">Áreas registradas</p>
+                    <p className="mt-1 text-2xl font-bold text-decom-blue-text">{areas.length}</p>
                   </div>
                 </div>
 
@@ -1098,7 +1098,7 @@ export default function DashboardPage() {
 
                   <div className={`rounded-xl border ${borderColor} p-4`}>
                     <p className={`text-xs font-medium ${secondaryText}`}>Áreas inactivas</p>
-                    <p className="mt-1 text-2xl font-bold text-slate-500">{inactiveAreas}</p>
+                    <p className="mt-1 text-2xl font-bold text-muted-fg">{inactiveAreas}</p>
                   </div>
                 </div>
 
@@ -1145,7 +1145,7 @@ export default function DashboardPage() {
                         maxLength={150}
                         required
                         disabled={savingArea}
-                        className={`w-full rounded-xl border ${borderColor} ${background} px-4 py-3 text-sm outline-none transition focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/20 disabled:opacity-50`}
+                        className={`w-full rounded-xl border ${borderColor} ${background} px-4 py-3 text-sm outline-none transition focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/20 disabled:opacity-50`}
                       />
                     </div>
 
@@ -1166,7 +1166,7 @@ export default function DashboardPage() {
                         maxLength={1000}
                         rows={4}
                         disabled={savingArea}
-                        className={`w-full resize-y rounded-xl border ${borderColor} ${background} px-4 py-3 text-sm outline-none transition focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/20 disabled:opacity-50`}
+                        className={`w-full resize-y rounded-xl border ${borderColor} ${background} px-4 py-3 text-sm outline-none transition focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/20 disabled:opacity-50`}
                       />
 
                       <p className={`mt-1 text-right text-xs ${secondaryText}`}>
@@ -1178,7 +1178,7 @@ export default function DashboardPage() {
                       <button
                         type="submit"
                         disabled={savingArea || areasLoading || !areaName.trim()}
-                        className="rounded-xl bg-[#087DB5] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#066895] disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-xl bg-decom-blue px-6 py-3 text-sm font-semibold text-white transition hover:bg-decom-blue-hover disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {savingArea
                           ? "Guardando..."
@@ -1218,7 +1218,7 @@ export default function DashboardPage() {
                       type="button"
                       onClick={loadAreas}
                       disabled={areasLoading}
-                      className="rounded-xl border border-[#087DB5] px-4 py-2 text-sm font-semibold text-[#087DB5] hover:bg-[#087DB5]/5 disabled:opacity-50"
+                      className="rounded-xl border border-decom-blue px-4 py-2 text-sm font-semibold text-decom-blue-text hover:bg-decom-blue/5 disabled:opacity-50"
                     >
                       {areasLoading ? "Actualizando..." : "Actualizar"}
                     </button>
@@ -1232,7 +1232,7 @@ export default function DashboardPage() {
                       value={areaSearch}
                       onChange={(event) => setAreaSearch(event.target.value)}
                       placeholder="Buscar área por nombre..."
-                      className={`w-full rounded-xl border ${borderColor} ${background} px-4 py-3 text-sm outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/20`}
+                      className={`w-full rounded-xl border ${borderColor} ${background} px-4 py-3 text-sm outline-none focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/20`}
                     />
 
                     <select
@@ -1241,7 +1241,7 @@ export default function DashboardPage() {
                       onChange={(event) =>
                         setAreaFilter(event.target.value as "all" | "active" | "inactive")
                       }
-                      className={`w-full rounded-xl border ${borderColor} ${background} px-4 py-3 text-sm outline-none focus:border-[#087DB5]`}
+                      className={`w-full rounded-xl border ${borderColor} ${background} px-4 py-3 text-sm outline-none focus:border-decom-blue`}
                     >
                       <option value="all">Todos los estados</option>
                       <option value="active">Activas</option>
@@ -1310,7 +1310,7 @@ export default function DashboardPage() {
                             {filteredAreas.map((area) => (
                               <tr
                                 key={area.id}
-                                className={`border-t ${borderColor} transition hover:bg-[#087DB5]/5`}
+                                className={`border-t ${borderColor} transition hover:bg-decom-blue/5`}
                               >
                                 <td className="break-words px-4 py-5 align-middle font-semibold">
                                   {area.name}
@@ -1327,7 +1327,7 @@ export default function DashboardPage() {
                                     className={`inline-flex whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold ${
                                       area.status === "active"
                                         ? "bg-emerald-100 text-emerald-700"
-                                        : "bg-slate-100 text-slate-600"
+                                        : "bg-surface-muted text-muted-fg"
                                     }`}
                                   >
                                     {area.status === "active" ? "Activa" : "Inactiva"}
@@ -1340,7 +1340,7 @@ export default function DashboardPage() {
                                       type="button"
                                       onClick={() => handleEditArea(area)}
                                       aria-label={`Editar área ${area.name}`}
-                                      className="inline-flex items-center justify-center rounded-lg bg-[#087DB5]/10 px-3 py-2 text-xs font-semibold text-[#087DB5] transition hover:bg-[#087DB5]/20"
+                                      className="inline-flex items-center justify-center rounded-lg bg-decom-blue/10 px-3 py-2 text-xs font-semibold text-decom-blue-text transition hover:bg-decom-blue/20"
                                     >
                                       Editar
                                     </button>

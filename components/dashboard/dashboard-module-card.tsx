@@ -44,7 +44,7 @@ export function DashboardModuleCard({
           <button
             type="button"
             onClick={onOpen}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#087DB5] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#066895] focus-visible:outline-offset-4"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-decom-blue px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-decom-blue-hover focus-visible:outline-offset-4"
           >
             Abrir módulo
             <span aria-hidden="true">→</span>

@@ -147,10 +147,10 @@ export default function InvitationActivationForm({
   const validRequest = requestIdPattern.test(requestId);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-4 py-8 text-[#102D4D]">
-      <section className="w-full max-w-xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <header className="bg-[#102D4D] px-7 py-8 text-white sm:px-9">
-          <p className="text-xs font-bold tracking-[0.2em] text-[#55D1C4]">
+    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-8 text-foreground">
+      <section className="w-full max-w-xl overflow-hidden rounded-3xl border border-line bg-surface shadow-sm">
+        <header className="bg-decom-navy px-7 py-8 text-white sm:px-9">
+          <p className="text-xs font-bold tracking-[0.2em] text-decom-teal-light">
             ACADEMIA DECOM
           </p>
           <h1 className="mt-3 text-2xl font-bold sm:text-3xl">
@@ -174,7 +174,7 @@ export default function InvitationActivationForm({
             </div>
           ) : (
             <>
-              <div className="mb-6 flex rounded-xl bg-slate-100 p-1">
+              <div className="mb-6 flex rounded-xl bg-surface-muted p-1">
                 <button
                   type="button"
                   onClick={() => {
@@ -183,8 +183,8 @@ export default function InvitationActivationForm({
                   }}
                   className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
                     mode === "signup"
-                      ? "bg-white text-[#087DB5] shadow-sm"
-                      : "text-slate-500 hover:text-slate-700"
+                      ? "bg-surface text-decom-blue-text shadow-sm"
+                      : "text-muted-fg hover:text-foreground"
                   }`}
                 >
                   Crear cuenta
@@ -197,8 +197,8 @@ export default function InvitationActivationForm({
                   }}
                   className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
                     mode === "signin"
-                      ? "bg-white text-[#087DB5] shadow-sm"
-                      : "text-slate-500 hover:text-slate-700"
+                      ? "bg-surface text-decom-blue-text shadow-sm"
+                      : "text-muted-fg hover:text-foreground"
                   }`}
                 >
                   Iniciar sesión
@@ -215,7 +215,7 @@ export default function InvitationActivationForm({
                       autoComplete="name"
                       value={fullName}
                       onChange={(event) => setFullName(event.target.value)}
-                      className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-normal outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10"
+                      className="mt-2 w-full rounded-xl border border-line px-4 py-3 font-normal outline-none focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/10"
                       placeholder="Tus nombres y apellidos"
                     />
                   </label>
@@ -229,7 +229,7 @@ export default function InvitationActivationForm({
                     autoComplete="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-normal outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10"
+                    className="mt-2 w-full rounded-xl border border-line px-4 py-3 font-normal outline-none focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/10"
                     placeholder="El mismo correo de tu solicitud"
                   />
                 </label>
@@ -243,7 +243,7 @@ export default function InvitationActivationForm({
                     autoComplete={mode === "signup" ? "new-password" : "current-password"}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-normal outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10"
+                    className="mt-2 w-full rounded-xl border border-line px-4 py-3 font-normal outline-none focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/10"
                     placeholder={mode === "signup" ? "Mínimo 8 caracteres" : "Tu contraseña"}
                   />
                 </label>
@@ -258,7 +258,7 @@ export default function InvitationActivationForm({
                       autoComplete="new-password"
                       value={confirmPassword}
                       onChange={(event) => setConfirmPassword(event.target.value)}
-                      className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-normal outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10"
+                      className="mt-2 w-full rounded-xl border border-line px-4 py-3 font-normal outline-none focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/10"
                       placeholder="Repite tu contraseña"
                     />
                   </label>
@@ -267,7 +267,7 @@ export default function InvitationActivationForm({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full rounded-xl bg-[#087DB5] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#066a9b] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full rounded-xl bg-decom-blue px-5 py-3.5 text-sm font-bold text-white transition hover:bg-decom-blue-hover disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loading
                     ? "Procesando..."
@@ -278,12 +278,12 @@ export default function InvitationActivationForm({
               </form>
 
               {message ? (
-                <p role="status" className="mt-5 rounded-xl bg-slate-100 p-4 text-sm leading-6 text-slate-700">
+                <p role="status" className="mt-5 rounded-xl bg-surface-muted p-4 text-sm leading-6 text-foreground">
                   {message}
                 </p>
               ) : null}
 
-              <p className="mt-6 text-xs leading-5 text-slate-500">
+              <p className="mt-6 text-xs leading-5 text-muted-fg">
                 La activación solo se completa si la solicitud está aprobada,
                 el correo está confirmado y coincide con el registrado.
               </p>

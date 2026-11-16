@@ -107,16 +107,16 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-semibold text-slate-700">{label}</span>
+      <span className="mb-1.5 block text-sm font-semibold text-foreground">{label}</span>
       {children}
-      {hint && <span className="mt-1 block text-xs text-slate-500">{hint}</span>}
+      {hint && <span className="mt-1 block text-xs text-muted-fg">{hint}</span>}
     </label>
   );
 }
 const inputClass =
-  "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-800 outline-none transition focus:border-[#087DB5] focus:ring-2 focus:ring-sky-100";
+  "w-full rounded-xl border border-line bg-surface px-3.5 py-3 text-sm text-foreground outline-none transition focus:border-decom-blue focus:ring-2 focus:ring-sky-100";
 const buttonClass =
-  "rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#066895] disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white transition hover:bg-decom-blue-hover disabled:cursor-not-allowed disabled:opacity-50";
 
 export default function AcademicPlannerPage() {
   const router = useRouter();
@@ -559,35 +559,35 @@ export default function AcademicPlannerPage() {
   const selectedType = materialTypes.find((t) => t.value === materialType)!;
   if (loading)
     return (
-      <main className="grid min-h-screen place-items-center bg-[#F4F7FA] text-sm text-slate-500">
+      <main className="grid min-h-screen place-items-center bg-background text-sm text-muted-fg">
         Preparando planner académico...
       </main>
     );
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
+    <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[.2em] text-[#087DB5]">
+            <p className="text-xs font-bold uppercase tracking-[.2em] text-decom-blue-text">
               Academia DECOM · Docencia
             </p>
             <h1 className="mt-2 text-3xl font-bold">Planner académico</h1>
-            <p className="mt-2 max-w-3xl text-sm text-slate-500">
+            <p className="mt-2 max-w-3xl text-sm text-muted-fg">
               Planea la sesión, organiza la enseñanza y reúne los recursos de cada lección en un
               solo lugar.
             </p>
           </div>
           <button
             onClick={() => router.push("/dashboard/espacio")}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold"
+            className="rounded-xl border border-line bg-surface px-4 py-3 text-sm font-semibold"
           >
             Volver a mi espacio
           </button>
         </header>
 
-        <section className="mt-7 rounded-3xl bg-[#102D4D] p-6 text-white sm:p-8">
-          <p className="text-xs font-bold uppercase tracking-[.18em] text-[#55D1C4]">
+        <section className="mt-7 rounded-3xl bg-decom-navy p-6 text-white sm:p-8">
+          <p className="text-xs font-bold uppercase tracking-[.18em] text-decom-teal-light">
             Ruta de preparación
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-5">
@@ -599,7 +599,7 @@ export default function AcademicPlannerPage() {
               "Revisar y guardar",
             ].map((s, i) => (
               <div key={s} className="rounded-xl border border-white/15 bg-white/5 p-3">
-                <span className="text-xs text-[#55D1C4]">0{i + 1}</span>
+                <span className="text-xs text-decom-teal-light">0{i + 1}</span>
                 <p className="mt-1 text-sm font-semibold">{s}</p>
               </div>
             ))}
@@ -623,9 +623,9 @@ export default function AcademicPlannerPage() {
           </div>
         )}
 
-        <section className="mt-7 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+        <section className="mt-7 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-7">
           <h2 className="text-lg font-bold">1. Ubicación curricular</h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-fg">
             Selecciona el distrito y la ruta formativa donde quedará organizada la clase.
           </p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -718,15 +718,15 @@ export default function AcademicPlannerPage() {
           )}
         </section>
 
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+        <section className="mt-6 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-7">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold">Agenda de planificación</h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-muted-fg">
                 Sesiones registradas en el distrito, con fecha, tema y estado de revisión.
               </p>
             </div>
-            <span className="rounded-full bg-sky-50 px-3 py-1.5 text-xs font-bold text-[#087DB5]">
+            <span className="rounded-full bg-sky-50 px-3 py-1.5 text-xs font-bold text-decom-blue-text">
               {agenda.length} plan(es)
             </span>
           </div>
@@ -734,7 +734,7 @@ export default function AcademicPlannerPage() {
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-[620px] text-left text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-500">
+                  <tr className="border-b border-line-soft text-xs uppercase tracking-wide text-muted-fg">
                     <th className="py-3 pr-4">Fecha</th>
                     <th className="py-3 pr-4">Clase / tema</th>
                     <th className="py-3 pr-4">Duración</th>
@@ -744,20 +744,20 @@ export default function AcademicPlannerPage() {
                 <tbody>
                   {agenda.map((item) => (
                     <tr key={item.id} className="border-b border-slate-50">
-                      <td className="py-3 pr-4 text-slate-600">
+                      <td className="py-3 pr-4 text-muted-fg">
                         {item.planned_for
                           ? new Date(item.planned_for + "T12:00:00").toLocaleDateString("es-CO")
                           : "Sin fecha"}
                       </td>
                       <td className="py-3 pr-4">
-                        <p className="font-semibold text-slate-800">{item.session_title}</p>
-                        <p className="mt-0.5 text-xs text-slate-500">{item.topic}</p>
+                        <p className="font-semibold text-foreground">{item.session_title}</p>
+                        <p className="mt-0.5 text-xs text-muted-fg">{item.topic}</p>
                       </td>
-                      <td className="py-3 pr-4 text-slate-600">
+                      <td className="py-3 pr-4 text-muted-fg">
                         {item.estimated_minutes ? item.estimated_minutes + " min" : "—"}
                       </td>
                       <td className="py-3">
-                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                        <span className="rounded-full bg-surface-muted px-2.5 py-1 text-xs font-semibold text-foreground">
                           {item.status === "approved"
                             ? "Aprobado"
                             : item.status === "review"
@@ -771,7 +771,7 @@ export default function AcademicPlannerPage() {
               </table>
             </div>
           ) : (
-            <p className="mt-4 rounded-xl border border-dashed border-slate-200 p-5 text-center text-sm text-slate-500">
+            <p className="mt-4 rounded-xl border border-dashed border-line p-5 text-center text-sm text-muted-fg">
               Aún no hay clases planificadas en este distrito. Crea la primera desde el formulario.
             </p>
           )}
@@ -788,9 +788,9 @@ export default function AcademicPlannerPage() {
                 </div>
               )}
               <div className="space-y-6">
-                <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+                <section className="rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-7">
                   <h2 className="text-lg font-bold">2. Diseña la sesión de clase</h2>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-muted-fg">
                     Define el asunto, propósito y enfoque pedagógico de la lección seleccionada.
                   </p>
                   {(selectedLesson.summary || selectedLesson.objectives.length > 0) && (
@@ -908,9 +908,9 @@ export default function AcademicPlannerPage() {
                   </div>
                 </section>
 
-                <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+                <section className="rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-7">
                   <h2 className="text-lg font-bold">3. Secuencia didáctica</h2>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-muted-fg">
                     Ayuda al tutor a conducir la sesión con una apertura, desarrollo y cierre.
                   </p>
                   <div className="mt-5 space-y-4">
@@ -965,16 +965,16 @@ export default function AcademicPlannerPage() {
                   <button disabled={saving} className={buttonClass}>
                     {saving ? "Guardando..." : "Guardar planificación"}
                   </button>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-muted-fg">
                     El plan se conserva como borrador o se envía a revisión.
                   </span>
                 </div>
               </div>
 
               <aside className="space-y-6">
-                <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+                <section className="rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6">
                   <h2 className="text-lg font-bold">4. Materiales de apoyo</h2>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-muted-fg">
                     Añade guías, archivos y recursos vinculados a esta lección.
                   </p>
                   <div className="mt-4 space-y-4">
@@ -1040,7 +1040,7 @@ export default function AcademicPlannerPage() {
                       >
                         <input
                           type="file"
-                          className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-sky-50 file:px-3 file:py-2 file:font-semibold file:text-[#087DB5]"
+                          className="block w-full text-sm text-muted-fg file:mr-3 file:rounded-lg file:border-0 file:bg-sky-50 file:px-3 file:py-2 file:font-semibold file:text-decom-blue-text"
                           accept={selectedType.accept}
                           onChange={(e: ChangeEvent<HTMLInputElement>) =>
                             setSelectedFile(e.target.files?.[0] ?? null)
@@ -1052,29 +1052,29 @@ export default function AcademicPlannerPage() {
                       type="button"
                       onClick={() => void addMaterial()}
                       disabled={uploading}
-                      className="w-full rounded-xl border border-[#087DB5] px-4 py-3 text-sm font-semibold text-[#087DB5] disabled:opacity-50"
+                      className="w-full rounded-xl border border-decom-blue px-4 py-3 text-sm font-semibold text-decom-blue-text disabled:opacity-50"
                     >
                       {uploading ? "Agregando material..." : "Agregar material al borrador"}
                     </button>
                   </div>
-                  <div className="mt-6 border-t border-slate-100 pt-5">
+                  <div className="mt-6 border-t border-line-soft pt-5">
                     <h3 className="font-bold">Recursos de esta lección ({materials.length})</h3>
                     <div className="mt-3 space-y-2">
                       {materials.length ? (
                         materials.map((m) => (
                           <div
                             key={m.id}
-                            className="flex items-start justify-between gap-3 rounded-xl bg-slate-50 p-3"
+                            className="flex items-start justify-between gap-3 rounded-xl bg-surface-muted p-3"
                           >
                             <div className="min-w-0">
                               <p className="truncate text-sm font-semibold">{m.title}</p>
-                              <p className="mt-1 text-xs text-slate-500">
+                              <p className="mt-1 text-xs text-muted-fg">
                                 {materialTypes.find((t) => t.value === m.material_type)?.label ??
                                   m.material_type}{" "}
                                 · {m.status === "published" ? "Publicado" : "Borrador"}
                               </p>
                               {m.description && (
-                                <p className="mt-1 text-xs text-slate-500">{m.description}</p>
+                                <p className="mt-1 text-xs text-muted-fg">{m.description}</p>
                               )}
                             </div>
                             {m.status === "draft" && (
@@ -1089,7 +1089,7 @@ export default function AcademicPlannerPage() {
                           </div>
                         ))
                       ) : (
-                        <p className="rounded-xl border border-dashed border-slate-200 p-4 text-center text-sm text-slate-500">
+                        <p className="rounded-xl border border-dashed border-line p-4 text-center text-sm text-muted-fg">
                           Todavía no hay materiales adjuntos.
                         </p>
                       )}
@@ -1097,9 +1097,9 @@ export default function AcademicPlannerPage() {
                   </div>
                 </section>
 
-                <section className="rounded-2xl border border-[#19A7A0]/30 bg-[#19A7A0]/5 p-5">
+                <section className="rounded-2xl border border-decom-teal/30 bg-decom-teal/5 p-5">
                   <h2 className="font-bold">5. Estado de la planificación</h2>
-                  <p className="mt-1 text-sm text-slate-600">
+                  <p className="mt-1 text-sm text-muted-fg">
                     Guarda el trabajo como borrador o remítelo a revisión académica.
                   </p>
                   <div className="mt-4 space-y-3">
@@ -1113,7 +1113,7 @@ export default function AcademicPlannerPage() {
                         </p>
                       </div>
                     )}
-                    <label className="flex items-start gap-3 rounded-xl bg-white p-3">
+                    <label className="flex items-start gap-3 rounded-xl bg-surface p-3">
                       <input
                         type="radio"
                         name="plan-status"
@@ -1122,12 +1122,12 @@ export default function AcademicPlannerPage() {
                       />
                       <span>
                         <b className="block text-sm">Guardar borrador</b>
-                        <small className="text-xs text-slate-500">
+                        <small className="text-xs text-muted-fg">
                           Conserva el trabajo para seguir editándolo.
                         </small>
                       </span>
                     </label>
-                    <label className="flex items-start gap-3 rounded-xl bg-white p-3">
+                    <label className="flex items-start gap-3 rounded-xl bg-surface p-3">
                       <input
                         type="radio"
                         name="plan-status"
@@ -1136,13 +1136,13 @@ export default function AcademicPlannerPage() {
                       />
                       <span>
                         <b className="block text-sm">Enviar a revisión</b>
-                        <small className="text-xs text-slate-500">
+                        <small className="text-xs text-muted-fg">
                           Queda pendiente de validación académica.
                         </small>
                       </span>
                     </label>
                     {plan.status === "approved" && (
-                      <p className="rounded-xl bg-white p-3 text-sm text-teal-800">
+                      <p className="rounded-xl bg-surface p-3 text-sm text-teal-800">
                         Esta planificación ya está aprobada.
                       </p>
                     )}
@@ -1152,7 +1152,7 @@ export default function AcademicPlannerPage() {
             </fieldset>
           </form>
         )}
-        <footer className="py-9 text-center text-xs text-slate-400">
+        <footer className="py-9 text-center text-xs text-muted-fg">
           Academia DECOM · Planificación pedagógica y recursos de aprendizaje.
         </footer>
       </div>

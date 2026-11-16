@@ -110,24 +110,24 @@ export default function StudentAchievementsPage() {
 
   if (access === "checking")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]">
-        <p className="text-sm text-slate-500">Verificando tu acceso...</p>
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-sm text-muted-fg">Verificando tu acceso...</p>
       </main>
     );
   if (access !== "allowed")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6">
-        <section className="max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center">
-          <h1 className="text-xl font-bold text-[#102D4D]">
+      <main className="flex min-h-screen items-center justify-center bg-background px-6">
+        <section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center">
+          <h1 className="text-xl font-bold text-foreground">
             {access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}
           </h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-fg">
             Esta sección está habilitada para estudiantes con una asignación vigente.
           </p>
           <button
             type="button"
             onClick={() => router.push("/dashboard/estudiante")}
-            className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white"
+            className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
           >
             Volver al panel
           </button>
@@ -136,19 +136,19 @@ export default function StudentAchievementsPage() {
     );
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
-      <header className="border-b border-slate-200 bg-white">
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 md:px-8">
           <div>
-            <p className="text-xs font-extrabold tracking-[0.14em] text-[#087DB5]">
+            <p className="text-xs font-extrabold tracking-[0.14em] text-decom-blue-text">
               ACADEMIA DECOM
             </p>
-            <p className="mt-1 text-xs text-slate-400">Reconocimientos y logros</p>
+            <p className="mt-1 text-xs text-muted-fg">Reconocimientos y logros</p>
           </div>
           <button
             type="button"
             onClick={() => router.push("/dashboard/estudiante")}
-            className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600"
+            className="rounded-xl border border-line px-4 py-2.5 text-xs font-semibold text-muted-fg"
           >
             ← Panel del estudiante
           </button>
@@ -157,11 +157,11 @@ export default function StudentAchievementsPage() {
       <div className="mx-auto max-w-6xl space-y-7 px-5 py-7 pb-12 md:px-8 md:py-9">
         <section className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#19A7A0]">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-decom-teal-text">
               Tu recorrido
             </p>
             <h1 className="mt-2 text-2xl font-extrabold md:text-3xl">Reconocimientos</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-fg">
               Cada avance refleja tu compromiso con una comunicación responsable y con propósito.
             </p>
           </div>
@@ -170,22 +170,22 @@ export default function StudentAchievementsPage() {
           </span>
         </section>
         <section className="grid gap-4 sm:grid-cols-3">
-          <article className="rounded-2xl border border-slate-200 bg-white p-5">
-            <p className="text-xs font-semibold text-slate-400">Logros obtenidos</p>
+          <article className="rounded-2xl border border-line bg-surface p-5">
+            <p className="text-xs font-semibold text-muted-fg">Logros obtenidos</p>
             <p className="mt-2 text-3xl font-extrabold">
               {earned.length}
-              <span className="text-base font-semibold text-slate-400">
+              <span className="text-base font-semibold text-muted-fg">
                 {" "}
                 / {achievements.length}
               </span>
             </p>
           </article>
-          <article className="rounded-2xl border border-slate-200 bg-white p-5">
-            <p className="text-xs font-semibold text-slate-400">Puntos acumulados</p>
+          <article className="rounded-2xl border border-line bg-surface p-5">
+            <p className="text-xs font-semibold text-muted-fg">Puntos acumulados</p>
             <p className="mt-2 text-3xl font-extrabold">{points}</p>
           </article>
-          <article className="rounded-2xl border border-slate-200 bg-white p-5">
-            <p className="text-xs font-semibold text-slate-400">Certificados emitidos</p>
+          <article className="rounded-2xl border border-line bg-surface p-5">
+            <p className="text-xs font-semibold text-muted-fg">Certificados emitidos</p>
             <p className="mt-2 text-3xl font-extrabold">0</p>
           </article>
         </section>
@@ -193,38 +193,38 @@ export default function StudentAchievementsPage() {
           <div className="flex items-end justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold">Insignias</h2>
-              <p className="mt-1 text-xs text-slate-400">Logros obtenidos y próximos objetivos.</p>
+              <p className="mt-1 text-xs text-muted-fg">Logros obtenidos y próximos objetivos.</p>
             </div>
-            <span className="text-xs font-semibold text-slate-500">{earned.length} obtenidas</span>
+            <span className="text-xs font-semibold text-muted-fg">{earned.length} obtenidas</span>
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {achievements.map((item) => (
               <article
                 key={item.title}
-                className={`rounded-2xl border p-5 ${item.earned ? "border-slate-200 bg-white shadow-sm" : "border-dashed border-slate-300 bg-slate-50/70"}`}
+                className={`rounded-2xl border p-5 ${item.earned ? "border-line bg-surface shadow-sm" : "border-dashed border-line bg-slate-50/70"}`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-2xl text-2xl ${item.earned ? "bg-[#E5F2F8] text-[#087DB5]" : "bg-slate-200 text-slate-400"}`}
+                    className={`flex h-12 w-12 items-center justify-center rounded-2xl text-2xl ${item.earned ? "bg-decom-blue-soft text-decom-blue-text" : "bg-slate-200 text-muted-fg"}`}
                   >
                     {item.symbol}
                   </div>
                   <span
-                    className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${item.earned ? "bg-teal-50 text-teal-700" : "bg-slate-200 text-slate-500"}`}
+                    className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${item.earned ? "bg-teal-50 text-teal-700" : "bg-slate-200 text-muted-fg"}`}
                   >
                     {item.earned ? "Obtenida" : "Por desbloquear"}
                   </span>
                 </div>
                 <h3 className="mt-4 text-sm font-bold">{item.title}</h3>
-                <p className="mt-2 min-h-10 text-xs leading-5 text-slate-500">{item.description}</p>
-                <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
-                  <span className="text-[10px] font-semibold text-slate-400">{item.category}</span>
-                  <span className="text-xs font-bold text-[#087DB5]">{item.points} XP</span>
+                <p className="mt-2 min-h-10 text-xs leading-5 text-muted-fg">{item.description}</p>
+                <div className="mt-4 flex items-center justify-between border-t border-line-soft pt-3">
+                  <span className="text-[10px] font-semibold text-muted-fg">{item.category}</span>
+                  <span className="text-xs font-bold text-decom-blue-text">{item.points} XP</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelected(item.title)}
-                  className="mt-3 text-xs font-semibold text-[#087DB5] hover:underline"
+                  className="mt-3 text-xs font-semibold text-decom-blue-text hover:underline"
                 >
                   Ver detalle →
                 </button>
@@ -232,33 +232,33 @@ export default function StudentAchievementsPage() {
             ))}
           </div>
         </section>
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-7">
+        <section className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-7">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-fg">
                 Certificación académica
               </p>
               <h2 className="mt-1 text-lg font-bold">Mis certificados</h2>
             </div>
-            <span className="rounded-full bg-slate-100 px-3 py-1.5 text-[10px] font-bold text-slate-500">
+            <span className="rounded-full bg-surface-muted px-3 py-1.5 text-[10px] font-bold text-muted-fg">
               Sin certificados emitidos
             </span>
           </div>
-          <div className="mt-5 rounded-2xl border border-dashed border-slate-200 bg-[#F8FAFC] p-6 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-2xl text-slate-400">
+          <div className="mt-5 rounded-2xl border border-dashed border-line bg-surface-muted p-6 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-muted text-2xl text-muted-fg">
               ♧
             </div>
             <h3 className="mt-4 text-sm font-bold">Tu primer certificado está por venir</h3>
-            <p className="mx-auto mt-2 max-w-lg text-xs leading-5 text-slate-500">
+            <p className="mx-auto mt-2 max-w-lg text-xs leading-5 text-muted-fg">
               Cuando completes los requisitos de un programa y el sistema valide tu aprobación, aquí
               aparecerá el certificado oficial con identificador único y código QR verificable.
             </p>
-            <p className="mt-4 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            <p className="mt-4 text-[10px] font-semibold uppercase tracking-wider text-muted-fg">
               La emisión y verificación QR aún no están conectadas
             </p>
           </div>
         </section>
-        <p className="text-[11px] leading-5 text-slate-400">
+        <p className="text-[11px] leading-5 text-muted-fg">
           Las insignias y los puntos son ilustrativos. No se han asignado XP reales ni emitido
           certificados. La información se reemplazará por datos académicos autorizados.
         </p>
@@ -269,23 +269,23 @@ export default function StudentAchievementsPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="achievement-title"
-            className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
+            className="w-full max-w-md rounded-3xl bg-surface p-6 shadow-2xl"
           >
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E5F2F8] text-2xl text-[#087DB5]">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-decom-blue-soft text-2xl text-decom-blue-text">
               {activeAchievement.symbol}
             </div>
             <h2 id="achievement-title" className="mt-4 text-lg font-bold">
               {activeAchievement.title}
             </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">{activeAchievement.description}</p>
-            <p className="mt-4 text-xs font-bold text-[#087DB5]">
+            <p className="mt-2 text-sm leading-6 text-muted-fg">{activeAchievement.description}</p>
+            <p className="mt-4 text-xs font-bold text-decom-blue-text">
               {activeAchievement.points} XP ·{" "}
               {activeAchievement.earned ? "Obtenida en esta demostración" : "Objetivo pendiente"}
             </p>
             <button
               type="button"
               onClick={() => setSelected(null)}
-              className="mt-6 w-full rounded-xl bg-[#087DB5] px-4 py-3 text-sm font-semibold text-white"
+              className="mt-6 w-full rounded-xl bg-decom-blue px-4 py-3 text-sm font-semibold text-white"
             >
               Cerrar
             </button>

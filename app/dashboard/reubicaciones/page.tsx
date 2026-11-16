@@ -96,9 +96,9 @@ function statusClasses(status: string) {
     case "maintained":
       return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300";
     case "ended":
-      return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+      return "bg-surface-muted text-foreground ";
     default:
-      return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+      return "bg-surface-muted text-foreground ";
   }
 }
 
@@ -525,10 +525,10 @@ export default function ReubicacionesPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+      <main className="flex min-h-screen items-center justify-center bg-surface-muted">
         <div className="text-center">
           <div className="mx-auto mb-3 h-9 w-9 animate-spin rounded-full border-4 border-sky-200 border-t-sky-700" />
-          <p className="text-sm text-slate-600 dark:text-slate-300">
+          <p className="text-sm text-muted-fg">
             Cargando módulo de reubicaciones...
           </p>
         </div>
@@ -541,7 +541,7 @@ export default function ReubicacionesPage() {
   // =========================================================
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 dark:bg-slate-950 sm:px-8">
+    <main className="min-h-screen bg-surface-muted px-4 py-8 sm:px-8">
       <div className="mx-auto max-w-6xl">
         {/* ENCABEZADO */}
 
@@ -559,20 +559,20 @@ export default function ReubicacionesPage() {
                 Administración institucional
               </p>
 
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">
                 Reubicación de creyentes
               </h1>
 
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400">
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-fg">
                 Gestiona los traslados de creyentes entre congregaciones, conservando su historial
                 institucional y sus asignaciones.
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
-              <p className="text-xs text-slate-500 dark:text-slate-400">Alcance de tu acceso</p>
+            <div className="rounded-xl border border-line bg-surface px-4 py-3 ">
+              <p className="text-xs text-muted-fg">Alcance de tu acceso</p>
 
-              <p className="mt-1 font-semibold text-slate-800 dark:text-white">
+              <p className="mt-1 font-semibold text-foreground">
                 {isNationalAdmin
                   ? "Administración nacional"
                   : isDistrictCoordinator
@@ -599,14 +599,14 @@ export default function ReubicacionesPage() {
 
         {/* PESTAÑAS */}
 
-        <div className="mb-6 flex flex-wrap gap-2 border-b border-slate-200 pb-3 dark:border-slate-800">
+        <div className="mb-6 flex flex-wrap gap-2 border-b border-line pb-3">
           <button
             type="button"
             onClick={() => changeTab("transfer")}
             className={`rounded-xl px-4 py-3 text-sm font-semibold transition ${
               activeTab === "transfer"
-                ? "bg-sky-700 text-white"
-                : "bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                ? "bg-decom-blue text-white"
+                : "bg-surface text-muted-fg hover:bg-surface-muted "
             }`}
           >
             Nuevo traslado
@@ -617,8 +617,8 @@ export default function ReubicacionesPage() {
             onClick={() => changeTab("history")}
             className={`rounded-xl px-4 py-3 text-sm font-semibold transition ${
               activeTab === "history"
-                ? "bg-sky-700 text-white"
-                : "bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                ? "bg-decom-blue text-white"
+                : "bg-surface text-muted-fg hover:bg-surface-muted "
             }`}
           >
             Historial
@@ -629,8 +629,8 @@ export default function ReubicacionesPage() {
             onClick={() => changeTab("reviews")}
             className={`rounded-xl px-4 py-3 text-sm font-semibold transition ${
               activeTab === "reviews"
-                ? "bg-sky-700 text-white"
-                : "bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                ? "bg-decom-blue text-white"
+                : "bg-surface text-muted-fg hover:bg-surface-muted "
             }`}
           >
             Responsabilidades
@@ -663,13 +663,13 @@ export default function ReubicacionesPage() {
 
         {activeTab === "transfer" && (
           <>
-            <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-7">
+            <section className="mb-6 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-7">
               <div className="mb-5">
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                <h2 className="text-lg font-bold text-foreground">
                   1. Buscar creyente
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                <p className="mt-1 text-sm text-muted-fg">
                   Busca por nombre o número de teléfono. Solo aparecen perfiles y membresías activos
                   dentro de tu ámbito autorizado.
                 </p>
@@ -687,13 +687,13 @@ export default function ReubicacionesPage() {
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder="Nombre o número de teléfono..."
-                  className="min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-600 focus:ring-2 focus:ring-sky-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-sky-900"
+                  className="min-w-0 flex-1 rounded-xl border border-line bg-surface px-4 py-3 text-sm text-foreground outline-none transition focus:border-sky-600 focus:ring-2 focus:ring-sky-100 dark:focus:ring-sky-900"
                 />
 
                 <button
                   type="submit"
                   disabled={searching}
-                  className="rounded-xl bg-sky-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-xl bg-decom-blue px-6 py-3 text-sm font-semibold text-white transition hover:bg-decom-blue-hover disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {searching ? "Buscando..." : "Buscar creyente"}
                 </button>
@@ -701,19 +701,19 @@ export default function ReubicacionesPage() {
             </section>
 
             {results.length > 0 && (
-              <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-7">
+              <section className="mb-6 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-7">
                 <div className="mb-5 flex items-center justify-between gap-3">
                   <div>
-                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                    <h2 className="text-lg font-bold text-foreground">
                       2. Resultados de búsqueda
                     </h2>
 
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    <p className="mt-1 text-sm text-muted-fg">
                       Selecciona el creyente que deseas reubicar.
                     </p>
                   </div>
 
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                  <span className="rounded-full bg-surface-muted px-3 py-1 text-xs font-semibold text-foreground ">
                     {results.length} resultado(s)
                   </span>
                 </div>
@@ -735,30 +735,30 @@ export default function ReubicacionesPage() {
                         className={`w-full rounded-xl border p-4 text-left transition ${
                           isSelected
                             ? "border-sky-600 bg-sky-50 ring-2 ring-sky-100 dark:border-sky-500 dark:bg-sky-950/40 dark:ring-sky-900"
-                            : "border-slate-200 hover:border-sky-300 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
+                            : "border-line hover:border-sky-300 hover:bg-surface-muted "
                         }`}
                       >
                         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                           <div>
-                            <p className="font-semibold text-slate-900 dark:text-white">
+                            <p className="font-semibold text-foreground">
                               {member.full_name || "Nombre no registrado"}
                             </p>
 
-                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                            <p className="mt-1 text-sm text-muted-fg">
                               {member.phone || "Sin teléfono registrado"}
                             </p>
 
-                            <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
+                            <p className="mt-2 text-sm text-foreground">
                               Congregación: <strong>{member.congregation_name}</strong>
                             </p>
 
-                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                            <p className="text-sm text-muted-fg">
                               Distrito: {member.district_name}
                             </p>
                           </div>
 
                           <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end">
-                            <span className="text-xs text-slate-500 dark:text-slate-400">
+                            <span className="text-xs text-muted-fg">
                               Asignaciones activas a áreas:{" "}
                               <strong>{member.active_area_assignments}</strong>
                             </span>
@@ -767,7 +767,7 @@ export default function ReubicacionesPage() {
                               className={`text-xs font-semibold ${
                                 isSelected
                                   ? "text-sky-700 dark:text-sky-300"
-                                  : "text-slate-500 dark:text-slate-400"
+                                  : "text-muted-fg"
                               }`}
                             >
                               {isSelected ? "Seleccionado ✓" : "Seleccionar →"}
@@ -782,27 +782,27 @@ export default function ReubicacionesPage() {
             )}
 
             {selected && (
-              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-7">
+              <section className="rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-7">
                 <div className="mb-6">
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                  <h2 className="text-lg font-bold text-foreground">
                     3. Configurar traslado
                   </h2>
 
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  <p className="mt-1 text-sm text-muted-fg">
                     Revisa la información y selecciona la congregación de destino.
                   </p>
                 </div>
 
-                <div className="mb-5 rounded-xl bg-slate-50 p-4 dark:bg-slate-950">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                <div className="mb-5 rounded-xl bg-surface-muted p-4">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-fg">
                     Congregación de origen
                   </p>
 
-                  <p className="font-semibold text-slate-900 dark:text-white">
+                  <p className="font-semibold text-foreground">
                     {selected.congregation_name}
                   </p>
 
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <p className="text-sm text-muted-fg">
                     {selected.district_name}
                   </p>
                 </div>
@@ -810,7 +810,7 @@ export default function ReubicacionesPage() {
                 <div className="mb-5">
                   <label
                     htmlFor="destination"
-                    className="mb-2 block text-sm font-semibold text-slate-800 dark:text-slate-200"
+                    className="mb-2 block text-sm font-semibold text-foreground"
                   >
                     Congregación de destino
                   </label>
@@ -819,7 +819,7 @@ export default function ReubicacionesPage() {
                     id="destination"
                     value={destinationId}
                     onChange={(event) => setDestinationId(event.target.value)}
-                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                    className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm text-foreground outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 "
                   >
                     <option value="">Seleccionar congregación...</option>
 
@@ -840,7 +840,7 @@ export default function ReubicacionesPage() {
                 <div className="mb-6">
                   <label
                     htmlFor="observations"
-                    className="mb-2 block text-sm font-semibold text-slate-800 dark:text-slate-200"
+                    className="mb-2 block text-sm font-semibold text-foreground"
                   >
                     Observaciones (opcional)
                   </label>
@@ -852,10 +852,10 @@ export default function ReubicacionesPage() {
                     onChange={(event) => setObservations(event.target.value)}
                     placeholder="Motivo del traslado u observaciones adicionales..."
                     maxLength={1000}
-                    className="w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                    className="w-full resize-y rounded-xl border border-line bg-surface px-4 py-3 text-sm text-foreground outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 "
                   />
 
-                  <p className="mt-1 text-right text-xs text-slate-400">
+                  <p className="mt-1 text-right text-xs text-muted-fg">
                     {observations.length}/1000
                   </p>
                 </div>
@@ -882,7 +882,7 @@ export default function ReubicacionesPage() {
                       setErrorMessage("");
                     }}
                     disabled={transferring}
-                    className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                    className="rounded-xl border border-line px-5 py-3 text-sm font-semibold text-foreground hover:bg-surface-muted disabled:opacity-50 "
                   >
                     Cancelar
                   </button>
@@ -891,7 +891,7 @@ export default function ReubicacionesPage() {
                     type="button"
                     onClick={executeTransfer}
                     disabled={!destinationId || transferring}
-                    className="rounded-xl bg-sky-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-xl bg-decom-blue px-6 py-3 text-sm font-semibold text-white transition hover:bg-decom-blue-hover disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {transferring ? "Procesando traslado..." : "Confirmar reubicación"}
                   </button>
@@ -906,14 +906,14 @@ export default function ReubicacionesPage() {
         {/* ================================================= */}
 
         {activeTab === "history" && (
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-7">
+          <section className="rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-7">
             <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
               <div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                <h2 className="text-lg font-bold text-foreground">
                   Historial de traslados
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                <p className="mt-1 text-sm text-muted-fg">
                   Consulta los movimientos institucionales y sus registros de responsabilidad.
                 </p>
               </div>
@@ -922,64 +922,64 @@ export default function ReubicacionesPage() {
                 type="button"
                 onClick={() => void loadHistory()}
                 disabled={loadingHistory}
-                className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                className="rounded-xl border border-line px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-surface-muted disabled:opacity-50 "
               >
                 {loadingHistory ? "Actualizando..." : "Actualizar historial"}
               </button>
             </div>
 
             {loadingHistory ? (
-              <p className="py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+              <p className="py-10 text-center text-sm text-muted-fg">
                 Cargando historial...
               </p>
             ) : history.length === 0 ? (
-              <div className="rounded-xl bg-slate-50 px-5 py-10 text-center dark:bg-slate-950">
-                <p className="font-semibold text-slate-700 dark:text-slate-200">
+              <div className="rounded-xl bg-surface-muted px-5 py-10 text-center">
+                <p className="font-semibold text-foreground">
                   No hay traslados registrados.
                 </p>
 
-                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                <p className="mt-2 text-sm text-muted-fg">
                   Cuando se realice una reubicación, aparecerá aquí su historial.
                 </p>
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="text-sm text-slate-500 dark:text-slate-400">
+                <div className="text-sm text-muted-fg">
                   {history.length} traslado(s) encontrado(s). Se muestran hasta 100 registros.
                 </div>
 
                 {history.map((item) => (
                   <article
                     key={item.transfer_id}
-                    className="rounded-xl border border-slate-200 p-4 dark:border-slate-700 sm:p-5"
+                    className="rounded-xl border border-line p-4 sm:p-5"
                   >
                     <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
                       <div>
-                        <h3 className="font-semibold text-slate-900 dark:text-white">
+                        <h3 className="font-semibold text-foreground">
                           {item.member_name || "Nombre no registrado"}
                         </h3>
 
-                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        <p className="mt-1 text-sm text-muted-fg">
                           {item.member_phone || "Sin teléfono registrado"}
                         </p>
                       </div>
 
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                      <span className="text-xs text-muted-fg">
                         {formatDate(item.created_at)}
                       </span>
                     </div>
 
                     <div className="my-4 grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-950">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      <div className="rounded-lg bg-surface-muted p-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-fg">
                           Origen
                         </p>
 
-                        <p className="mt-1 font-semibold text-slate-800 dark:text-slate-200">
+                        <p className="mt-1 font-semibold text-foreground">
                           {item.from_congregation_name}
                         </p>
 
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                        <p className="text-sm text-muted-fg">
                           {item.from_district_name}
                         </p>
                       </div>
@@ -989,32 +989,32 @@ export default function ReubicacionesPage() {
                           Destino
                         </p>
 
-                        <p className="mt-1 font-semibold text-slate-800 dark:text-slate-200">
+                        <p className="mt-1 font-semibold text-foreground">
                           {item.to_congregation_name}
                         </p>
 
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                        <p className="text-sm text-muted-fg">
                           {item.to_district_name}
                         </p>
                       </div>
                     </div>
 
                     <div className="grid gap-3 text-sm sm:grid-cols-2">
-                      <p className="text-slate-600 dark:text-slate-300">
+                      <p className="text-muted-fg">
                         Responsable:{" "}
-                        <strong className="text-slate-800 dark:text-white">
+                        <strong className="text-foreground">
                           {item.performed_by_name || "No disponible"}
                         </strong>
                       </p>
 
-                      <p className="text-slate-600 dark:text-slate-300">
+                      <p className="text-muted-fg">
                         Revisiones de áreas:{" "}
-                        <strong className="text-slate-800 dark:text-white">
+                        <strong className="text-foreground">
                           {item.total_area_reviews}
                         </strong>
                       </p>
 
-                      <p className="text-slate-600 dark:text-slate-300">
+                      <p className="text-muted-fg">
                         Revisiones pendientes:{" "}
                         <strong className="text-amber-700 dark:text-amber-400">
                           {item.pending_area_reviews}
@@ -1023,18 +1023,18 @@ export default function ReubicacionesPage() {
                     </div>
 
                     {item.observations && (
-                      <div className="mt-4 rounded-lg border border-slate-200 p-3 dark:border-slate-700">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      <div className="mt-4 rounded-lg border border-line p-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-fg">
                           Observaciones
                         </p>
 
-                        <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">
+                        <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">
                           {item.observations}
                         </p>
                       </div>
                     )}
 
-                    <p className="mt-4 break-all text-xs text-slate-400">
+                    <p className="mt-4 break-all text-xs text-muted-fg">
                       Operación: {item.transfer_id}
                     </p>
                   </article>
@@ -1049,14 +1049,14 @@ export default function ReubicacionesPage() {
         {/* ================================================= */}
 
         {activeTab === "reviews" && (
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-7">
+          <section className="rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-7">
             <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
               <div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                <h2 className="text-lg font-bold text-foreground">
                   Revisión de responsabilidades
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                <p className="mt-1 text-sm text-muted-fg">
                   Evalúa las asignaciones a áreas de los creyentes después de su traslado.
                 </p>
               </div>
@@ -1065,7 +1065,7 @@ export default function ReubicacionesPage() {
                 type="button"
                 onClick={() => void loadReviews(reviewFilter)}
                 disabled={loadingReviews}
-                className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                className="rounded-xl border border-line px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-surface-muted disabled:opacity-50 "
               >
                 {loadingReviews ? "Actualizando..." : "Actualizar"}
               </button>
@@ -1074,7 +1074,7 @@ export default function ReubicacionesPage() {
             <div className="mb-6">
               <label
                 htmlFor="review-filter"
-                className="mb-2 block text-sm font-semibold text-slate-800 dark:text-slate-200"
+                className="mb-2 block text-sm font-semibold text-foreground"
               >
                 Filtrar revisiones
               </label>
@@ -1083,7 +1083,7 @@ export default function ReubicacionesPage() {
                 id="review-filter"
                 value={reviewFilter}
                 onChange={(event) => changeReviewFilter(event.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-sky-600 dark:border-slate-700 dark:bg-slate-950 dark:text-white sm:max-w-xs"
+                className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm text-foreground outline-none focus:border-sky-600 sm:max-w-xs"
               >
                 <option value="pending">Pendientes</option>
                 <option value="maintained">Responsabilidades mantenidas</option>
@@ -1093,16 +1093,16 @@ export default function ReubicacionesPage() {
             </div>
 
             {loadingReviews ? (
-              <p className="py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+              <p className="py-10 text-center text-sm text-muted-fg">
                 Cargando revisiones...
               </p>
             ) : reviews.length === 0 ? (
-              <div className="rounded-xl bg-slate-50 px-5 py-10 text-center dark:bg-slate-950">
-                <p className="font-semibold text-slate-700 dark:text-slate-200">
+              <div className="rounded-xl bg-surface-muted px-5 py-10 text-center">
+                <p className="font-semibold text-foreground">
                   No hay revisiones en esta categoría.
                 </p>
 
-                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                <p className="mt-2 text-sm text-muted-fg">
                   Las asignaciones activas de área generarán revisiones cuando se realicen
                   traslados.
                 </p>
@@ -1116,15 +1116,15 @@ export default function ReubicacionesPage() {
                   return (
                     <article
                       key={review.review_id}
-                      className="rounded-xl border border-slate-200 p-4 dark:border-slate-700 sm:p-5"
+                      className="rounded-xl border border-line p-4 sm:p-5"
                     >
                       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
                         <div>
-                          <h3 className="font-semibold text-slate-900 dark:text-white">
+                          <h3 className="font-semibold text-foreground">
                             {review.member_name || "Nombre no registrado"}
                           </h3>
 
-                          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                          <p className="mt-1 text-sm text-muted-fg">
                             {review.member_phone || "Sin teléfono registrado"}
                           </p>
                         </div>
@@ -1136,51 +1136,51 @@ export default function ReubicacionesPage() {
                         </span>
                       </div>
 
-                      <div className="mt-4 rounded-lg bg-slate-50 p-4 dark:bg-slate-950">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      <div className="mt-4 rounded-lg bg-surface-muted p-4">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-fg">
                           Área y responsabilidad
                         </p>
 
-                        <p className="mt-1 font-semibold text-slate-900 dark:text-white">
+                        <p className="mt-1 font-semibold text-foreground">
                           {review.area_name}
                         </p>
 
-                        <p className="text-sm text-slate-600 dark:text-slate-300">
+                        <p className="text-sm text-muted-fg">
                           Cargo o posición: {review.area_position || "No especificado"}
                         </p>
                       </div>
 
                       <div className="my-4 grid gap-3 sm:grid-cols-2">
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-muted-fg">
                             Congregación de origen
                           </p>
 
-                          <p className="mt-1 text-sm font-medium text-slate-800 dark:text-slate-200">
+                          <p className="mt-1 text-sm font-medium text-foreground">
                             {review.from_congregation_name}
                           </p>
 
-                          <p className="text-sm text-slate-500 dark:text-slate-400">
+                          <p className="text-sm text-muted-fg">
                             {review.from_district_name}
                           </p>
                         </div>
 
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-muted-fg">
                             Congregación de destino
                           </p>
 
-                          <p className="mt-1 text-sm font-medium text-slate-800 dark:text-slate-200">
+                          <p className="mt-1 text-sm font-medium text-foreground">
                             {review.to_congregation_name}
                           </p>
 
-                          <p className="text-sm text-slate-500 dark:text-slate-400">
+                          <p className="text-sm text-muted-fg">
                             {review.to_district_name}
                           </p>
                         </div>
                       </div>
 
-                      <div className="grid gap-2 text-sm text-slate-500 dark:text-slate-400 sm:grid-cols-2">
+                      <div className="grid gap-2 text-sm text-muted-fg sm:grid-cols-2">
                         <p>Fecha del traslado: {formatDate(review.transfer_date)}</p>
 
                         <p>Fecha de revisión: {formatDate(review.reviewed_at)}</p>
@@ -1189,22 +1189,22 @@ export default function ReubicacionesPage() {
                       </div>
 
                       {review.observations && (
-                        <div className="mt-4 rounded-lg border border-slate-200 p-3 dark:border-slate-700">
-                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        <div className="mt-4 rounded-lg border border-line p-3">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-muted-fg">
                             Observaciones de la revisión
                           </p>
 
-                          <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">
+                          <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">
                             {review.observations}
                           </p>
                         </div>
                       )}
 
                       {isPending && (
-                        <div className="mt-5 border-t border-slate-200 pt-5 dark:border-slate-700">
+                        <div className="mt-5 border-t border-line pt-5">
                           <label
                             htmlFor={`review-observations-${review.review_id}`}
-                            className="mb-2 block text-sm font-semibold text-slate-800 dark:text-slate-200"
+                            className="mb-2 block text-sm font-semibold text-foreground"
                           >
                             Observaciones de la decisión (opcional)
                           </label>
@@ -1217,7 +1217,7 @@ export default function ReubicacionesPage() {
                             maxLength={2000}
                             placeholder="Registra el motivo o las observaciones de esta decisión..."
                             disabled={Boolean(resolvingReviewId)}
-                            className="mb-4 w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-sky-600 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                            className="mb-4 w-full resize-y rounded-xl border border-line bg-surface px-4 py-3 text-sm text-foreground outline-none focus:border-sky-600 "
                           />
 
                           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
@@ -1225,7 +1225,7 @@ export default function ReubicacionesPage() {
                               type="button"
                               onClick={() => void resolveReview(review, "ended")}
                               disabled={Boolean(resolvingReviewId)}
-                              className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                              className="rounded-xl border border-line px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-surface-muted disabled:opacity-50 "
                             >
                               {isResolving ? "Procesando..." : "Finalizar responsabilidad"}
                             </button>
@@ -1234,7 +1234,7 @@ export default function ReubicacionesPage() {
                               type="button"
                               onClick={() => void resolveReview(review, "maintained")}
                               disabled={Boolean(resolvingReviewId)}
-                              className="rounded-xl bg-sky-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-800 disabled:opacity-50"
+                              className="rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white transition hover:bg-decom-blue-hover disabled:opacity-50"
                             >
                               {isResolving ? "Procesando..." : "Mantener responsabilidad"}
                             </button>
@@ -1251,8 +1251,8 @@ export default function ReubicacionesPage() {
 
         {/* PIE */}
 
-        <div className="mt-8 border-t border-slate-200 pt-5 dark:border-slate-800">
-          <p className="text-xs leading-6 text-slate-500 dark:text-slate-400">
+        <div className="mt-8 border-t border-line pt-5">
+          <p className="text-xs leading-6 text-muted-fg">
             Academia DECOM · Formación para comunicar con propósito. Los traslados se registran en
             el historial institucional. Las revisiones de asignaciones a áreas se gestionan de forma
             independiente.

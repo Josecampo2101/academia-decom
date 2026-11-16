@@ -252,34 +252,34 @@ export default function TutorDashboardPage() {
 
   if (access === "checking" || loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#087DB5]/20 border-t-[#087DB5]" />
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-decom-blue/20 border-t-decom-blue" />
       </main>
     );
   }
 
   if (access !== "allowed") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6">
-        <section className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center">
-          <h1 className="text-xl font-bold text-[#102D4D]">
+      <main className="flex min-h-screen items-center justify-center bg-background px-6">
+        <section className="w-full max-w-md rounded-3xl border border-line bg-surface p-8 text-center">
+          <h1 className="text-xl font-bold text-foreground">
             {access === "denied" ? "Acceso restringido" : "No fue posible abrir el panel"}
           </h1>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-2 text-sm leading-6 text-muted-fg">
             {error || "Este espacio está habilitado para tutores con acceso autorizado."}
           </p>
           <div className="mt-5 flex justify-center gap-2">
             <button
               type="button"
               onClick={() => void load()}
-              className="rounded-xl bg-[#087DB5] px-4 py-2.5 text-xs font-semibold text-white"
+              className="rounded-xl bg-decom-blue px-4 py-2.5 text-xs font-semibold text-white"
             >
               Reintentar
             </button>
             <button
               type="button"
               onClick={() => router.push("/dashboard")}
-              className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600"
+              className="rounded-xl border border-line px-4 py-2.5 text-xs font-semibold text-muted-fg"
             >
               Panel general
             </button>
@@ -290,22 +290,22 @@ export default function TutorDashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
-      <header className="border-b border-slate-200 bg-white">
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-5 py-4 md:px-8">
           <div>
             <p className="text-sm font-extrabold tracking-wide">ACADEMIA DECOM</p>
-            <p className="text-xs text-slate-400">Espacio de acompañamiento académico</p>
+            <p className="text-xs text-muted-fg">Espacio de acompañamiento académico</p>
           </div>
           <div className="flex items-center gap-3">
             <span className="hidden text-right sm:block">
               <span className="block text-sm font-semibold">{displayName}</span>
-              <span className="block text-xs text-slate-400">Panel del tutor</span>
+              <span className="block text-xs text-muted-fg">Panel del tutor</span>
             </span>
             <button
               type="button"
               onClick={() => router.push("/dashboard")}
-              className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              className="rounded-xl border border-line px-3 py-2 text-xs font-semibold text-muted-fg hover:bg-surface-muted"
             >
               Panel general
             </button>
@@ -316,13 +316,13 @@ export default function TutorDashboardPage() {
       <div className="mx-auto max-w-[1500px] space-y-7 px-5 py-7 pb-12 md:px-8 md:py-9">
         <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#19A7A0]">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-decom-teal-text">
               Acompañamiento y evaluación
             </p>
             <h1 className="mt-2 text-2xl font-extrabold tracking-tight md:text-3xl">
               Panel del tutor
             </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-fg">
               Consulta tus cursos asignados, acompaña las matrículas y prioriza las entregas
               pendientes.
             </p>
@@ -331,28 +331,28 @@ export default function TutorDashboardPage() {
             <button
               type="button"
               onClick={() => router.push("/dashboard/planificador")}
-              className="rounded-xl border border-[#19A7A0] px-4 py-2.5 text-xs font-bold text-[#138b84] hover:bg-teal-50"
+              className="rounded-xl border border-decom-teal px-4 py-2.5 text-xs font-bold text-decom-teal-text hover:bg-teal-50"
             >
               Preparar clase
             </button>
             <button
               type="button"
               onClick={() => router.push("/dashboard/tutor/calificaciones")}
-              className="rounded-xl bg-[#087DB5] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#066a9b]"
+              className="rounded-xl bg-decom-blue px-4 py-2.5 text-xs font-bold text-white hover:bg-decom-blue-hover"
             >
               Revisar actividades
             </button>
             <button
               type="button"
               onClick={() => router.push("/dashboard/tutor/evaluaciones")}
-              className="rounded-xl border border-[#087DB5] px-4 py-2.5 text-xs font-bold text-[#087DB5] hover:bg-sky-50"
+              className="rounded-xl border border-decom-blue px-4 py-2.5 text-xs font-bold text-decom-blue-text hover:bg-sky-50"
             >
               Revisar evaluaciones
             </button>
             <button
               type="button"
               onClick={() => void load()}
-              className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              className="rounded-xl border border-line px-4 py-2.5 text-xs font-semibold text-muted-fg hover:bg-surface-muted"
             >
               Actualizar
             </button>
@@ -386,35 +386,35 @@ export default function TutorDashboardPage() {
           ].map((item) => (
             <article
               key={item.label}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+              className="rounded-2xl border border-line bg-surface p-5 shadow-sm"
             >
-              <p className="text-xs font-semibold text-slate-400">{item.label}</p>
+              <p className="text-xs font-semibold text-muted-fg">{item.label}</p>
               <p className="mt-3 text-3xl font-extrabold tabular-nums">{item.value}</p>
-              <p className="mt-1 text-xs text-slate-400">{item.detail}</p>
+              <p className="mt-1 text-xs text-muted-fg">{item.detail}</p>
             </article>
           ))}
         </section>
 
         <section className="grid gap-5 xl:grid-cols-[1fr_1.4fr]">
-          <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+          <article className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-6">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-fg">
                 Docencia asignada
               </p>
               <h2 className="mt-1 text-lg font-bold">Mis cursos</h2>
             </div>
             <div className="mt-5 space-y-3">
               {courses.map((course) => (
-                <div key={course.id} className="rounded-2xl border border-slate-100 p-4">
+                <div key={course.id} className="rounded-2xl border border-line-soft p-4">
                   <p className="text-sm font-bold">{course.title}</p>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-muted-fg">
                     {course.status === "published" ? "Publicado" : course.status} ·{" "}
                     {course.studentCount} estudiantes activos
                   </p>
                 </div>
               ))}
               {courses.length === 0 && (
-                <p className="rounded-2xl border border-dashed border-slate-200 p-6 text-center text-xs leading-5 text-slate-500">
+                <p className="rounded-2xl border border-dashed border-line p-6 text-center text-xs leading-5 text-muted-fg">
                   Todavía no tienes cursos con una asignación activa. Cuando coordinación te asigne
                   un curso, aparecerá aquí.
                 </p>
@@ -422,36 +422,36 @@ export default function TutorDashboardPage() {
             </div>
           </article>
 
-          <article className="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+          <article className="min-w-0 rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-6">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-fg">
                   Bandeja de trabajo
                 </p>
                 <h2 className="mt-1 text-lg font-bold">Entregas para revisar</h2>
-                <p className="mt-1 text-xs text-slate-400">Entregas enviadas por tus estudiantes</p>
+                <p className="mt-1 text-xs text-muted-fg">Entregas enviadas por tus estudiantes</p>
               </div>
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Buscar estudiante o actividad..."
                 aria-label="Buscar entregas"
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm sm:max-w-xs"
+                className="w-full rounded-xl border border-line px-3 py-2.5 text-sm sm:max-w-xs"
               />
             </div>
             <div className="mt-5 space-y-3">
               {visibleReviews.map((item) => (
-                <article key={item.id} className="rounded-2xl border border-slate-100 p-4">
+                <article key={item.id} className="rounded-2xl border border-line-soft p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-sm font-bold">{item.activity}</p>
-                      <p className="mt-1 text-xs font-semibold text-slate-600">{item.student}</p>
-                      <p className="mt-1 text-xs text-slate-400">{item.course}</p>
-                      <p className="mt-2 text-[11px] text-slate-400">
+                      <p className="mt-1 text-xs font-semibold text-muted-fg">{item.student}</p>
+                      <p className="mt-1 text-xs text-muted-fg">{item.course}</p>
+                      <p className="mt-2 text-[11px] text-muted-fg">
                         Recibida: {formatDate(item.submittedAt)}
                       </p>
                       {item.dueAt && (
-                        <p className="mt-1 text-[11px] text-slate-400">
+                        <p className="mt-1 text-[11px] text-muted-fg">
                           Fecha límite: {formatDate(item.dueAt)}
                         </p>
                       )}
@@ -470,7 +470,7 @@ export default function TutorDashboardPage() {
                 </article>
               ))}
               {visibleReviews.length === 0 && (
-                <p className="rounded-2xl border border-dashed border-slate-200 p-8 text-center text-xs leading-5 text-slate-500">
+                <p className="rounded-2xl border border-dashed border-line p-8 text-center text-xs leading-5 text-muted-fg">
                   {reviews.length
                     ? "No hay entregas que coincidan con la búsqueda."
                     : "No hay entregas pendientes de revisión en tus cursos asignados."}
@@ -480,22 +480,22 @@ export default function TutorDashboardPage() {
             <button
               type="button"
               onClick={() => router.push("/dashboard/tutor/calificaciones")}
-              className="mt-5 rounded-xl bg-[#087DB5] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#066a9b]"
+              className="mt-5 rounded-xl bg-decom-blue px-4 py-2.5 text-xs font-bold text-white hover:bg-decom-blue-hover"
             >
               Abrir bandeja de calificaciones
             </button>
           </article>
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+        <section className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-6">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-fg">
                 Matrículas
               </p>
               <h2 className="mt-1 text-lg font-bold">Estudiantes de mis cursos</h2>
             </div>
-            <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-[#087DB5]">
+            <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-decom-blue-text">
               {students.length} inscripciones
             </span>
           </div>
@@ -503,12 +503,12 @@ export default function TutorDashboardPage() {
             {students.map((student) => (
               <article
                 key={student.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 p-4"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line-soft p-4"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold">{student.name}</p>
-                  <p className="mt-1 text-xs text-slate-500">{student.course}</p>
-                  <p className="mt-1 text-[11px] text-slate-400">
+                  <p className="mt-1 text-xs text-muted-fg">{student.course}</p>
+                  <p className="mt-1 text-[11px] text-muted-fg">
                     Inscrito: {formatDate(student.enrolledAt)}
                   </p>
                 </div>
@@ -517,7 +517,7 @@ export default function TutorDashboardPage() {
                     "rounded-full px-2.5 py-1 text-[10px] font-semibold " +
                     (student.status === "active"
                       ? "bg-emerald-50 text-emerald-700"
-                      : "bg-slate-100 text-slate-600")
+                      : "bg-surface-muted text-muted-fg")
                   }
                 >
                   {student.status === "active" ? "Activo" : "Completado"}
@@ -525,14 +525,14 @@ export default function TutorDashboardPage() {
               </article>
             ))}
             {students.length === 0 && (
-              <p className="rounded-2xl border border-dashed border-slate-200 p-8 text-center text-xs leading-5 text-slate-500">
+              <p className="rounded-2xl border border-dashed border-line p-8 text-center text-xs leading-5 text-muted-fg">
                 No hay estudiantes inscritos en tus cursos asignados.
               </p>
             )}
           </div>
         </section>
 
-        <footer className="border-t border-slate-200 pt-5 text-xs text-slate-400">
+        <footer className="border-t border-line pt-5 text-xs text-muted-fg">
           Academia DECOM · Información consultada desde Supabase y limitada a tus cursos asignados.
         </footer>
       </div>

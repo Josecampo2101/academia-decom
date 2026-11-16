@@ -315,23 +315,23 @@ export default function CreateAssessmentPage() {
 
   if (access === "checking")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#087DB5]/20 border-t-[#087DB5]" />
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-decom-blue/20 border-t-decom-blue" />
       </main>
     );
   if (access !== "allowed")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6">
-        <section className="max-w-md rounded-3xl bg-white p-8 text-center">
+      <main className="flex min-h-screen items-center justify-center bg-background px-6">
+        <section className="max-w-md rounded-3xl bg-surface p-8 text-center">
           <h1 className="text-xl font-bold">
             {access === "error" ? "No pudimos cargar el módulo" : "Acceso restringido"}
           </h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-fg">
             Este espacio requiere un rol de tutor, editor académico o administración nacional.
           </p>
           <button
             onClick={() => router.push("/dashboard/tutor")}
-            className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white"
+            className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
           >
             Volver
           </button>
@@ -340,18 +340,18 @@ export default function CreateAssessmentPage() {
     );
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
-      <header className="border-b border-slate-200 bg-white">
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
           <div>
-            <p className="text-xs font-extrabold tracking-[0.14em] text-[#087DB5]">
+            <p className="text-xs font-extrabold tracking-[0.14em] text-decom-blue-text">
               ACADEMIA DECOM
             </p>
-            <p className="mt-1 text-xs text-slate-400">Constructor de evaluaciones</p>
+            <p className="mt-1 text-xs text-muted-fg">Constructor de evaluaciones</p>
           </div>
           <button
             onClick={() => router.push("/dashboard/tutor/evaluaciones")}
-            className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold"
+            className="rounded-xl border border-line px-4 py-2.5 text-xs font-semibold"
           >
             Volver a revisión
           </button>
@@ -359,13 +359,13 @@ export default function CreateAssessmentPage() {
       </header>
       <div className="mx-auto max-w-6xl space-y-6 px-5 py-7 md:px-8">
         <section>
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#19A7A0]">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-decom-teal-text">
             Instrumentos de evaluación
           </p>
           <h1 className="mt-2 text-2xl font-extrabold md:text-3xl">
             Crear evaluación o examen final
           </h1>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-fg">
             Configura prácticas, evaluaciones por lección y el examen final. La clave de respuestas
             se mantiene en un esquema privado y la calificación se calcula en el servidor.
           </p>
@@ -374,7 +374,7 @@ export default function CreateAssessmentPage() {
           <div className="space-y-5">
             <form
               onSubmit={createAssessment}
-              className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 md:p-6"
+              className="space-y-4 rounded-3xl border border-line bg-surface p-5 md:p-6"
             >
               <h2 className="text-base font-bold">1. Datos generales</h2>
               <label className="block text-xs font-semibold">
@@ -382,7 +382,7 @@ export default function CreateAssessmentPage() {
                 <select
                   value={selectedCourseId}
                   onChange={(event) => setSelectedCourseId(event.target.value)}
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"
+                  className="mt-2 w-full rounded-xl border border-line bg-surface px-3 py-3 text-sm"
                 >
                   {courses.map((course) => (
                     <option key={course.id} value={course.id}>
@@ -400,7 +400,7 @@ export default function CreateAssessmentPage() {
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
                   placeholder="Ej. Examen final de fundamentos"
-                  className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"
+                  className="mt-2 w-full rounded-xl border border-line px-3 py-3 text-sm"
                 />
               </label>
               <label className="block text-xs font-semibold">
@@ -409,7 +409,7 @@ export default function CreateAssessmentPage() {
                   value={instructions}
                   onChange={(event) => setInstructions(event.target.value)}
                   rows={3}
-                  className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"
+                  className="mt-2 w-full rounded-xl border border-line px-3 py-3 text-sm"
                 />
               </label>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -420,7 +420,7 @@ export default function CreateAssessmentPage() {
                     onChange={(event) =>
                       setAssessmentType(event.target.value as typeof assessmentType)
                     }
-                    className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"
+                    className="mt-2 w-full rounded-xl border border-line bg-surface px-3 py-3 text-sm"
                   >
                     <option value="lesson">Evaluación de lección</option>
                     <option value="practice">Práctica</option>
@@ -435,7 +435,7 @@ export default function CreateAssessmentPage() {
                     max="100"
                     value={passingScore}
                     onChange={(event) => setPassingScore(event.target.value)}
-                    className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"
+                    className="mt-2 w-full rounded-xl border border-line px-3 py-3 text-sm"
                   />
                 </label>
                 <label className="block text-xs font-semibold">
@@ -446,7 +446,7 @@ export default function CreateAssessmentPage() {
                     max="20"
                     value={maxAttempts}
                     onChange={(event) => setMaxAttempts(event.target.value)}
-                    className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"
+                    className="mt-2 w-full rounded-xl border border-line px-3 py-3 text-sm"
                   />
                 </label>
                 <label className="block text-xs font-semibold">
@@ -457,28 +457,28 @@ export default function CreateAssessmentPage() {
                     max="360"
                     value={timeLimit}
                     onChange={(event) => setTimeLimit(event.target.value)}
-                    className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"
+                    className="mt-2 w-full rounded-xl border border-line px-3 py-3 text-sm"
                   />
                 </label>
               </div>
               <button
                 disabled={saving || !selectedCourseId}
-                className="w-full rounded-xl bg-[#087DB5] px-4 py-3 text-sm font-bold text-white disabled:opacity-50"
+                className="w-full rounded-xl bg-decom-blue px-4 py-3 text-sm font-bold text-white disabled:opacity-50"
               >
                 {saving ? "Guardando..." : "Crear borrador"}
               </button>
             </form>
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 md:p-6">
+            <div className="rounded-3xl border border-line bg-surface p-5 md:p-6">
               <h2 className="text-base font-bold">2. Evaluaciones del curso</h2>
               <div className="mt-3 space-y-2">
                 {assessments.map((assessment) => (
                   <button
                     key={assessment.id}
                     onClick={() => setSelectedAssessmentId(assessment.id)}
-                    className={`w-full rounded-xl border p-3 text-left ${selectedAssessmentId === assessment.id ? "border-[#087DB5] bg-sky-50" : "border-slate-200"}`}
+                    className={`w-full rounded-xl border p-3 text-left ${selectedAssessmentId === assessment.id ? "border-decom-blue bg-sky-50" : "border-line"}`}
                   >
                     <span className="block text-sm font-semibold">{assessment.title}</span>
-                    <span className="mt-1 block text-[11px] text-slate-500">
+                    <span className="mt-1 block text-[11px] text-muted-fg">
                       {assessment.assessment_type === "final"
                         ? "Examen final"
                         : assessment.assessment_type === "practice"
@@ -490,7 +490,7 @@ export default function CreateAssessmentPage() {
                   </button>
                 ))}
                 {assessments.length === 0 && (
-                  <p className="rounded-xl border border-dashed border-slate-200 p-4 text-xs text-slate-500">
+                  <p className="rounded-xl border border-dashed border-line p-4 text-xs text-muted-fg">
                     Todavía no hay evaluaciones en este curso.
                   </p>
                 )}
@@ -500,11 +500,11 @@ export default function CreateAssessmentPage() {
           <div className="space-y-5">
             <form
               onSubmit={saveQuestion}
-              className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 md:p-6"
+              className="space-y-4 rounded-3xl border border-line bg-surface p-5 md:p-6"
             >
               <div>
                 <h2 className="text-base font-bold">3. Banco de preguntas</h2>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-muted-fg">
                   Selecciona un borrador para agregar preguntas. Las evaluaciones publicadas quedan
                   bloqueadas.
                 </p>
@@ -520,7 +520,7 @@ export default function CreateAssessmentPage() {
                 <select
                   value={questionType}
                   onChange={(event) => setQuestionType(event.target.value as typeof questionType)}
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"
+                  className="mt-2 w-full rounded-xl border border-line bg-surface px-3 py-3 text-sm"
                 >
                   {questionTypes.map((type) => (
                     <option key={type.value} value={type.value}>
@@ -539,7 +539,7 @@ export default function CreateAssessmentPage() {
                   onChange={(event) => setPrompt(event.target.value)}
                   rows={3}
                   placeholder="Escribe la pregunta..."
-                  className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"
+                  className="mt-2 w-full rounded-xl border border-line px-3 py-3 text-sm"
                 />
               </label>
               {["single_choice", "multiple_choice"].includes(questionType) && (
@@ -549,7 +549,7 @@ export default function CreateAssessmentPage() {
                     value={optionsText}
                     onChange={(event) => setOptionsText(event.target.value)}
                     rows={4}
-                    className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"
+                    className="mt-2 w-full rounded-xl border border-line px-3 py-3 text-sm"
                   />
                 </label>
               )}
@@ -566,7 +566,7 @@ export default function CreateAssessmentPage() {
                   placeholder={
                     questionType === "multiple_choice" ? "Opción A, Opción C" : "Respuesta esperada"
                   }
-                  className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"
+                  className="mt-2 w-full rounded-xl border border-line px-3 py-3 text-sm"
                 />
               </label>
               <label className="block text-xs font-semibold">
@@ -577,18 +577,18 @@ export default function CreateAssessmentPage() {
                   max="100"
                   value={points}
                   onChange={(event) => setPoints(event.target.value)}
-                  className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"
+                  className="mt-2 w-full rounded-xl border border-line px-3 py-3 text-sm"
                 />
               </label>
               <button
                 disabled={saving || !selectedAssessment || selectedAssessment.status !== "draft"}
-                className="w-full rounded-xl bg-[#19A7A0] px-4 py-3 text-sm font-bold text-white disabled:opacity-50"
+                className="w-full rounded-xl bg-decom-teal px-4 py-3 text-sm font-bold text-decom-navy disabled:opacity-50"
               >
                 {saving ? "Guardando..." : "Guardar pregunta"}
               </button>
             </form>
             {selectedAssessment && (
-              <div className="rounded-3xl border border-slate-200 bg-white p-5 md:p-6">
+              <div className="rounded-3xl border border-line bg-surface p-5 md:p-6">
                 <div className="flex items-center justify-between gap-3">
                   <h2 className="text-base font-bold">Preguntas ({questions.length})</h2>
                   <button
@@ -596,18 +596,18 @@ export default function CreateAssessmentPage() {
                       saving || selectedAssessment.status !== "draft" || questions.length === 0
                     }
                     onClick={publishAssessment}
-                    className="rounded-xl bg-[#102D4D] px-4 py-2.5 text-xs font-bold text-white disabled:opacity-40"
+                    className="rounded-xl bg-decom-navy px-4 py-2.5 text-xs font-bold text-white disabled:opacity-40"
                   >
                     Publicar evaluación
                   </button>
                 </div>
                 <ol className="mt-4 space-y-2">
                   {questions.map((question, index) => (
-                    <li key={question.id} className="rounded-xl bg-[#F4F7FA] p-3">
+                    <li key={question.id} className="rounded-xl bg-surface-muted p-3">
                       <p className="text-xs font-semibold">
                         {index + 1}. {question.prompt}
                       </p>
-                      <p className="mt-1 text-[10px] text-slate-500">
+                      <p className="mt-1 text-[10px] text-muted-fg">
                         {questionTypes.find((item) => item.value === question.question_type)
                           ?.label ?? question.question_type}{" "}
                         · {question.points} punto(s)
@@ -616,7 +616,7 @@ export default function CreateAssessmentPage() {
                   ))}
                 </ol>
                 {questions.length === 0 && (
-                  <p className="mt-3 text-xs text-slate-500">
+                  <p className="mt-3 text-xs text-muted-fg">
                     Agrega al menos una pregunta antes de publicar.
                   </p>
                 )}

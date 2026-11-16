@@ -266,26 +266,26 @@ export default function EnrollmentManagementPage() {
     members.find((m) => m.user_id === id)?.full_name ?? "Integrante";
   if (loading)
     return (
-      <main className="grid min-h-screen place-items-center bg-[#F4F7FA] text-sm text-slate-500">
+      <main className="grid min-h-screen place-items-center bg-background text-sm text-muted-fg">
         Cargando matrículas...
       </main>
     );
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
+    <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[.2em] text-[#087DB5]">
+            <p className="text-xs font-bold uppercase tracking-[.2em] text-decom-blue-text">
               Academia DECOM · Gestión académica
             </p>
             <h1 className="mt-2 text-3xl font-bold">Matrículas de estudiantes</h1>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-fg">
               Asigna cursos publicados a integrantes activos de las congregaciones de tu distrito.
             </p>
           </div>
           <button
             onClick={() => router.push("/dashboard/espacio")}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold"
+            className="rounded-xl border border-line bg-surface px-4 py-3 text-sm font-semibold"
           >
             Volver a mi espacio
           </button>
@@ -307,27 +307,27 @@ export default function EnrollmentManagementPage() {
           </div>
         )}
         <div className="mt-7 grid gap-4 sm:grid-cols-3">
-          <article className="rounded-2xl border border-slate-200 bg-white p-5">
-            <p className="text-xs font-semibold uppercase text-slate-500">Distritos autorizados</p>
+          <article className="rounded-2xl border border-line bg-surface p-5">
+            <p className="text-xs font-semibold uppercase text-muted-fg">Distritos autorizados</p>
             <p className="mt-2 text-3xl font-bold">{districts.length}</p>
           </article>
-          <article className="rounded-2xl border border-slate-200 bg-white p-5">
-            <p className="text-xs font-semibold uppercase text-slate-500">Integrantes activos</p>
+          <article className="rounded-2xl border border-line bg-surface p-5">
+            <p className="text-xs font-semibold uppercase text-muted-fg">Integrantes activos</p>
             <p className="mt-2 text-3xl font-bold">{members.length}</p>
           </article>
-          <article className="rounded-2xl border border-slate-200 bg-white p-5">
-            <p className="text-xs font-semibold uppercase text-slate-500">Matrículas activas</p>
+          <article className="rounded-2xl border border-line bg-surface p-5">
+            <p className="text-xs font-semibold uppercase text-muted-fg">Matrículas activas</p>
             <p className="mt-2 text-3xl font-bold">{activeCount}</p>
           </article>
         </div>
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+        <section className="mt-6 rounded-2xl border border-line bg-surface p-5 sm:p-7">
           <h2 className="text-lg font-bold">1. Selecciona el ámbito</h2>
           <label className="mt-4 block max-w-md text-sm font-semibold">
             Distrito
             <select
               value={districtId}
               onChange={(e) => setDistrictId(e.target.value)}
-              className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"
+              className="mt-2 w-full rounded-xl border border-line px-3 py-3 text-sm"
             >
               {districts.map((d) => (
                 <option key={d.id} value={d.id}>
@@ -337,7 +337,7 @@ export default function EnrollmentManagementPage() {
             </select>
           </label>
           <h2 className="mt-7 text-lg font-bold">2. Asignar un curso</h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-fg">
             Solo aparecen cursos cuyo programa y publicación están activos.
           </p>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -346,7 +346,7 @@ export default function EnrollmentManagementPage() {
               <select
                 value={memberId}
                 onChange={(e) => setMemberId(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"
+                className="mt-2 w-full rounded-xl border border-line px-3 py-3 text-sm"
               >
                 {visibleMembers.map((m) => (
                   <option key={m.user_id} value={m.user_id}>
@@ -360,7 +360,7 @@ export default function EnrollmentManagementPage() {
               <select
                 value={courseId}
                 onChange={(e) => setCourseId(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"
+                className="mt-2 w-full rounded-xl border border-line px-3 py-3 text-sm"
               >
                 {courses.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -376,11 +376,11 @@ export default function EnrollmentManagementPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Nombre, congregación o teléfono"
-              className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"
+              className="mt-2 w-full rounded-xl border border-line px-3 py-3 text-sm"
             />
           </label>
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 p-4">
-            <p className="text-sm text-slate-600">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-muted p-4">
+            <p className="text-sm text-muted-fg">
               {selectedMember ? selectedMember.full_name : "Selecciona un estudiante"}
               {selectedCourse ? " · " + selectedCourse.title : ""}
             </p>
@@ -392,7 +392,7 @@ export default function EnrollmentManagementPage() {
                 !visibleMembers.some((m) => m.user_id === memberId)
               }
               onClick={() => void assign()}
-              className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+              className="rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
             >
               {saving ? "Guardando..." : "Asignar curso"}
             </button>
@@ -410,25 +410,25 @@ export default function EnrollmentManagementPage() {
             </p>
           )}
         </section>
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+        <section className="mt-6 rounded-2xl border border-line bg-surface p-5 sm:p-7">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold">3. Matrículas registradas</h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-muted-fg">
                 Puedes reactivar o retirar una matrícula sin borrar el historial.
               </p>
             </div>
-            <span className="text-sm text-slate-500">{enrollments.length} registros</span>
+            <span className="text-sm text-muted-fg">{enrollments.length} registros</span>
           </div>
           {!enrollments.length ? (
-            <p className="mt-5 rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">
+            <p className="mt-5 rounded-xl border border-dashed border-line p-6 text-center text-sm text-muted-fg">
               Todavía no hay matrículas para este distrito.
             </p>
           ) : (
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-[680px] text-left text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 text-xs uppercase text-slate-500">
+                  <tr className="border-b border-line text-xs uppercase text-muted-fg">
                     <th className="px-3 py-3">Estudiante</th>
                     <th className="px-3 py-3">Curso</th>
                     <th className="px-3 py-3">Estado</th>
@@ -438,7 +438,7 @@ export default function EnrollmentManagementPage() {
                 </thead>
                 <tbody>
                   {enrollments.map((e) => (
-                    <tr key={e.id} className="border-b border-slate-100">
+                    <tr key={e.id} className="border-b border-line-soft">
                       <td className="px-3 py-4 font-semibold">{memberName(e.user_id)}</td>
                       <td className="px-3 py-4">{courseName(e.course_id)}</td>
                       <td className="px-3 py-4">
@@ -456,7 +456,7 @@ export default function EnrollmentManagementPage() {
                           <button
                             disabled={saving}
                             onClick={() => void changeStatus(e, "active")}
-                            className="text-xs font-semibold text-[#087DB5]"
+                            className="text-xs font-semibold text-decom-blue-text"
                           >
                             Reactivar
                           </button>
@@ -469,7 +469,7 @@ export default function EnrollmentManagementPage() {
                             Retirar
                           </button>
                         ) : (
-                          <span className="text-xs text-slate-400">Cerrada</span>
+                          <span className="text-xs text-muted-fg">Cerrada</span>
                         )}
                       </td>
                     </tr>

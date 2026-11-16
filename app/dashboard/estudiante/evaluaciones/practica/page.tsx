@@ -210,18 +210,18 @@ export default function PracticeAssessmentPage() {
 
   if (access === "checking" || (access === "allowed" && !storageReady))
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#087DB5]/20 border-t-[#087DB5]" />
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-decom-blue/20 border-t-decom-blue" />
       </main>
     );
   if (access !== "allowed")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6">
-        <section className="max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center">
-          <h1 className="text-xl font-bold text-[#102D4D]">
+      <main className="flex min-h-screen items-center justify-center bg-background px-6">
+        <section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center">
+          <h1 className="text-xl font-bold text-foreground">
             {access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}
           </h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-fg">
             {access === "error"
               ? "Intenta nuevamente."
               : "Esta práctica está habilitada para estudiantes con una asignación vigente."}
@@ -229,7 +229,7 @@ export default function PracticeAssessmentPage() {
           <button
             type="button"
             onClick={() => router.push("/dashboard/estudiante")}
-            className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white"
+            className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
           >
             Volver al panel
           </button>
@@ -238,26 +238,26 @@ export default function PracticeAssessmentPage() {
     );
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
-      <header className="border-b border-slate-200 bg-white">
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-5 py-4 md:px-8">
           <div>
-            <p className="text-xs font-extrabold tracking-[0.14em] text-[#087DB5]">
+            <p className="text-xs font-extrabold tracking-[0.14em] text-decom-blue-text">
               ACADEMIA DECOM
             </p>
-            <p className="mt-1 text-xs text-slate-400">Práctica de evaluación</p>
+            <p className="mt-1 text-xs text-muted-fg">Práctica de evaluación</p>
           </div>
           <button
             type="button"
             onClick={() => router.push("/dashboard/estudiante/evaluaciones")}
-            className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600"
+            className="rounded-xl border border-line px-4 py-2.5 text-xs font-semibold text-muted-fg"
           >
             ← Evaluaciones
           </button>
         </div>
       </header>
       <div className="mx-auto max-w-4xl space-y-6 px-5 py-7 pb-12 md:px-8 md:py-9">
-        <section className="rounded-3xl bg-[#102D4D] p-6 text-white md:p-8">
+        <section className="rounded-3xl bg-decom-navy p-6 text-white md:p-8">
           <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider">
             Práctica · No oficial
           </span>
@@ -274,7 +274,7 @@ export default function PracticeAssessmentPage() {
           </div>
           <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/15">
             <div
-              className="h-full rounded-full bg-[#19A7A0] transition-all"
+              className="h-full rounded-full bg-decom-teal transition-all"
               style={{ width: `${(answeredCount / practiceQuestions.length) * 100}%` }}
             />
           </div>
@@ -294,13 +294,13 @@ export default function PracticeAssessmentPage() {
             {practiceQuestions.map((question, index) => (
               <article
                 key={question.id}
-                className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-7"
+                className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-7"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#087DB5]">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-decom-blue-text">
                     Pregunta {index + 1} de {practiceQuestions.length}
                   </span>
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-semibold text-slate-500">
+                  <span className="rounded-full bg-surface-muted px-3 py-1 text-[10px] font-semibold text-muted-fg">
                     {question.type}
                   </span>
                 </div>
@@ -310,7 +310,7 @@ export default function PracticeAssessmentPage() {
                     {question.options.map((option) => (
                       <label
                         key={option}
-                        className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-100 p-3 text-sm text-slate-600 hover:bg-slate-50"
+                        className="flex cursor-pointer items-start gap-3 rounded-xl border border-line-soft p-3 text-sm text-muted-fg hover:bg-surface-muted"
                       >
                         <input
                           type="radio"
@@ -319,7 +319,7 @@ export default function PracticeAssessmentPage() {
                           onChange={() =>
                             setAnswers((current) => ({ ...current, [question.id]: option }))
                           }
-                          className="mt-0.5 h-4 w-4 accent-[#087DB5]"
+                          className="mt-0.5 h-4 w-4 accent-decom-blue"
                         />
                         {option}
                       </label>
@@ -331,7 +331,7 @@ export default function PracticeAssessmentPage() {
                     {question.options.map((option) => (
                       <label
                         key={option}
-                        className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-100 p-3 text-sm text-slate-600 hover:bg-slate-50"
+                        className="flex cursor-pointer items-start gap-3 rounded-xl border border-line-soft p-3 text-sm text-muted-fg hover:bg-surface-muted"
                       >
                         <input
                           type="checkbox"
@@ -340,7 +340,7 @@ export default function PracticeAssessmentPage() {
                             (answers[question.id] as string[]).includes(option)
                           }
                           onChange={() => toggleMultiple(option)}
-                          className="mt-0.5 h-4 w-4 accent-[#087DB5]"
+                          className="mt-0.5 h-4 w-4 accent-decom-blue"
                         />
                         {option}
                       </label>
@@ -357,7 +357,7 @@ export default function PracticeAssessmentPage() {
                         onClick={() =>
                           setAnswers((current) => ({ ...current, [question.id]: option }))
                         }
-                        className={`rounded-xl border px-4 py-3 text-sm font-semibold ${answers[question.id] === option ? "border-[#087DB5] bg-sky-50 text-[#087DB5]" : "border-slate-200 text-slate-500"}`}
+                        className={`rounded-xl border px-4 py-3 text-sm font-semibold ${answers[question.id] === option ? "border-decom-blue bg-sky-50 text-decom-blue-text" : "border-line text-muted-fg"}`}
                       >
                         {option}
                       </button>
@@ -377,13 +377,13 @@ export default function PracticeAssessmentPage() {
                     rows={4}
                     maxLength={500}
                     placeholder="Escribe tu respuesta..."
-                    className="mt-4 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm leading-6 outline-none focus:border-[#087DB5]"
+                    className="mt-4 w-full rounded-xl border border-line px-4 py-3 text-sm leading-6 outline-none focus:border-decom-blue"
                   />
                 )}
               </article>
             ))}
-            <div className="flex flex-col justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center">
-              <p className="text-xs leading-5 text-slate-500">
+            <div className="flex flex-col justify-between gap-3 rounded-2xl border border-line bg-surface p-5 sm:flex-row sm:items-center">
+              <p className="text-xs leading-5 text-muted-fg">
                 Las preguntas objetivas se corrigen automáticamente en esta demostración. La
                 respuesta corta queda pendiente de revisión humana.
               </p>
@@ -391,26 +391,26 @@ export default function PracticeAssessmentPage() {
                 type="button"
                 disabled={answeredCount !== practiceQuestions.length}
                 onClick={() => setShowConfirm(true)}
-                className="shrink-0 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+                className="shrink-0 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Revisar y finalizar
               </button>
             </div>
           </section>
         ) : (
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-            <p className="text-xs font-bold uppercase tracking-wider text-[#19A7A0]">
+          <section className="rounded-3xl border border-line bg-surface p-6 shadow-sm md:p-8">
+            <p className="text-xs font-bold uppercase tracking-wider text-decom-teal-text">
               Resultado de demostración
             </p>
             <h2 className="mt-2 text-2xl font-extrabold">Intento completado</h2>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-fg">
               Puntuación objetiva: {submittedAttempt.result.objectiveEarned}/
               {submittedAttempt.result.objectivePossible}. Puntuación manual:{" "}
               {submittedAttempt.result.manualEarned ?? 0}/
               {submittedAttempt.result.manualPossible ?? 0}. Preguntas pendientes:{" "}
               {submittedAttempt.result.pendingManual}.
             </p>
-            <p className="mt-1 text-[11px] text-slate-400">
+            <p className="mt-1 text-[11px] text-muted-fg">
               Enviado: {new Date(submittedAttempt.submittedAt).toLocaleString("es-CO")}
             </p>
             <div className="mt-6 space-y-3">
@@ -440,7 +440,7 @@ export default function PracticeAssessmentPage() {
                 return (
                   <article
                     key={result.questionId}
-                    className="rounded-2xl border border-slate-100 p-4"
+                    className="rounded-2xl border border-line-soft p-4"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="text-xs font-bold">
@@ -453,7 +453,7 @@ export default function PracticeAssessmentPage() {
                       </span>
                     </div>
                     <p className="mt-2 text-sm font-semibold">{question?.prompt}</p>
-                    <p className="mt-2 text-xs leading-5 text-slate-500">
+                    <p className="mt-2 text-xs leading-5 text-muted-fg">
                       Tu respuesta: {answerText}
                     </p>
                     {result.status === "revisada" && (
@@ -477,14 +477,14 @@ export default function PracticeAssessmentPage() {
               <button
                 type="button"
                 onClick={startNewAttempt}
-                className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white"
+                className="rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
               >
                 Iniciar nuevo intento
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/dashboard/estudiante/evaluaciones")}
-                className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600"
+                className="rounded-xl border border-line px-5 py-3 text-sm font-semibold text-muted-fg"
               >
                 Volver a evaluaciones
               </button>
@@ -507,12 +507,12 @@ export default function PracticeAssessmentPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="confirm-assessment-title"
-            className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
+            className="w-full max-w-md rounded-3xl bg-surface p-6 shadow-2xl"
           >
             <h2 id="confirm-assessment-title" className="text-lg font-bold">
               ¿Finalizar esta práctica?
             </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
+            <p className="mt-2 text-sm leading-6 text-muted-fg">
               Has respondido las cuatro preguntas. Se guardará un nuevo intento local y podrás
               consultar el resultado después.
             </p>
@@ -520,14 +520,14 @@ export default function PracticeAssessmentPage() {
               <button
                 type="button"
                 onClick={() => setShowConfirm(false)}
-                className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600"
+                className="rounded-xl border border-line px-4 py-3 text-sm font-semibold text-muted-fg"
               >
                 Seguir revisando
               </button>
               <button
                 type="button"
                 onClick={finalizeAttempt}
-                className="rounded-xl bg-[#087DB5] px-4 py-3 text-sm font-semibold text-white"
+                className="rounded-xl bg-decom-blue px-4 py-3 text-sm font-semibold text-white"
               >
                 Finalizar práctica
               </button>

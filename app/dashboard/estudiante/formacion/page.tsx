@@ -267,26 +267,26 @@ export default function FormationPage() {
 
   if (loading)
     return (
-      <main className="grid min-h-screen place-items-center bg-[#F4F7FA] text-sm text-slate-500">
+      <main className="grid min-h-screen place-items-center bg-background text-sm text-muted-fg">
         Cargando tu ruta de aprendizaje...
       </main>
     );
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
+    <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[.2em] text-[#087DB5]">
+            <p className="text-xs font-bold uppercase tracking-[.2em] text-decom-blue-text">
               Academia DECOM · Formación
             </p>
             <h1 className="mt-2 text-3xl font-bold">Mi aprendizaje</h1>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-fg">
               Estudia las lecciones publicadas y registra tu avance.
             </p>
           </div>
           <button
             onClick={() => router.push("/dashboard/espacio")}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold"
+            className="rounded-xl border border-line bg-surface px-4 py-3 text-sm font-semibold"
           >
             Volver a mi espacio
           </button>
@@ -300,22 +300,22 @@ export default function FormationPage() {
           </div>
         )}
         {!enrollments.length ? (
-          <section className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
+          <section className="mt-8 rounded-2xl border border-dashed border-line bg-surface p-10 text-center">
             <h2 className="text-xl font-bold">Aún no tienes cursos asignados</h2>
-            <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
+            <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-fg">
               Cuando la dirección distrital o administración nacional registre tu matrícula, aquí
               aparecerán tus cursos y los materiales publicados.
             </p>
           </section>
         ) : (
           <>
-            <section className="mt-7 rounded-2xl border border-slate-200 bg-white p-5">
+            <section className="mt-7 rounded-2xl border border-line bg-surface p-5">
               <label className="block text-sm font-semibold">
                 Mi curso
                 <select
                   value={selectedEnrollmentId}
                   onChange={(e) => setSelectedEnrollmentId(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm sm:max-w-xl"
+                  className="mt-2 w-full rounded-xl border border-line bg-surface px-3 py-3 text-sm sm:max-w-xl"
                 >
                   {enrollments.map((item) => (
                     <option key={item.id} value={item.id}>
@@ -326,23 +326,23 @@ export default function FormationPage() {
               </label>
               <div className="mt-5 flex flex-wrap items-end justify-between gap-3">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wide text-[#087DB5]">
+                  <p className="text-xs font-bold uppercase tracking-wide text-decom-blue-text">
                     Progreso del curso
                   </p>
                   <p className="mt-1 text-2xl font-bold">{percent}%</p>
                 </div>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-muted-fg">
                   {completed} de {courseLessons.length} lecciones completadas
                 </p>
               </div>
-              <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
+              <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-muted">
                 <div
-                  className="h-full rounded-full bg-[#19A7A0] transition-all"
+                  className="h-full rounded-full bg-decom-teal transition-all"
                   style={{ width: percent + "%" }}
                 />
               </div>
               {course?.description && (
-                <p className="mt-4 text-sm leading-6 text-slate-600">{course.description}</p>
+                <p className="mt-4 text-sm leading-6 text-muted-fg">{course.description}</p>
               )}
             </section>
             <div className="mt-6 grid gap-6 lg:grid-cols-[.8fr_1.2fr]">
@@ -350,11 +350,11 @@ export default function FormationPage() {
                 {courseModules.map((courseModule) => (
                   <section
                     key={courseModule.id}
-                    className="rounded-2xl border border-slate-200 bg-white p-4"
+                    className="rounded-2xl border border-line bg-surface p-4"
                   >
                     <h2 className="font-bold">{courseModule.title}</h2>
                     {courseModule.description && (
-                      <p className="mt-1 text-xs text-slate-500">{courseModule.description}</p>
+                      <p className="mt-1 text-xs text-muted-fg">{courseModule.description}</p>
                     )}
                     <div className="mt-3 space-y-2">
                       {lessons
@@ -373,8 +373,8 @@ export default function FormationPage() {
                               className={
                                 "w-full rounded-xl border p-3 text-left text-sm " +
                                 (selectedLessonId === lesson.id
-                                  ? "border-[#087DB5] bg-sky-50"
-                                  : "border-slate-100 hover:border-slate-300")
+                                  ? "border-decom-blue bg-sky-50"
+                                  : "border-line-soft hover:border-line")
                               }
                             >
                               <span className="flex items-center justify-between gap-2">
@@ -384,7 +384,7 @@ export default function FormationPage() {
                                 </span>
                               </span>
                               {lesson.estimated_minutes && (
-                                <span className="mt-1 block text-xs text-slate-500">
+                                <span className="mt-1 block text-xs text-muted-fg">
                                   {lesson.estimated_minutes} minutos
                                 </span>
                               )}
@@ -395,22 +395,22 @@ export default function FormationPage() {
                   </section>
                 ))}
               </aside>
-              <section className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+              <section className="rounded-2xl border border-line bg-surface p-5 sm:p-7">
                 {selectedLesson ? (
                   <>
-                    <p className="text-xs font-bold uppercase tracking-wide text-[#087DB5]">
+                    <p className="text-xs font-bold uppercase tracking-wide text-decom-blue-text">
                       Lección
                     </p>
                     <h2 className="mt-2 text-2xl font-bold">{selectedLesson.title}</h2>
                     {selectedLesson.summary && (
-                      <p className="mt-3 text-sm leading-6 text-slate-600">
+                      <p className="mt-3 text-sm leading-6 text-muted-fg">
                         {selectedLesson.summary}
                       </p>
                     )}
                     {selectedLesson.objectives.length > 0 && (
-                      <div className="mt-5 rounded-xl bg-slate-50 p-4">
+                      <div className="mt-5 rounded-xl bg-surface-muted p-4">
                         <h3 className="font-bold">Objetivos de aprendizaje</h3>
-                        <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">
+                        <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted-fg">
                           {selectedLesson.objectives.map((objective, index) => (
                             <li key={index}>{objective}</li>
                           ))}
@@ -418,27 +418,27 @@ export default function FormationPage() {
                       </div>
                     )}
                     {bodyText(selectedLesson.content) && (
-                      <pre className="mt-6 whitespace-pre-wrap break-words rounded-xl bg-slate-50 p-4 text-sm leading-7 text-slate-700">
+                      <pre className="mt-6 whitespace-pre-wrap break-words rounded-xl bg-surface-muted p-4 text-sm leading-7 text-foreground">
                         {bodyText(selectedLesson.content)}
                       </pre>
                     )}
-                    <div className="mt-7 border-t border-slate-100 pt-5">
+                    <div className="mt-7 border-t border-line-soft pt-5">
                       <h3 className="font-bold">Materiales de la lección</h3>
                       {materials.length ? (
                         <div className="mt-3 space-y-3">
                           {materials.map((item) => (
                             <article
                               key={item.id}
-                              className="rounded-xl border border-slate-100 p-4"
+                              className="rounded-xl border border-line-soft p-4"
                             >
                               <div className="flex flex-wrap items-start justify-between gap-3">
                                 <div>
                                   <p className="font-semibold">{item.title}</p>
-                                  <p className="mt-1 text-xs text-slate-500">
+                                  <p className="mt-1 text-xs text-muted-fg">
                                     {labels[item.material_type] ?? item.material_type}
                                   </p>
                                   {item.description && (
-                                    <p className="mt-2 text-sm text-slate-600">
+                                    <p className="mt-2 text-sm text-muted-fg">
                                       {item.description}
                                     </p>
                                   )}
@@ -446,14 +446,14 @@ export default function FormationPage() {
                                 {(item.storage_path || item.external_url) && (
                                   <button
                                     onClick={() => void openMaterial(item)}
-                                    className="rounded-lg bg-[#087DB5] px-3 py-2 text-xs font-semibold text-white"
+                                    className="rounded-lg bg-decom-blue px-3 py-2 text-xs font-semibold text-white"
                                   >
                                     Abrir recurso
                                   </button>
                                 )}
                               </div>
                               {item.content && (
-                                <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                                <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-foreground">
                                   {item.content}
                                 </p>
                               )}
@@ -461,13 +461,13 @@ export default function FormationPage() {
                           ))}
                         </div>
                       ) : (
-                        <p className="mt-3 rounded-xl border border-dashed border-slate-200 p-5 text-sm text-slate-500">
+                        <p className="mt-3 rounded-xl border border-dashed border-line p-5 text-sm text-muted-fg">
                           No hay materiales publicados para esta lección.
                         </p>
                       )}
                     </div>
-                    <div className="mt-7 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-5">
-                      <span className="text-sm text-slate-500">
+                    <div className="mt-7 flex flex-wrap items-center justify-between gap-3 border-t border-line-soft pt-5">
+                      <span className="text-sm text-muted-fg">
                         {selectedProgress?.status === "completed"
                           ? "Lección completada"
                           : "Al terminar, registra tu avance."}
@@ -475,7 +475,7 @@ export default function FormationPage() {
                       <button
                         disabled={busy || selectedProgress?.status === "completed"}
                         onClick={() => void completeLesson()}
-                        className="rounded-xl bg-[#19A7A0] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                        className="rounded-xl bg-decom-teal px-5 py-3 text-sm font-semibold text-decom-navy disabled:opacity-50"
                       >
                         {busy
                           ? "Guardando..."
@@ -486,7 +486,7 @@ export default function FormationPage() {
                     </div>
                   </>
                 ) : (
-                  <p className="py-12 text-center text-sm text-slate-500">
+                  <p className="py-12 text-center text-sm text-muted-fg">
                     Este curso todavía no tiene lecciones publicadas.
                   </p>
                 )}

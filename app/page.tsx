@@ -112,7 +112,7 @@ export default function Home() {
 
   return (
     <main
-      className={`relative min-h-screen overflow-x-hidden transition-colors duration-300 ${isDark ? "bg-[#0b1422]" : "bg-[#f4f7fb]"}`}
+      className={`relative min-h-screen overflow-x-hidden transition-colors duration-300 ${isDark ? "bg-[#0b1422]" : "bg-surface-muted"}`}
     >
       <div
         className="absolute inset-x-0 top-0 h-[320px] px-[11px] pt-[11px] sm:h-[335px]"
@@ -146,7 +146,7 @@ export default function Home() {
             onClick={() => changeTheme("light")}
             title="Tema claro"
             aria-label="Tema claro"
-            className={`flex h-7 w-7 items-center justify-center rounded-full ${theme === "light" ? "bg-white text-[#142b4b]" : "text-white/75 hover:bg-white/10"}`}
+            className={`flex h-7 w-7 items-center justify-center rounded-full ${theme === "light" ? "bg-surface text-foreground" : "text-white/75 hover:bg-white/10"}`}
           >
             <Sun className="h-4 w-4" aria-hidden="true" />
           </button>
@@ -155,7 +155,7 @@ export default function Home() {
             onClick={() => changeTheme("dark")}
             title="Tema oscuro"
             aria-label="Tema oscuro"
-            className={`flex h-7 w-7 items-center justify-center rounded-full ${theme === "dark" ? "bg-white text-[#142b4b]" : "text-white/75 hover:bg-white/10"}`}
+            className={`flex h-7 w-7 items-center justify-center rounded-full ${theme === "dark" ? "bg-surface text-foreground" : "text-white/75 hover:bg-white/10"}`}
           >
             <Moon className="h-4 w-4" aria-hidden="true" />
           </button>
@@ -164,14 +164,14 @@ export default function Home() {
             onClick={() => changeTheme("system")}
             title="Tema automático"
             aria-label="Tema automático"
-            className={`flex h-7 w-7 items-center justify-center rounded-full ${theme === "system" ? "bg-white text-[#142b4b]" : "text-white/75 hover:bg-white/10"}`}
+            className={`flex h-7 w-7 items-center justify-center rounded-full ${theme === "system" ? "bg-surface text-foreground" : "text-white/75 hover:bg-white/10"}`}
           >
             <Monitor className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
 
         <section
-          className={`relative z-10 -mt-0 w-full max-w-[440px] rounded-3xl border border-slate-200/70 px-6 pb-7 pt-8 shadow-[0_24px_70px_rgba(15,23,42,0.16)] sm:px-9 sm:pb-9 ${isDark ? "border border-white/10 bg-[#1f2937] text-white" : "bg-white text-[#252525]"}`}
+          className={`relative z-10 -mt-0 w-full max-w-[440px] rounded-3xl border border-slate-200/70 px-6 pb-7 pt-8 shadow-[0_24px_70px_rgba(15,23,42,0.16)] sm:px-9 sm:pb-9 ${isDark ? "border border-white/10 bg-[#1f2937] text-white" : "bg-surface text-[#252525]"}`}
         >
           <div className="mb-8 flex flex-col items-center text-center">
             <div
@@ -185,21 +185,21 @@ export default function Home() {
               aria-label="Escuela de Comunicaciones, Distrito 34, IPUC"
             >
               <p
-                className={`text-lg font-bold leading-tight tracking-[-0.025em] ${isDark ? "text-white" : "text-[#142b4b]"}`}
+                className={`text-lg font-bold leading-tight tracking-[-0.025em] ${isDark ? "text-white" : "text-foreground"}`}
               >
                 Escuela de
               </p>
               <p
-                className={`text-2xl font-extrabold leading-tight tracking-[-0.035em] ${isDark ? "text-white" : "text-[#142b4b]"}`}
+                className={`text-2xl font-extrabold leading-tight tracking-[-0.035em] ${isDark ? "text-white" : "text-foreground"}`}
               >
                 Comunicaciones
               </p>
-              <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#087db5]">
+              <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.18em] text-decom-blue-text">
                 Distrito 34 · IPUC
               </p>
             </div>
             <h1 className="mt-4 text-base font-semibold">Acceso institucional</h1>
-            <p className={`mt-1 text-sm ${isDark ? "text-slate-300" : "text-slate-500"}`}>
+            <p className={`mt-1 text-sm ${isDark ? "text-slate-300" : "text-muted-fg"}`}>
               Ingresa con las credenciales de tu cuenta.
             </p>
           </div>
@@ -217,7 +217,7 @@ export default function Home() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Correo electrónico"
-                className={`h-12 w-full rounded-xl border px-4 text-sm outline-none transition placeholder:text-slate-500 focus:border-[#0aa9d2] focus:ring-2 focus:ring-[#0aa9d2]/15 ${isDark ? "border-slate-600 bg-[#111827] text-white" : "border-[#cbd1d8] bg-white text-[#263548]"}`}
+                className={`h-12 w-full rounded-xl border px-4 text-sm outline-none transition placeholder:text-muted-fg focus:border-[#0aa9d2] focus:ring-2 focus:ring-[#0aa9d2]/15 ${isDark ? "border-slate-600 bg-[#111827] text-white" : "border-[#cbd1d8] bg-surface text-foreground"}`}
               />
             </div>
             <div className="relative">
@@ -232,13 +232,13 @@ export default function Home() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Contraseña"
-                className={`h-12 w-full rounded-xl border px-4 pr-12 text-sm outline-none transition placeholder:text-slate-500 focus:border-[#0aa9d2] focus:ring-2 focus:ring-[#0aa9d2]/15 ${isDark ? "border-slate-600 bg-[#111827] text-white" : "border-[#cbd1d8] bg-white text-[#263548]"}`}
+                className={`h-12 w-full rounded-xl border px-4 pr-12 text-sm outline-none transition placeholder:text-muted-fg focus:border-[#0aa9d2] focus:ring-2 focus:ring-[#0aa9d2]/15 ${isDark ? "border-slate-600 bg-[#111827] text-white" : "border-[#cbd1d8] bg-surface text-foreground"}`}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8492a3] hover:text-[#087db5]"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8492a3] hover:text-decom-blue-text"
               >
                 {showPassword ? (
                   <EyeOff className="h-5 w-5" aria-hidden="true" />
@@ -267,7 +267,7 @@ export default function Home() {
                 type="button"
                 onClick={handleRecovery}
                 disabled={isRecovering}
-                className="text-xs font-semibold text-[#087db5] hover:underline disabled:opacity-50"
+                className="text-xs font-semibold text-decom-blue-text hover:underline disabled:opacity-50"
               >
                 {isRecovering ? "Enviando..." : "¿Olvidaste tu contraseña?"}
               </button>
@@ -276,7 +276,7 @@ export default function Home() {
             {message && (
               <div
                 role="status"
-                className={`rounded-xl border p-3 text-sm leading-5 ${messageType === "error" ? "border-red-200 bg-red-50 text-red-700" : messageType === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-blue-200 bg-blue-50 text-blue-700"}`}
+                className={`rounded-xl border p-3 text-sm leading-5 ${messageType === "error" ? "border-red-200 bg-red-50 text-red-700" : messageType === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-blue-200 bg-blue-50 text-decom-blue-text"}`}
               >
                 {message}
               </div>
@@ -285,7 +285,7 @@ export default function Home() {
             <button
               type="submit"
               disabled={isLoading}
-              className="mt-4 flex h-12 w-full items-center justify-center rounded-xl bg-[#087db5] px-4 text-sm font-bold text-white shadow-[0_3px_7px_rgba(0,0,0,0.14)] transition hover:bg-[#0797bd] disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-4 flex h-12 w-full items-center justify-center rounded-xl bg-decom-blue px-4 text-sm font-bold text-white shadow-[0_3px_7px_rgba(0,0,0,0.14)] transition hover:bg-[#0797bd] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isLoading ? (
                 <>
@@ -298,7 +298,7 @@ export default function Home() {
             </button>
           </form>
 
-          <div className="my-5 text-center text-xs font-medium text-slate-400">o</div>
+          <div className="my-5 text-center text-xs font-medium text-muted-fg">o</div>
           <button
             type="button"
             onClick={() => {
@@ -313,7 +313,7 @@ export default function Home() {
           </button>
 
           <p
-            className={`mt-6 text-center text-xs leading-5 ${isDark ? "text-slate-400" : "text-slate-500"}`}
+            className={`mt-6 text-center text-xs leading-5 ${isDark ? "text-muted-fg" : "text-muted-fg"}`}
           >
             Escuela de Comunicaciones D34 · Formación para comunicar con propósito.
           </p>

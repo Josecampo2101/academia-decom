@@ -27,7 +27,7 @@ const statusLabel: Record<string, string> = {
   changes_requested: "Requiere ajustes",
 };
 const statusClass: Record<string, string> = {
-  draft: "bg-slate-100 text-slate-700",
+  draft: "bg-surface-muted text-foreground",
   review: "bg-amber-50 text-amber-800",
   approved: "bg-teal-50 text-teal-800",
   changes_requested: "bg-orange-50 text-orange-800",
@@ -115,33 +115,33 @@ export default function TutorWorkspacePage() {
   const districtName = (id: string) => districts.find((d) => d.id === id)?.name ?? "Distrito";
   if (loading)
     return (
-      <main className="grid min-h-screen place-items-center bg-[#F4F7FA] text-sm text-slate-500">
+      <main className="grid min-h-screen place-items-center bg-background text-sm text-muted-fg">
         Cargando espacio del tutor...
       </main>
     );
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
+    <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[.2em] text-[#087DB5]">
+            <p className="text-xs font-bold uppercase tracking-[.2em] text-decom-blue-text">
               Academia DECOM · Docencia
             </p>
             <h1 className="mt-2 text-3xl font-bold">Espacio del tutor</h1>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-fg">
               Organiza tus clases, materiales y entregas para revisión académica.
             </p>
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => router.push("/dashboard/planificador")}
-              className="rounded-xl bg-[#087DB5] px-4 py-3 text-sm font-semibold text-white"
+              className="rounded-xl bg-decom-blue px-4 py-3 text-sm font-semibold text-white"
             >
               Crear una clase
             </button>
             <button
               onClick={() => router.push("/dashboard/espacio")}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold"
+              className="rounded-xl border border-line bg-surface px-4 py-3 text-sm font-semibold"
             >
               Mi espacio
             </button>
@@ -162,45 +162,45 @@ export default function TutorWorkspacePage() {
             { label: "En revisión", value: count("review") },
             { label: "Requieren ajustes", value: count("changes_requested") },
           ].map((item) => (
-            <article key={item.label} className="rounded-2xl border border-slate-200 bg-white p-5">
-              <p className="text-xs font-semibold uppercase text-slate-500">{item.label}</p>
+            <article key={item.label} className="rounded-2xl border border-line bg-surface p-5">
+              <p className="text-xs font-semibold uppercase text-muted-fg">{item.label}</p>
               <p className="mt-2 text-3xl font-bold">{item.value}</p>
             </article>
           ))}
         </div>
-        <section className="mt-7 rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+        <section className="mt-7 rounded-2xl border border-line bg-surface p-5 sm:p-7">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <h2 className="text-xl font-bold">Mis clases preparadas</h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-muted-fg">
                 Consulta el estado y continúa trabajando en tus planificaciones.
               </p>
             </div>
             <button
               onClick={() => router.push("/dashboard/planificador")}
-              className="rounded-xl border border-[#087DB5] px-4 py-2.5 text-sm font-semibold text-[#087DB5]"
+              className="rounded-xl border border-decom-blue px-4 py-2.5 text-sm font-semibold text-decom-blue-text"
             >
               Abrir planner
             </button>
           </div>
           {!plans.length ? (
-            <div className="mt-5 rounded-xl border border-dashed border-slate-200 p-8 text-center">
+            <div className="mt-5 rounded-xl border border-dashed border-line p-8 text-center">
               <p className="font-semibold">Todavía no has guardado planificaciones.</p>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-muted-fg">
                 Crea tu primera clase desde el planner académico.
               </p>
             </div>
           ) : (
             <div className="mt-5 space-y-3">
               {plans.map((plan) => (
-                <article key={plan.id} className="rounded-xl border border-slate-100 p-4">
+                <article key={plan.id} className="rounded-xl border border-line-soft p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wide text-[#087DB5]">
+                      <p className="text-xs font-bold uppercase tracking-wide text-decom-blue-text">
                         {districtName(plan.district_id)} · {lessonName(plan.lesson_id)}
                       </p>
                       <h3 className="mt-1 font-bold">{plan.session_title}</h3>
-                      <p className="mt-1 text-sm text-slate-500">{plan.topic}</p>
+                      <p className="mt-1 text-sm text-muted-fg">{plan.topic}</p>
                     </div>
                     <span
                       className={
@@ -219,7 +219,7 @@ export default function TutorWorkspacePage() {
                       </p>
                     </div>
                   )}
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-fg">
                     <span>
                       {plan.planned_for
                         ? new Date(plan.planned_for + "T12:00:00").toLocaleDateString("es-CO")
@@ -228,7 +228,7 @@ export default function TutorWorkspacePage() {
                     </span>
                     <button
                       onClick={() => router.push("/dashboard/planificador")}
-                      className="font-semibold text-[#087DB5]"
+                      className="font-semibold text-decom-blue-text"
                     >
                       Editar en planner
                     </button>
@@ -238,9 +238,9 @@ export default function TutorWorkspacePage() {
             </div>
           )}
         </section>
-        <section className="mt-6 rounded-2xl border border-[#19A7A0]/30 bg-[#19A7A0]/5 p-5">
+        <section className="mt-6 rounded-2xl border border-decom-teal/30 bg-decom-teal/5 p-5">
           <h2 className="font-bold">Ruta de trabajo sugerida</h2>
-          <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-slate-700">
+          <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-foreground">
             <li>Selecciona la lección que vas a desarrollar.</li>
             <li>Define el tema, propósito y resultados de aprendizaje.</li>
             <li>Organiza apertura, desarrollo, cierre y evaluación.</li>

@@ -341,22 +341,22 @@ export default function StudentActivityClient({
   }
   if (loading || access === "checking")
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#087DB5]/20 border-t-[#087DB5]" />
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-decom-blue/20 border-t-decom-blue" />
       </main>
     );
   if (access !== "allowed" || !assignment || !submission || !activity)
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6">
-        <section className="max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center">
-          <h1 className="text-xl font-bold text-[#102D4D]">No fue posible abrir la actividad</h1>
-          <p className="mt-2 text-sm text-slate-500">
+      <main className="flex min-h-screen items-center justify-center bg-background px-6">
+        <section className="max-w-md rounded-3xl border border-line bg-surface p-8 text-center">
+          <h1 className="text-xl font-bold text-foreground">No fue posible abrir la actividad</h1>
+          <p className="mt-2 text-sm text-muted-fg">
             {error || "Comprueba que la asignación siga vigente."}
           </p>
           <button
             type="button"
             onClick={() => router.push("/dashboard/estudiante/actividades")}
-            className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white"
+            className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white"
           >
             Volver a actividades
           </button>
@@ -366,29 +366,29 @@ export default function StudentActivityClient({
   const due = assignment.due_at ?? activity.due_at;
   const locked = submission.status === "submitted" || submission.status === "graded";
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
-      <header className="border-b border-slate-200 bg-white">
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-4 md:px-8">
           <div>
-            <p className="text-xs font-extrabold tracking-[0.14em] text-[#087DB5]">
+            <p className="text-xs font-extrabold tracking-[0.14em] text-decom-blue-text">
               ACADEMIA DECOM
             </p>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-muted-fg">
               Actividad asignada · Intento {submission.attempt_number}
             </p>
           </div>
           <button
             type="button"
             onClick={() => router.push("/dashboard/estudiante/actividades")}
-            className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600"
+            className="rounded-xl border border-line px-4 py-2.5 text-xs font-semibold text-muted-fg"
           >
             ← Mis actividades
           </button>
         </div>
       </header>
       <div className="mx-auto grid max-w-6xl gap-6 px-5 py-7 pb-12 md:px-8 md:py-9 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <section className="min-w-0 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-          <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-400">
+        <section className="min-w-0 rounded-3xl border border-line bg-surface p-6 shadow-sm md:p-8">
+          <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-muted-fg">
             <span>{activity.courses?.title ?? "Curso"}</span>
             <span>·</span>
             <span>{activity.course_modules?.title ?? "Sin módulo"}</span>
@@ -398,11 +398,11 @@ export default function StudentActivityClient({
           </div>
           <h1 className="mt-5 text-2xl font-extrabold md:text-3xl">{activity.title}</h1>
           {activity.description && (
-            <p className="mt-3 text-sm leading-6 text-slate-500">{activity.description}</p>
+            <p className="mt-3 text-sm leading-6 text-muted-fg">{activity.description}</p>
           )}
-          <div className="mt-7 rounded-2xl bg-[#F4F7FA] p-5">
+          <div className="mt-7 rounded-2xl bg-surface-muted p-5">
             <h2 className="text-sm font-bold">Instrucciones</h2>
-            <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">
+            <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-fg">
               {activity.instructions}
             </p>
           </div>
@@ -427,7 +427,7 @@ export default function StudentActivityClient({
               type="button"
               disabled={busy}
               onClick={() => void reopen()}
-              className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+              className="mt-5 rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
             >
               Reabrir y corregir entrega
             </button>
@@ -446,9 +446,9 @@ export default function StudentActivityClient({
                     rows={9}
                     maxLength={10000}
                     placeholder="Desarrolla tu respuesta con tus propias palabras..."
-                    className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm leading-6 outline-none focus:border-[#087DB5]"
+                    className="mt-3 w-full rounded-2xl border border-line px-4 py-3 text-sm leading-6 outline-none focus:border-decom-blue"
                   />
-                  <p className="mt-1 text-right text-[10px] text-slate-400">
+                  <p className="mt-1 text-right text-[10px] text-muted-fg">
                     {answer.length}/10000
                   </p>
                 </div>
@@ -464,16 +464,16 @@ export default function StudentActivityClient({
                     value={link}
                     onChange={(e) => setLink(e.target.value)}
                     placeholder="https://..."
-                    className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-[#087DB5]"
+                    className="mt-2 w-full rounded-xl border border-line px-4 py-3 text-sm outline-none focus:border-decom-blue"
                   />
                 </div>
               )}
               {needFile && (
-                <div className="rounded-2xl border border-slate-200 p-4">
+                <div className="rounded-2xl border border-line p-4">
                   <label htmlFor="activity-file" className="text-sm font-bold">
                     Archivos adjuntos
                   </label>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-muted-fg">
                     Máximo 50 MB por archivo. Los archivos son privados.
                   </p>
                   <div className="mt-3 flex flex-col gap-2 sm:flex-row">
@@ -488,7 +488,7 @@ export default function StudentActivityClient({
                       type="button"
                       disabled={!file || busy}
                       onClick={() => void uploadFile()}
-                      className="rounded-lg border border-[#087DB5]/30 px-3 py-2 text-xs font-semibold text-[#087DB5] disabled:opacity-40"
+                      className="rounded-lg border border-decom-blue/30 px-3 py-2 text-xs font-semibold text-decom-blue-text disabled:opacity-40"
                     >
                       Adjuntar
                     </button>
@@ -496,17 +496,17 @@ export default function StudentActivityClient({
                   {attachments.map((item) => (
                     <div
                       key={item.id}
-                      className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-[#F4F7FA] p-3"
+                      className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-surface-muted p-3"
                     >
                       <button
                         type="button"
                         onClick={() => void openFile(item)}
-                        className="min-w-0 truncate text-left text-xs font-semibold text-[#087DB5] underline"
+                        className="min-w-0 truncate text-left text-xs font-semibold text-decom-blue-text underline"
                       >
                         {item.file_name}
                       </button>
                       <div className="flex shrink-0 items-center gap-2">
-                        <span className="text-[10px] text-slate-400">
+                        <span className="text-[10px] text-muted-fg">
                           {(item.size_bytes / 1048576).toFixed(1)} MB
                         </span>
                         <button
@@ -527,14 +527,14 @@ export default function StudentActivityClient({
                   type="button"
                   disabled={busy}
                   onClick={() => void saveDraft()}
-                  className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 disabled:opacity-50"
+                  className="rounded-xl border border-line px-5 py-3 text-sm font-semibold text-muted-fg disabled:opacity-50"
                 >
                   Guardar borrador
                 </button>
                 <button
                   type="submit"
                   disabled={busy}
-                  className="rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                  className="rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
                 >
                   {busy ? "Procesando..." : "Enviar al tutor"}
                 </button>
@@ -542,7 +542,7 @@ export default function StudentActivityClient({
             </form>
           )}
           {locked && (
-            <p className="mt-7 rounded-xl bg-[#F4F7FA] p-4 text-xs leading-5 text-slate-500">
+            <p className="mt-7 rounded-xl bg-surface-muted p-4 text-xs leading-5 text-muted-fg">
               {submission.status === "graded"
                 ? "Esta entrega ya fue calificada. Consulta el puntaje y la retroalimentación."
                 : "Tu entrega fue recibida y está pendiente de revisión."}
@@ -560,62 +560,62 @@ export default function StudentActivityClient({
           )}
         </section>
         <aside className="space-y-4">
-          <section className="rounded-3xl border border-slate-200 bg-white p-5">
+          <section className="rounded-3xl border border-line bg-surface p-5">
             <h2 className="text-sm font-bold">Detalles de la actividad</h2>
             <dl className="mt-4 space-y-3 text-xs">
               <div>
-                <dt className="text-slate-400">Estado</dt>
+                <dt className="text-muted-fg">Estado</dt>
                 <dd className="mt-1 font-semibold">
                   {statusText[submission.status] ?? submission.status}
                 </dd>
               </div>
               <div>
-                <dt className="text-slate-400">Puntaje máximo</dt>
+                <dt className="text-muted-fg">Puntaje máximo</dt>
                 <dd className="mt-1 font-semibold">{activity.total_points} puntos</dd>
               </div>
               <div>
-                <dt className="text-slate-400">Intento</dt>
+                <dt className="text-muted-fg">Intento</dt>
                 <dd className="mt-1 font-semibold">
                   {submission.attempt_number} de {activity.max_attempts}
                 </dd>
               </div>
               <div>
-                <dt className="text-slate-400">Fecha límite</dt>
+                <dt className="text-muted-fg">Fecha límite</dt>
                 <dd className="mt-1 font-semibold">
                   {due ? new Date(due).toLocaleString("es-CO") : "Sin fecha límite"}
                 </dd>
               </div>
               <div>
-                <dt className="text-slate-400">Formato</dt>
+                <dt className="text-muted-fg">Formato</dt>
                 <dd className="mt-1 font-semibold">{activity.response_type}</dd>
               </div>
             </dl>
           </section>
-          <section className="rounded-3xl border border-slate-200 bg-white p-5">
+          <section className="rounded-3xl border border-line bg-surface p-5">
             <h2 className="text-sm font-bold">Historial de revisiones</h2>
             {reviews.length ? (
               <ol className="mt-4 space-y-4">
                 {reviews.map((item) => (
-                  <li key={item.id} className="border-l-2 border-[#19A7A0] pl-3">
+                  <li key={item.id} className="border-l-2 border-decom-teal pl-3">
                     <p className="text-xs font-bold">
                       {statusText[item.status] ?? item.status} · intento {item.attempt_number}
                     </p>
                     {item.awarded_points !== null && (
-                      <p className="mt-1 text-xs text-slate-600">{item.awarded_points} puntos</p>
+                      <p className="mt-1 text-xs text-muted-fg">{item.awarded_points} puntos</p>
                     )}
                     {item.feedback && (
-                      <p className="mt-1 whitespace-pre-wrap text-xs leading-5 text-slate-500">
+                      <p className="mt-1 whitespace-pre-wrap text-xs leading-5 text-muted-fg">
                         {item.feedback}
                       </p>
                     )}
-                    <p className="mt-1 text-[10px] text-slate-400">
+                    <p className="mt-1 text-[10px] text-muted-fg">
                       {new Date(item.reviewed_at).toLocaleString("es-CO")}
                     </p>
                   </li>
                 ))}
               </ol>
             ) : (
-              <p className="mt-3 text-xs leading-5 text-slate-400">
+              <p className="mt-3 text-xs leading-5 text-muted-fg">
                 Aún no hay decisiones registradas para esta entrega.
               </p>
             )}

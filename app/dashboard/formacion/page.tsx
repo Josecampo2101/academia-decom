@@ -84,42 +84,42 @@ export default function FormationPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] p-6">
-        <p className="text-sm text-slate-500">Verificando tu sesión...</p>
+      <main className="flex min-h-screen items-center justify-center bg-background p-6">
+        <p className="text-sm text-muted-fg">Verificando tu sesión...</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
+    <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#087DB5] text-xl font-bold text-white">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-decom-blue text-xl font-bold text-white">
               D
             </div>
             <div>
               <p className="text-sm font-extrabold tracking-[0.12em]">ACADEMIA DECOM</p>
-              <p className="text-xs text-slate-500">Mi formación</p>
+              <p className="text-xs text-muted-fg">Mi formación</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="hidden max-w-56 truncate text-xs text-slate-500 sm:block">{email}</span>
+            <span className="hidden max-w-56 truncate text-xs text-muted-fg sm:block">{email}</span>
             <button
               type="button"
               onClick={() => router.push("/dashboard")}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold transition hover:border-[#087DB5] hover:text-[#087DB5]"
+              className="rounded-xl border border-line bg-surface px-4 py-2.5 text-sm font-semibold transition hover:border-decom-blue hover:text-decom-blue-text"
             >
               ← Volver al panel
             </button>
           </div>
         </header>
 
-        <section className="relative overflow-hidden rounded-3xl bg-[#102D4D] px-6 py-9 text-white sm:px-10 sm:py-12">
+        <section className="relative overflow-hidden rounded-3xl bg-decom-navy px-6 py-9 text-white sm:px-10 sm:py-12">
           <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full border border-white/10" />
-          <div className="absolute -bottom-36 right-28 h-72 w-72 rounded-full bg-[#087DB5]/30 blur-3xl" />
+          <div className="absolute -bottom-36 right-28 h-72 w-72 rounded-full bg-decom-blue/30 blur-3xl" />
           <div className="relative max-w-3xl">
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#55D1C4]">
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-decom-teal-light">
               Ruta de aprendizaje
             </p>
             <h1 className="mt-4 text-3xl font-bold leading-tight sm:text-4xl">
@@ -138,29 +138,29 @@ export default function FormationPage() {
         </section>
 
         <section className="mt-7 grid gap-4 sm:grid-cols-3">
-          <article className="rounded-2xl border border-slate-200 bg-white p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Tu avance</p>
-            <p className="mt-3 text-2xl font-bold text-[#102D4D]">—</p>
-            <p className="mt-1 text-xs text-slate-500">Se mostrará al activar el registro académico</p>
+          <article className="rounded-2xl border border-line bg-surface p-5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-fg">Tu avance</p>
+            <p className="mt-3 text-2xl font-bold text-foreground">—</p>
+            <p className="mt-1 text-xs text-muted-fg">Se mostrará al activar el registro académico</p>
           </article>
-          <article className="rounded-2xl border border-slate-200 bg-white p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Cursos aprobados</p>
-            <p className="mt-3 text-2xl font-bold text-[#102D4D]">—</p>
-            <p className="mt-1 text-xs text-slate-500">Sin datos de evaluación todavía</p>
+          <article className="rounded-2xl border border-line bg-surface p-5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-fg">Cursos aprobados</p>
+            <p className="mt-3 text-2xl font-bold text-foreground">—</p>
+            <p className="mt-1 text-xs text-muted-fg">Sin datos de evaluación todavía</p>
           </article>
-          <article className="rounded-2xl border border-slate-200 bg-white p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Siguiente paso</p>
-            <p className="mt-3 text-lg font-bold text-[#087DB5]">Identidad corporativa</p>
-            <p className="mt-1 text-xs text-slate-500">Primer curso de la ruta formativa</p>
+          <article className="rounded-2xl border border-line bg-surface p-5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-fg">Siguiente paso</p>
+            <p className="mt-3 text-lg font-bold text-decom-blue-text">Identidad corporativa</p>
+            <p className="mt-1 text-xs text-muted-fg">Primer curso de la ruta formativa</p>
           </article>
         </section>
 
         <section className="mt-9">
           <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#087DB5]">Plan de estudios</p>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-decom-blue-text">Plan de estudios</p>
               <h2 className="mt-2 text-2xl font-bold">Ruta formativa DECOM</h2>
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-muted-fg">
                 Los cursos se completan en orden. Las actividades obligatorias deben ser aprobadas antes del examen final.
               </p>
             </div>
@@ -176,30 +176,30 @@ export default function FormationPage() {
               return (
                 <article
                   key={course.number}
-                  className={`overflow-hidden rounded-2xl border bg-white transition ${isAvailable ? "border-[#087DB5]/30 shadow-sm" : "border-slate-200"}`}
+                  className={`overflow-hidden rounded-2xl border bg-surface transition ${isAvailable ? "border-decom-blue/30 shadow-sm" : "border-line"}`}
                 >
                   <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:p-6">
-                    <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-sm font-bold ${isAvailable ? "bg-[#087DB5] text-white" : "bg-slate-100 text-slate-400"}`}>
+                    <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-sm font-bold ${isAvailable ? "bg-decom-blue text-white" : "bg-surface-muted text-muted-fg"}`}>
                       {isAvailable ? course.number : "🔒"}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-[#19A7A0]">{course.area}</p>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-decom-teal-text">{course.area}</p>
                         {isAvailable ? (
-                          <span className="rounded-full bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-[#087DB5]">Primer curso</span>
+                          <span className="rounded-full bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-decom-blue-text">Primer curso</span>
                         ) : (
-                          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-500">Bloqueado por secuencia</span>
+                          <span className="rounded-full bg-surface-muted px-2.5 py-1 text-[11px] font-semibold text-muted-fg">Bloqueado por secuencia</span>
                         )}
                       </div>
-                      <h3 className="mt-2 text-lg font-bold text-[#102D4D]">{course.title}</h3>
-                      <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-500">{course.description}</p>
-                      <p className="mt-3 text-xs text-slate-400">{course.lessons}</p>
+                      <h3 className="mt-2 text-lg font-bold text-foreground">{course.title}</h3>
+                      <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-fg">{course.description}</p>
+                      <p className="mt-3 text-xs text-muted-fg">{course.lessons}</p>
                     </div>
                     <div className="sm:pl-4">
                       {isAvailable ? (
                         <a
                           href="/dashboard/formacion/identidad-corporativa"
-                          className="inline-flex w-full items-center justify-center rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#066895] sm:w-auto"
+                          className="inline-flex w-full items-center justify-center rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white transition hover:bg-decom-blue-hover sm:w-auto"
                         >
                           Ver estructura del curso
                         </a>
@@ -208,7 +208,7 @@ export default function FormationPage() {
                           type="button"
                           disabled
                           title="Se habilitará al aprobar el curso anterior"
-                          className="w-full cursor-not-allowed rounded-xl bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-400 sm:w-auto"
+                          className="w-full cursor-not-allowed rounded-xl bg-surface-muted px-5 py-3 text-sm font-semibold text-muted-fg sm:w-auto"
                         >
                           Curso bloqueado
                         </button>
@@ -216,7 +216,7 @@ export default function FormationPage() {
                     </div>
                   </div>
                   {index < curriculum.length - 1 && (
-                    <div className="h-px bg-slate-100" />
+                    <div className="h-px bg-surface-muted" />
                   )}
                 </article>
               );
@@ -224,12 +224,12 @@ export default function FormationPage() {
           </div>
         </section>
 
-        <section className="mt-9 rounded-2xl border border-slate-200 bg-white p-6">
+        <section className="mt-9 rounded-2xl border border-line bg-surface p-6">
           <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#19A7A0]/10 text-lg text-[#138B84]">i</div>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-decom-teal/10 text-lg text-decom-teal-text">i</div>
             <div>
               <h2 className="font-bold">¿Cómo funciona tu formación?</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-500">
+              <p className="mt-2 text-sm leading-6 text-muted-fg">
                 Cada curso tendrá lecciones en distintos formatos, actividades prácticas
                 obligatorias, acompañamiento de tutor y un examen final. Al aprobarlo,
                 se registrará tu resultado y se desbloqueará el siguiente curso.
@@ -238,7 +238,7 @@ export default function FormationPage() {
           </div>
         </section>
 
-        <footer className="py-8 text-center text-xs text-slate-400">
+        <footer className="py-8 text-center text-xs text-muted-fg">
           Academia DECOM · Formación para comunicar con propósito.
         </footer>
       </div>
