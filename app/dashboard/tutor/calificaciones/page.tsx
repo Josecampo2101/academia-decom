@@ -24,9 +24,9 @@ export default function TutorAssessmentWorkflowPage(){
  const [search,setSearch]=useState("");const [filter,setFilter]=useState("Todas");
  const [busy,setBusy]=useState(false);const [loading,setLoading]=useState(true);const [error,setError]=useState("");const [notice,setNotice]=useState("");
  const load=useCallback(async()=>{
-  setLoading(true);setError("");
   try{
-   const {data:{user},error:authError}=await supabase.auth.getUser();if(authError||!user){router.replace("/conexion");return;}
+   const {data:{user},error:authError}=await supabase.auth.getUser();
+   setLoading(true);setError("");if(authError||!user){router.replace("/conexion");return;}
    const {data:roleRows,error:roleError}=await supabase.from("user_role_assignments").select("role_id").eq("user_id",user.id);if(roleError)throw roleError;
    const roleIds=[...new Set((roleRows??[]).map(x=>x.role_id))];const {data:roles,error:rolesError}=await supabase.from("roles").select("role_key").in("id",roleIds);if(rolesError)throw rolesError;
    const roleKeys=(roles??[]).map(x=>x.role_key);if(!roleKeys.includes("tutor")&&!roleKeys.includes("national_admin")){setAccess("denied");return;}
@@ -62,7 +62,7 @@ export default function TutorAssessmentWorkflowPage(){
   }catch(cause){console.error("No fue posible cargar la bandeja de tutoría:",cause);setError(cause instanceof Error?cause.message:"No fue posible consultar las entregas.");setAccess("error");}
   finally{setLoading(false);}
  },[router,supabase]);
- useEffect(()=>{void load();},[load]);
+ useEffect(()=>{let active=true;void Promise.resolve().then(()=>{if(active)return load();});return()=>{active=false;};},[load]);
  const selected=items.find(x=>x.id===selectedId)??null;
  const selectedCriteria=criteria.filter(x=>x.activity_id===selected?.activity_id);
  const visible=items.filter(x=>(filter==="Todas"||(filter==="Pendientes"&&x.status==="submitted")||false)&&(!search.trim()||[x.studentName,x.academic_activities.title,x.academic_activities.courses?.title??""].some(v=>v.toLocaleLowerCase("es").includes(search.trim().toLocaleLowerCase("es")))));

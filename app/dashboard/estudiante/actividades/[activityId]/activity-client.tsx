@@ -17,9 +17,9 @@ export default function StudentActivityClient({activityId:assignmentId}:{activit
  const [file,setFile]=useState<File|null>(null);const [busy,setBusy]=useState(false);const [loading,setLoading]=useState(true);
  const [notice,setNotice]=useState("");const [error,setError]=useState("");
  const load=useCallback(async()=>{
-  setLoading(true);setError("");
   try{
-   const {data:{user},error:authError}=await supabase.auth.getUser();if(authError||!user){router.replace("/conexion");return;}
+   const {data:{user},error:authError}=await supabase.auth.getUser();
+   setLoading(true);setError("");if(authError||!user){router.replace("/conexion");return;}
    const {data:a,error:ae}=await supabase.from("academic_activity_assignments").select("id,district_id,due_at,academic_activities!inner(id,title,description,instructions,response_type,total_points,max_attempts,due_at,status,courses(title),course_modules(title))").eq("id",assignmentId).eq("status","active").single();
    if(ae)throw ae;const current=a as unknown as Assignment;if(current.academic_activities.status!=="published")throw new Error("La actividad ya no está publicada.");setAssignment(current);
    const {data:submissionRows,error:se}=await supabase.from("academic_activity_submissions").select("id,attempt_number,response_text,external_url,status,awarded_points,feedback,submitted_at").eq("assignment_id",assignmentId).order("attempt_number",{ascending:false});
@@ -37,7 +37,7 @@ export default function StudentActivityClient({activityId:assignmentId}:{activit
   }catch(cause){console.error("No fue posible cargar la actividad:",cause);setError(cause instanceof Error?cause.message:"No fue posible cargar esta actividad.");setAccess("error");}
   finally{setLoading(false);}
  },[assignmentId,router,supabase]);
- useEffect(()=>{void load();},[load]);
+ useEffect(()=>{let active=true;void Promise.resolve().then(()=>{if(active)return load();});return()=>{active=false;};},[load]);
  const activity=assignment?.academic_activities;const editable=submission?.status==="draft";
  const responseType=activity?.response_type;const needText=responseType==="text"||responseType==="mixed";
  const needFile=responseType==="file"||responseType==="mixed";const needLink=responseType==="link"||responseType==="mixed";

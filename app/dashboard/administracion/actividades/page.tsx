@@ -3,18 +3,20 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-type Row = { id:string; title:string; status:string; district_id:string; [key:string]:any };
-type Activity = Row & { course_id:string; module_id:string; lesson_id:string; instructions:string; response_type:"text"|"file"|"link"|"mixed"; total_points:number; max_attempts:number; due_at:string|null; criteria: any[]; courseTitle:string; moduleTitle:string; lessonTitle:string; assigned:number };
+type Row = { id:string; title:string; status:string; district_id:string; program_id?:string; course_id?:string; module_id?:string; lesson_id?:string; description?:string|null; [key:string]:unknown };
+type RubricCriterion = { id?:string; activity_id?:string; title:string; description:string|null; max_points:number; sort_order:number };
+type RubricDraft = { id?:string; title:string; description:string; max_points:number; sort_order:number };
+type ActivityAssignment = { activity_id:string };
+type Activity = Row & { course_id:string; module_id:string; lesson_id:string; instructions:string; response_type:"text"|"file"|"link"|"mixed"; total_points:number; max_attempts:number; due_at:string|null; criteria:RubricCriterion[]; courseTitle:string; moduleTitle:string; lessonTitle:string; assigned:number };
 const blank = { title:"", description:"", instructions:"", program_id:"", course_id:"", module_id:"", lesson_id:"", response_type:"text" as "text"|"file"|"link"|"mixed", total_points:100, max_attempts:2, due_at:"" };
 const label = (s:string) => s==="published"?"Publicado":s==="archived"?"Archivado":"Borrador";
 export default function AcademicActivitiesAdminPage() {
  const router=useRouter(), supabase=useMemo(()=>createClient(),[]);
  const [access,setAccess]=useState("checking"),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[publishScope,setPublishScope]=useState<{global:boolean;districtIds:string[]}>({global:false,districtIds:[]});
  const [programs,setPrograms]=useState<Row[]>([]),[courses,setCourses]=useState<Row[]>([]),[modules,setModules]=useState<Row[]>([]),[lessons,setLessons]=useState<Row[]>([]),[activities,setActivities]=useState<Activity[]>([]);
- const [form,setForm]=useState(blank),[criteria,setCriteria]=useState<any[]>([{title:"Dominio del tema",description:"Comprensión y aplicación del contenido.",max_points:100,sort_order:0}]);
+ const [form,setForm]=useState(blank),[criteria,setCriteria]=useState<RubricDraft[]>([{title:"Dominio del tema",description:"Comprensión y aplicación del contenido.",max_points:100,sort_order:0}]);
  const [editing,setEditing]=useState<string|null>(null),[open,setOpen]=useState(false),[search,setSearch]=useState(""),[filter,setFilter]=useState("all"),[notice,setNotice]=useState(""),[error,setError]=useState("");
  const load=useCallback(async()=>{
-  setLoading(true); setError("");
   try {
    const [p,c,m,l,a]=await Promise.all([
     supabase.from("academic_programs").select("id,title,status,district_id").order("sort_order"),
@@ -23,21 +25,22 @@ export default function AcademicActivitiesAdminPage() {
     supabase.from("lessons").select("id,title,status,module_id,district_id").order("sort_order"),
     supabase.from("academic_activities").select("*").order("updated_at",{ascending:false})
    ]);
+   setError("");
    for(const r of [p,c,m,l,a]) if(r.error) throw r.error;
    const ps=(p.data??[]) as Row[], cs=(c.data??[]) as Row[], ms=(m.data??[]) as Row[], ls=(l.data??[]) as Row[], acts=(a.data??[]) as Row[];
    setPrograms(ps);setCourses(cs);setModules(ms);setLessons(ls);
-   let rub:any[]=[];let ass:any[]=[];
-   if(acts.length){const ids=acts.map(x=>x.id);const [r,s]=await Promise.all([supabase.from("academic_activity_rubric_criteria").select("id,activity_id,title,description,max_points,sort_order").in("activity_id",ids).order("sort_order"),supabase.from("academic_activity_assignments").select("activity_id").in("activity_id",ids).eq("status","active")]);if(r.error)throw r.error;if(s.error)throw s.error;rub=r.data??[];ass=s.data??[];}
+   let rub:RubricCriterion[]=[];let ass:ActivityAssignment[]=[];
+   if(acts.length){const ids=acts.map(x=>x.id);const [r,s]=await Promise.all([supabase.from("academic_activity_rubric_criteria").select("id,activity_id,title,description,max_points,sort_order").in("activity_id",ids).order("sort_order"),supabase.from("academic_activity_assignments").select("activity_id").in("activity_id",ids).eq("status","active")]);if(r.error)throw r.error;if(s.error)throw s.error;rub=(r.data??[]) as RubricCriterion[];ass=(s.data??[]) as ActivityAssignment[];}
    setActivities(acts.map(x=>({...x,criteria:rub.filter(y=>y.activity_id===x.id),assigned:ass.filter(y=>y.activity_id===x.id).length,courseTitle:cs.find(y=>y.id===x.course_id)?.title??"Curso no disponible",moduleTitle:ms.find(y=>y.id===x.module_id)?.title??"Módulo no disponible",lessonTitle:ls.find(y=>y.id===x.lesson_id)?.title??"Lección no disponible"})) as Activity[]);
   }catch(e){setError(e instanceof Error?e.message:"No fue posible consultar el catálogo.");}finally{setLoading(false);}
  },[supabase]);
  useEffect(()=>{let active=true;(async()=>{try{const {data:{user},error:authError}=await supabase.auth.getUser();if(authError||!user){router.replace("/conexion");return;}const {data:ua,error:uae}=await supabase.from("user_role_assignments").select("role_id,district_id").eq("user_id",user.id);if(uae)throw uae;const ids=[...new Set((ua??[]).map(x=>x.role_id))];const {data:roles,error:re}=ids.length?await supabase.from("roles").select("id,role_key").in("id",ids):{data:[],error:null};if(re)throw re;if(!active)return;const roleById=new Map((roles??[]).map(x=>[x.id,x.role_key]));const assignments=ua??[];const roleKeys=assignments.map(x=>roleById.get(x.role_id));setPublishScope({global:roleKeys.includes("national_admin"),districtIds:[...new Set(assignments.filter(x=>roleById.get(x.role_id)==="academic_editor"&&x.district_id).map(x=>x.district_id as string))]});setAccess(roleKeys.some(x=>["national_admin","academic_editor","district_coordinator","area_coordinator","tutor"].includes(x??""))?"allowed":"denied");}catch{if(active)setAccess("error");}})();return()=>{active=false};},[router,supabase]);
- useEffect(()=>{if(access==="allowed")void load();},[access,load]);
+ useEffect(()=>{let active=true;if(access==="allowed")void Promise.resolve().then(()=>{if(active)return load();});return()=>{active=false;};},[access,load]);
  const courseOptions=courses.filter(x=>x.program_id===form.program_id),moduleOptions=modules.filter(x=>x.course_id===form.course_id),lessonOptions=lessons.filter(x=>x.module_id===form.module_id);
  const filtered=activities.filter(x=>(filter==="all"||x.status===filter)&&[x.title,x.courseTitle,x.moduleTitle,x.lessonTitle].join(" ").toLowerCase().includes(search.toLowerCase()));
  const canPublishActivity=(x:Activity)=>publishScope.global||publishScope.districtIds.includes(x.district_id);
  function create(){setEditing(null);setForm({...blank,program_id:programs[0]?.id??""});setCriteria([{title:"Dominio del tema",description:"Comprensión y aplicación del contenido.",max_points:100,sort_order:0}]);setOpen(true);setError("");setNotice("");}
- function edit(x:Activity){if(x.status!=="draft")return;setEditing(x.id);setForm({title:x.title,description:x.description??"",instructions:x.instructions,program_id:courses.find(y=>y.id===x.course_id)?.program_id??"",course_id:x.course_id,module_id:x.module_id,lesson_id:x.lesson_id,response_type:x.response_type,total_points:Number(x.total_points),max_attempts:x.max_attempts,due_at:x.due_at?new Date(x.due_at).toISOString().slice(0,16):""});setCriteria(x.criteria.map((r,i)=>({...r,max_points:Number(r.max_points),sort_order:i})));setOpen(true);setError("");}
+ function edit(x:Activity){if(x.status!=="draft")return;setEditing(x.id);setForm({title:x.title,description:x.description??"",instructions:x.instructions,program_id:courses.find(y=>y.id===x.course_id)?.program_id??"",course_id:x.course_id,module_id:x.module_id,lesson_id:x.lesson_id,response_type:x.response_type,total_points:Number(x.total_points),max_attempts:x.max_attempts,due_at:x.due_at?new Date(x.due_at).toISOString().slice(0,16):""});setCriteria(x.criteria.map((r,i)=>({...r,description:r.description??"",max_points:Number(r.max_points),sort_order:i})));setOpen(true);setError("");}
  async function save(e:FormEvent){e.preventDefault();setSaving(true);setError("");try{
   const p=programs.find(x=>x.id===form.program_id),c=courses.find(x=>x.id===form.course_id),m=modules.find(x=>x.id===form.module_id),l=lessons.find(x=>x.id===form.lesson_id);
   if(!p||!c||!m||!l||c.program_id!==p.id||m.course_id!==c.id||l.module_id!==m.id)throw Error("Selecciona una jerarquía completa y válida: programa, curso, módulo y lección.");
