@@ -989,7 +989,7 @@ export default function AcademicCatalogPage() {
                   type="button"
                   onClick={() => openCreate("lesson")}
                   disabled={!selectedModule || saving}
-                  className="rounded-lg bg-decom-navy px-4 py-2.5 text-xs font-bold text-white disabled:opacity-40"
+                  className="rounded-lg bg-decom-blue px-4 py-2.5 text-xs font-bold text-white disabled:opacity-40 hover:bg-decom-blue-hover"
                 >
                   ＋ Añadir lección al módulo seleccionado
                 </button>

@@ -43,6 +43,18 @@ autenticación, Supabase, migraciones ni políticas RLS.
 14. **`StatusScreen`.** El bloque de "acceso restringido" estaba copiado en 12 páginas; 10 usan ahora el
     componente compartido (mismos textos y acciones). Quedan `lesson-client` y `tutor/page` con variantes propias.
 
+15. **Pulido verificado con capturas reales.** Se usó un navegador sin interfaz contra la app con datos
+    ficticios (servidor Supabase simulado, solo en local). Auditoría de contraste automática en 12 pantallas,
+    claro y oscuro: 24 hallazgos -> 0. Cambios: azul de texto AA en claro (`#096ba0`), eyebrow turquesa legible
+    sobre el hero azul marino, saludo no duplicado, login con botón secundario en contorno y divisor de líneas,
+    botones azul marino -> azul de marca, sombra `sm` más suave, `text-wrap: balance/pretty`.
+16. **Móvil.** Sin desborde horizontal en 18 pantallas a 360 y 768 px. Áreas táctiles mínimas de 40 px
+    (controles < 36 px a 360 px: de 47 a 1, el input de archivo oculto). Encabezado móvil del panel más limpio.
+
+> Límites de la auditoría automática: no evalúa texto sobre fondos con degradado ni imágenes; las pantallas de
+> estudiante y tutor se revisaron con listas vacías (sin datos de ejemplo), así que falta ver su aspecto con
+> contenido real.
+
 ## Verificación ejecutada
 
 | Comprobación | Resultado |

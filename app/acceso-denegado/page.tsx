@@ -47,7 +47,7 @@ export default function AccesoDenegado() {
         <button
           onClick={cerrarSesion}
           disabled={loading}
-          className="w-full rounded-xl bg-decom-navy px-5 py-3 font-semibold text-white transition hover:bg-decom-blue disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded-xl bg-decom-blue px-5 py-3 font-semibold text-white transition hover:bg-decom-blue-hover disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? "Cerrando sesión..." : "Volver al inicio"}
         </button>

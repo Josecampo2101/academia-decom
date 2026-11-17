@@ -597,7 +597,7 @@ export default function CreateAssessmentPage() {
                       saving || selectedAssessment.status !== "draft" || questions.length === 0
                     }
                     onClick={publishAssessment}
-                    className="rounded-xl bg-decom-navy px-4 py-2.5 text-xs font-bold text-white disabled:opacity-40"
+                    className="rounded-xl bg-decom-blue px-4 py-2.5 text-xs font-bold text-white disabled:opacity-40 hover:bg-decom-blue-hover"
                   >
                     Publicar evaluación
                   </button>

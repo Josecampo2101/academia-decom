@@ -890,7 +890,8 @@ export default function DashboardPage() {
               >
                 <Menu className="h-5 w-5" aria-hidden="true" />
               </button>
-              <div>
+              {/* En móvil se oculta el título: el saludo del panel ya identifica la pantalla y se libera espacio. */}
+              <div className="hidden sm:block">
                 <p className={`text-xs font-medium ${secondaryText}`}>ACADEMIA DECOM</p>
                 <h2 className="mt-1 text-lg font-bold">Panel principal</h2>
               </div>
@@ -966,12 +967,11 @@ export default function DashboardPage() {
               <div className="absolute -bottom-40 right-32 h-72 w-72 rounded-full border border-white/10" />
 
               <div className="relative z-10">
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-decom-teal-text">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-decom-teal-light">
                   Formación institucional
                 </p>
 
-                <p className="mt-4 text-sm font-semibold text-[#9BDCF5]">{greeting}</p>
-                <h2 className="mt-2 max-w-3xl text-3xl font-bold leading-tight md:text-4xl">
+                <h2 className="mt-3 max-w-3xl text-3xl font-bold leading-tight md:text-4xl">
                   {displayName === "Bienvenido"
                     ? "Bienvenido a tu escuela"
                     : `${greeting}, ${displayName}`}
@@ -994,7 +994,7 @@ export default function DashboardPage() {
               className={`mt-6 rounded-2xl border ${borderColor} ${surface} p-5 shadow-sm md:p-6`}
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#FFBD00]/15 text-[#B78100]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#FFBD00]/15 text-amber-700">
                   ✦
                 </div>
                 <div>

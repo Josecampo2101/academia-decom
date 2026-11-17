@@ -525,7 +525,7 @@ export default function RoleWorkspacePage() {
             <div className="mt-4 flex flex-wrap gap-3">
               <button
                 onClick={() => router.push("/dashboard")}
-                className="rounded-xl bg-decom-navy px-5 py-3 text-sm font-semibold text-white"
+                className="rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white hover:bg-decom-blue-hover"
               >
                 Panel de administración
               </button>

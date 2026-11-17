@@ -299,7 +299,12 @@ export default function Home() {
             </button>
           </form>
 
-          <div className="my-5 text-center text-xs font-medium text-muted-fg">o</div>
+          <div
+            aria-hidden="true"
+            className="my-5 flex items-center gap-3 text-xs font-medium text-muted-fg"
+          >
+            <span className="h-px flex-1 bg-line" />o<span className="h-px flex-1 bg-line" />
+          </div>
           <button
             type="button"
             onClick={() => {
@@ -308,16 +313,10 @@ export default function Home() {
               );
               setMessageType("info");
             }}
-            className={`flex h-12 w-full items-center justify-center rounded-xl text-sm font-bold text-white shadow-[0_3px_7px_rgba(0,0,0,0.14)] transition ${isDark ? "bg-[#34363a] hover:bg-[#41444a]" : "bg-[#252528] hover:bg-[#38383d]"}`}
+            className="flex h-12 w-full items-center justify-center rounded-xl border border-line bg-transparent text-sm font-semibold text-foreground transition hover:bg-surface-muted"
           >
             Registrarse
           </button>
-
-          <p
-            className={`mt-6 text-center text-xs leading-5 ${isDark ? "text-muted-fg" : "text-muted-fg"}`}
-          >
-            Escuela de Comunicaciones D34 · Formación para comunicar con propósito.
-          </p>
         </section>
         <PublicFooter />
       </div>

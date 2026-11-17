@@ -474,7 +474,7 @@ export default function LibraryAdministrationPage() {
               </label>
               <button
                 type="submit"
-                className="rounded-lg bg-decom-navy px-4 py-2.5 text-xs font-bold text-white"
+                className="rounded-lg bg-decom-blue px-4 py-2.5 text-xs font-bold text-white hover:bg-decom-blue-hover"
               >
                 Añadir categoría
               </button>
