@@ -112,7 +112,8 @@ export default function Home() {
   const isDark = resolvedTheme === "dark";
 
   return (
-    <main id="contenido"
+    <main
+      id="contenido"
       className={`relative min-h-screen overflow-x-hidden transition-colors duration-300 bg-background`}
     >
       <div

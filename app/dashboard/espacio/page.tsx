@@ -228,7 +228,10 @@ export default function RoleWorkspacePage() {
 
   if (loading)
     return (
-      <main id="contenido" className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-fg">
+      <main
+        id="contenido"
+        className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-fg"
+      >
         Preparando tu espacio de trabajo...
       </main>
     );
@@ -247,9 +250,7 @@ export default function RoleWorkspacePage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="hidden max-w-64 truncate text-xs text-muted-fg sm:block">
-              {email}
-            </span>
+            <span className="hidden max-w-64 truncate text-xs text-muted-fg sm:block">{email}</span>
             <button
               onClick={() => router.push("/dashboard")}
               className="rounded-xl border border-line bg-surface px-4 py-2.5 text-sm font-semibold hover:border-decom-blue"
@@ -322,10 +323,7 @@ export default function RoleWorkspacePage() {
                 enrollments.map((e) => {
                   const course = courses.find((c) => c.id === e.course_id);
                   return (
-                    <article
-                      key={e.id}
-                      className="rounded-2xl border border-line bg-surface p-5"
-                    >
+                    <article key={e.id} className="rounded-2xl border border-line bg-surface p-5">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
                           <h3 className="font-bold">{course?.title ?? "Curso asignado"}</h3>

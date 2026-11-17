@@ -97,8 +97,7 @@ html {
 body {
   min-height: 100vh;
   background:
-    radial-gradient(ellipse at top left, rgb(57 169 220 / 8%), transparent 38%),
-    var(--background);
+    radial-gradient(ellipse at top left, rgb(57 169 220 / 8%), transparent 38%), var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), Inter, Arial, Helvetica, sans-serif;
   text-rendering: optimizeLegibility;
@@ -117,8 +116,7 @@ body {
 
 .dark body {
   background:
-    radial-gradient(ellipse at top left, rgb(57 169 220 / 10%), transparent 42%),
-    var(--background);
+    radial-gradient(ellipse at top left, rgb(57 169 220 / 10%), transparent 42%), var(--background);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -132,7 +130,6 @@ body {
   }
 }
 
-
 /* Shared interaction and form-control baseline for every module. */
 :where(button, a, input, select, textarea) {
   -webkit-tap-highlight-color: transparent;
@@ -141,10 +138,17 @@ body {
 :where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {
   color: var(--foreground);
   accent-color: var(--brand);
-  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
 }
 
-:where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea)::placeholder {
+:where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  select,
+  textarea
+)::placeholder {
   color: var(--muted);
   opacity: 0.82;
 }
@@ -167,7 +171,6 @@ body {
     max-width: 100%;
   }
 }
-
 
 /* Accesibilidad adicional para navegación por teclado y modos de alto contraste. */
 :where([id]) {

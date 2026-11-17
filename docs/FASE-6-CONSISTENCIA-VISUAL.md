@@ -57,19 +57,19 @@ autenticación, Supabase, migraciones ni políticas RLS.
 
 ## Verificación ejecutada
 
-| Comprobación | Resultado |
-|---|---|
-| `npm run lint` | sin errores |
-| `npm run typecheck` (sin caché `.next`) | sin errores |
-| `npm test` | 30 de 30 |
-| `npm run build` (fuente de Google simulada, sin red) | compila |
-| `/conexion` en ejecución | 307 hacia `/` |
-| Cabeceras en `/` | las 5 presentes |
-| CSS generado | todas las utilidades de tokens existen |
-| `/ruta-inexistente` | 404 con la página de marca y las cabeceras de seguridad |
-| Login | contiene enlace de salto, `theme-color`, `id="contenido"` y pie |
-| `/dashboard/...` sin sesión | 307 a `/` (el proxy sigue igual) |
-| `npm ci` + lint + pruebas tras agregar Prettier | sin errores, 30 de 30 |
+| Comprobación                                         | Resultado                                                       |
+| ---------------------------------------------------- | --------------------------------------------------------------- |
+| `npm run lint`                                       | sin errores                                                     |
+| `npm run typecheck` (sin caché `.next`)              | sin errores                                                     |
+| `npm test`                                           | 30 de 30                                                        |
+| `npm run build` (fuente de Google simulada, sin red) | compila                                                         |
+| `/conexion` en ejecución                             | 307 hacia `/`                                                   |
+| Cabeceras en `/`                                     | las 5 presentes                                                 |
+| CSS generado                                         | todas las utilidades de tokens existen                          |
+| `/ruta-inexistente`                                  | 404 con la página de marca y las cabeceras de seguridad         |
+| Login                                                | contiene enlace de salto, `theme-color`, `id="contenido"` y pie |
+| `/dashboard/...` sin sesión                          | 307 a `/` (el proxy sigue igual)                                |
+| `npm ci` + lint + pruebas tras agregar Prettier      | sin errores, 30 de 30                                           |
 
 ## Lo que NO se verificó (revisar a ojo antes de fusionar)
 

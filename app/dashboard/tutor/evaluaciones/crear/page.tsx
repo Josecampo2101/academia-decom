@@ -322,7 +322,10 @@ export default function CreateAssessmentPage() {
     );
   if (access !== "allowed")
     return (
-      <main id="contenido" className="flex min-h-screen items-center justify-center bg-background px-6">
+      <main
+        id="contenido"
+        className="flex min-h-screen items-center justify-center bg-background px-6"
+      >
         <section className="max-w-md rounded-3xl bg-surface p-8 text-center">
           <h1 className="text-xl font-bold">
             {access === "error" ? "No pudimos cargar el módulo" : "Acceso restringido"}

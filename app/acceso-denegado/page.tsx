@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -20,7 +19,10 @@ export default function AccesoDenegado() {
   }
 
   return (
-    <main id="contenido" className="min-h-screen flex items-center justify-center bg-background px-6 py-12 dark:bg-[#101B2A]">
+    <main
+      id="contenido"
+      className="min-h-screen flex items-center justify-center bg-background px-6 py-12 dark:bg-[#101B2A]"
+    >
       <section className="w-full max-w-lg rounded-2xl border border-line bg-surface p-8 text-center shadow-lg dark:bg-[#1C2B3D]">
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-3xl text-red-600 dark:bg-red-950 dark:text-red-400">
           !
@@ -30,18 +32,16 @@ export default function AccesoDenegado() {
           Academia DECOM
         </p>
 
-        <h1 className="mb-4 text-2xl font-bold text-foreground">
-          Acceso no autorizado
-        </h1>
+        <h1 className="mb-4 text-2xl font-bold text-foreground">Acceso no autorizado</h1>
 
         <p className="mb-6 leading-relaxed text-muted-fg">
-          Tu cuenta no tiene autorización para acceder a esta plataforma
-          en este momento, o no fue posible verificar su estado.
+          Tu cuenta no tiene autorización para acceder a esta plataforma en este momento, o no fue
+          posible verificar su estado.
         </p>
 
         <div className="mb-7 rounded-xl bg-surface-muted p-4 text-sm text-muted-fg dark:bg-[#101B2A]">
-          Si consideras que se trata de un error, comunícate con la
-          administración de Academia DECOM para verificar tu cuenta.
+          Si consideras que se trata de un error, comunícate con la administración de Academia DECOM
+          para verificar tu cuenta.
         </div>
 
         <button
@@ -52,9 +52,7 @@ export default function AccesoDenegado() {
           {loading ? "Cerrando sesión..." : "Volver al inicio"}
         </button>
 
-        <p className="mt-8 text-xs text-muted-fg">
-          Formación para comunicar con propósito
-        </p>
+        <p className="mt-8 text-xs text-muted-fg">Formación para comunicar con propósito</p>
       </section>
     </main>
   );
