@@ -1,5 +1,7 @@
 "use client";
 
+import { StatusScreen } from "@/components/ui/StatusScreen";
+import { Spinner } from "@/components/ui/Spinner";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -51,18 +53,23 @@ export default function TutorManualAssessmentReviewsPage() {
   }, [router, supabase]);
 
   if (access === "checking") {
-    return <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]"><div className="h-10 w-10 animate-spin rounded-full border-4 border-[#087DB5]/20 border-t-[#087DB5]" /></main>;
+    return <main id="contenido" className="flex min-h-screen items-center justify-center bg-background"><Spinner /></main>;
   }
 
   if (access !== "allowed") {
-    return <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6"><section className="max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center"><h1 className="text-xl font-bold text-[#102D4D]">{access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}</h1><p className="mt-2 text-sm text-slate-500">{access === "error" ? "Intenta nuevamente." : "Este espacio está habilitado para tutores, editores académicos y administración nacional."}</p><button type="button" onClick={() => router.push("/dashboard/tutor")} className="mt-5 rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white">Volver al panel</button></section></main>;
+    return <StatusScreen
+   title={access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}
+   message={access === "error" ? "Intenta nuevamente." : "Este espacio está habilitado para tutores, editores académicos y administración nacional."}
+   actionLabel="Volver al panel"
+   onAction={() => router.push("/dashboard/tutor")}
+ />;
   }
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
-      <header className="border-b border-slate-200 bg-white"><div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-4 md:px-8"><div><p className="text-xs font-extrabold tracking-[0.14em] text-[#087DB5]">ACADEMIA DECOM</p><p className="mt-1 text-xs text-slate-400">Revisión de evaluaciones</p></div><div className="flex items-center gap-2"><button type="button" onClick={() => router.push("/dashboard/tutor/evaluaciones/crear")} className="rounded-xl bg-[#19A7A0] px-4 py-2.5 text-xs font-semibold text-white">Crear evaluación</button><button type="button" onClick={() => router.push("/dashboard/tutor")} className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600">Volver al panel</button></div></div></header>
+    <main id="contenido" className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-line bg-surface"><div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-4 md:px-8"><div><p className="text-xs font-extrabold tracking-[0.14em] text-decom-blue-text">ACADEMIA DECOM</p><p className="mt-1 text-xs text-muted-fg">Revisión de evaluaciones</p></div><div className="flex items-center gap-2"><button type="button" onClick={() => router.push("/dashboard/tutor/evaluaciones/crear")} className="rounded-xl bg-decom-teal px-4 py-2.5 text-xs font-semibold text-decom-navy">Crear evaluación</button><button type="button" onClick={() => router.push("/dashboard/tutor")} className="rounded-xl border border-line px-4 py-2.5 text-xs font-semibold text-muted-fg">Volver al panel</button></div></div></header>
       <div className="mx-auto max-w-6xl space-y-6 px-5 py-7 md:px-8 md:py-9">
-        <section><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#19A7A0]">Evaluación del aprendizaje</p><h1 className="mt-2 text-2xl font-extrabold md:text-3xl">Revisión manual de evaluaciones</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Consulta respuestas cortas, asigna puntajes y deja retroalimentación para el estudiante.</p></section>
+        <section><p className="text-xs font-bold uppercase tracking-[0.16em] text-decom-teal-text">Evaluación del aprendizaje</p><h1 className="mt-2 text-2xl font-extrabold md:text-3xl">Revisión manual de evaluaciones</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-fg">Consulta respuestas cortas, asigna puntajes y deja retroalimentación para el estudiante.</p></section>
         <ManualAssessmentReviewInbox />
       </div>
     </main>

@@ -67,25 +67,25 @@ export default function IdentityCoursePage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] p-6">
-        <p className="text-sm text-slate-500">Verificando tu sesión...</p>
+      <main id="contenido" className="flex min-h-screen items-center justify-center bg-background p-6">
+        <p className="text-sm text-muted-fg">Verificando tu sesión...</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-[#102D4D]">
+    <main id="contenido" className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <button
           type="button"
           onClick={() => router.push("/dashboard/formacion")}
-          className="mb-6 text-sm font-semibold text-[#087DB5] hover:text-[#066895]"
+          className="mb-6 text-sm font-semibold text-decom-blue-text hover:text-[#066895]"
         >
           ← Volver a Mi formación
         </button>
 
-        <section className="overflow-hidden rounded-3xl bg-[#102D4D] p-7 text-white sm:p-10">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#55D1C4]">
+        <section className="overflow-hidden rounded-3xl bg-decom-navy p-7 text-white sm:p-10">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-decom-teal-light">
             Curso 01 · Fundamentos institucionales
           </p>
           <h1 className="mt-4 max-w-3xl text-3xl font-bold sm:text-4xl">
@@ -123,17 +123,17 @@ export default function IdentityCoursePage() {
           </div>
         </section>
 
-        <section className="mt-7 rounded-2xl border border-[#087DB5]/20 bg-white p-5 sm:flex sm:items-center sm:justify-between sm:gap-5">
+        <section className="mt-7 rounded-2xl border border-decom-blue/20 bg-surface p-5 sm:flex sm:items-center sm:justify-between sm:gap-5">
           <div>
             <h2 className="font-bold">Explorar el aula virtual</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-500">
+            <p className="mt-1 text-sm leading-6 text-muted-fg">
               Revisa la estructura prevista para lecciones, actividades, recursos y evaluación.
             </p>
           </div>
           <button
             type="button"
             onClick={() => router.push("/dashboard/formacion/identidad-corporativa/aula")}
-            className="mt-4 w-full rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#066895] sm:mt-0 sm:w-auto"
+            className="mt-4 w-full rounded-xl bg-decom-blue px-5 py-3 text-sm font-semibold text-white transition hover:bg-decom-blue-hover sm:mt-0 sm:w-auto"
           >
             Abrir aula de prueba
           </button>
@@ -141,11 +141,11 @@ export default function IdentityCoursePage() {
 
         <section className="mt-9">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#087DB5]">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-decom-blue-text">
               Estructura del curso
             </p>
             <h2 className="mt-2 text-2xl font-bold">Etapas de aprendizaje</h2>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-fg">
               El recorrido académico previsto para cada estudiante.
             </p>
           </div>
@@ -154,16 +154,16 @@ export default function IdentityCoursePage() {
             {stages.map((stage) => (
               <article
                 key={stage.number}
-                className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center"
+                className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-5 sm:flex-row sm:items-center"
               >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#087DB5]/10 text-sm font-bold text-[#087DB5]">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-decom-blue/10 text-sm font-bold text-decom-blue-text">
                   {stage.number}
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="font-bold">{stage.title}</h3>
-                  <p className="mt-1 text-sm leading-6 text-slate-500">{stage.description}</p>
+                  <p className="mt-1 text-sm leading-6 text-muted-fg">{stage.description}</p>
                 </div>
-                <span className="w-fit rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-500">
+                <span className="w-fit rounded-full bg-surface-muted px-3 py-2 text-xs font-semibold text-muted-fg">
                   {stage.status}
                 </span>
               </article>
@@ -172,24 +172,24 @@ export default function IdentityCoursePage() {
         </section>
 
         <section className="mt-8 grid gap-4 md:grid-cols-2">
-          <article className="rounded-2xl border border-slate-200 bg-white p-6">
+          <article className="rounded-2xl border border-line bg-surface p-6">
             <h2 className="font-bold">Requisitos para aprobar</h2>
-            <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-              <li className="flex gap-2"><span className="text-[#19A7A0]">✓</span> Completar todas las lecciones obligatorias.</li>
-              <li className="flex gap-2"><span className="text-[#19A7A0]">✓</span> Entregar las actividades prácticas requeridas.</li>
-              <li className="flex gap-2"><span className="text-[#19A7A0]">✓</span> Obtener aprobación del tutor en las actividades.</li>
-              <li className="flex gap-2"><span className="text-[#19A7A0]">✓</span> Aprobar el examen final del curso.</li>
+            <ul className="mt-4 space-y-3 text-sm leading-6 text-muted-fg">
+              <li className="flex gap-2"><span className="text-decom-teal-text">✓</span> Completar todas las lecciones obligatorias.</li>
+              <li className="flex gap-2"><span className="text-decom-teal-text">✓</span> Entregar las actividades prácticas requeridas.</li>
+              <li className="flex gap-2"><span className="text-decom-teal-text">✓</span> Obtener aprobación del tutor en las actividades.</li>
+              <li className="flex gap-2"><span className="text-decom-teal-text">✓</span> Aprobar el examen final del curso.</li>
             </ul>
           </article>
-          <article className="rounded-2xl border border-slate-200 bg-white p-6">
+          <article className="rounded-2xl border border-line bg-surface p-6">
             <h2 className="font-bold">Al completar el curso</h2>
-            <p className="mt-3 text-sm leading-6 text-slate-500">
+            <p className="mt-3 text-sm leading-6 text-muted-fg">
               El sistema registrará el resultado, emitirá el certificado
               correspondiente cuando se cumplan los requisitos y habilitará el
               siguiente curso de la ruta.
             </p>
-            <div className="mt-5 rounded-xl bg-[#087DB5]/5 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#087DB5]">
+            <div className="mt-5 rounded-xl bg-decom-blue/5 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-decom-blue-text">
                 Siguiente curso previsto
               </p>
               <p className="mt-1 font-bold">Medios escritos</p>
@@ -197,7 +197,7 @@ export default function IdentityCoursePage() {
           </article>
         </section>
 
-        <footer className="py-8 text-center text-xs text-slate-400">
+        <footer className="py-8 text-center text-xs text-muted-fg">
           Academia DECOM · Formación para comunicar con propósito.
         </footer>
       </div>

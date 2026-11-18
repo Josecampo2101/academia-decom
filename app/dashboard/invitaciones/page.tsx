@@ -322,31 +322,31 @@ export default function InvitationsPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] p-6 text-sm text-slate-500">
+      <main id="contenido" className="flex min-h-screen items-center justify-center bg-background p-6 text-sm text-muted-fg">
         Cargando administración de invitaciones...
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] px-4 py-8 text-[#102D4D] sm:px-6">
+    <main id="contenido" className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6">
       <div className="mx-auto max-w-6xl">
         <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-bold tracking-[0.18em] text-[#087DB5]">ACADEMIA DECOM</p>
+            <p className="text-xs font-bold tracking-[0.18em] text-decom-blue-text">ACADEMIA DECOM</p>
             <h1 className="mt-2 text-2xl font-bold sm:text-3xl">Administración de invitaciones</h1>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-fg">
               Genera enlaces de ingreso y controla su vigencia y utilización.
             </p>
           </div>
-          <a href="/dashboard" className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-[#087DB5]">
+          <a href="/dashboard" className="rounded-xl border border-line bg-surface px-4 py-2.5 text-sm font-semibold text-decom-blue-text">
             Volver al panel
           </a>
         </header>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <section className="rounded-2xl border border-line bg-surface p-6 shadow-sm sm:p-8">
           <h2 className="text-lg font-bold">Crear enlace de invitación</h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-fg">
             El enlace permite solicitar el ingreso. No concede acceso automáticamente: la administración debe aprobar la solicitud.
           </p>
 
@@ -361,7 +361,7 @@ export default function InvitationsPage() {
                 <select
                   value={selectedDistrict}
                   onChange={(event) => setSelectedDistrict(event.target.value)}
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 font-normal"
+                  className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 font-normal"
                 >
                   {districts.map((district) => (
                     <option key={district.id} value={district.id}>{district.name}</option>
@@ -374,7 +374,7 @@ export default function InvitationsPage() {
                 <select
                   value={invitationType}
                   onChange={(event) => setInvitationType(event.target.value as "guest" | "decom_member")}
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 font-normal"
+                  className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 font-normal"
                 >
                   <option value="guest">Invitado</option>
                   <option value="decom_member">Miembro de DECOM</option>
@@ -386,7 +386,7 @@ export default function InvitationsPage() {
                 <select
                   value={validityDays}
                   onChange={(event) => setValidityDays(event.target.value)}
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 font-normal"
+                  className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 font-normal"
                 >
                   <option value="7">7 días</option>
                   <option value="14">14 días</option>
@@ -399,7 +399,7 @@ export default function InvitationsPage() {
                   type="button"
                   onClick={createInvitation}
                   disabled={saving || !selectedDistrict || !memberRoleId}
-                  className="w-full rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-bold text-white hover:bg-[#066a9b] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full rounded-xl bg-decom-blue px-5 py-3 text-sm font-bold text-white hover:bg-decom-blue-hover disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {saving ? "Generando enlace..." : "Generar invitación"}
                 </button>
@@ -410,11 +410,11 @@ export default function InvitationsPage() {
           {createdLink ? (
             <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-5">
               <p className="text-sm font-bold text-emerald-900">Enlace generado</p>
-              <p className="mt-2 break-all rounded-lg bg-white p-3 text-sm text-slate-700">{createdLink}</p>
+              <p className="mt-2 break-all rounded-lg bg-surface p-3 text-sm text-foreground">{createdLink}</p>
               <button
                 type="button"
                 onClick={copyLink}
-                className="mt-3 rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800"
+                className="mt-3 rounded-lg bg-decom-blue px-4 py-2.5 text-sm font-semibold text-white hover:bg-decom-blue-hover"
               >
                 Copiar enlace
               </button>
@@ -424,29 +424,29 @@ export default function InvitationsPage() {
             </div>
           ) : null}
 
-          {message ? <p role="status" className="mt-5 rounded-xl bg-slate-100 p-4 text-sm text-slate-700">{message}</p> : null}
+          {message ? <p role="status" className="mt-5 rounded-xl bg-surface-muted p-4 text-sm text-foreground">{message}</p> : null}
           {errorMessage ? <p role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm text-red-700">{errorMessage}</p> : null}
         </section>
 
-        <section className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-100 px-6 py-5 sm:px-8">
+        <section className="mt-8 overflow-hidden rounded-2xl border border-line bg-surface shadow-sm">
+          <div className="border-b border-line-soft px-6 py-5 sm:px-8">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-lg font-bold">Invitaciones registradas</h2>
-                <p className="mt-1 text-sm text-slate-500">Se muestran hasta las 100 invitaciones más recientes dentro de tu ámbito.</p>
+                <p className="mt-1 text-sm text-muted-fg">Se muestran hasta las 100 invitaciones más recientes dentro de tu ámbito.</p>
               </div>
-              <button type="button" onClick={() => void loadData()} className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-[#087DB5]">
+              <button type="button" onClick={() => void loadData()} className="rounded-lg border border-line px-3 py-2 text-sm font-semibold text-decom-blue-text">
                 Actualizar
               </button>
             </div>
           </div>
 
           {invitations.length === 0 ? (
-            <p className="px-6 py-10 text-center text-sm text-slate-500">Todavía no hay invitaciones registradas.</p>
+            <p className="px-6 py-10 text-center text-sm text-muted-fg">Todavía no hay invitaciones registradas.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] text-left text-sm">
-                <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                <thead className="bg-surface-muted text-xs uppercase tracking-wide text-muted-fg">
                   <tr>
                     <th className="px-6 py-4">Distrito</th>
                     <th className="px-6 py-4">Tipo</th>
@@ -461,13 +461,13 @@ export default function InvitationsPage() {
                     const status = invitationStatus(invitation);
                     const canRevoke = status === "Pendiente de uso";
                     return (
-                      <tr key={invitation.id} className="border-t border-slate-100">
+                      <tr key={invitation.id} className="border-t border-line-soft">
                         <td className="px-6 py-4 font-medium">{districtNames[invitation.district_id] ?? "Distrito"}</td>
                         <td className="px-6 py-4">{invitation.invitation_type === "decom_member" ? "Miembro DECOM" : invitation.invitation_type === "guest" ? "Invitado" : "Legada"}</td>
-                        <td className="px-6 py-4 text-slate-600">{new Date(invitation.created_at).toLocaleDateString("es-CO")}</td>
-                        <td className="px-6 py-4 text-slate-600">{new Date(invitation.expires_at).toLocaleDateString("es-CO")}</td>
+                        <td className="px-6 py-4 text-muted-fg">{new Date(invitation.created_at).toLocaleDateString("es-CO")}</td>
+                        <td className="px-6 py-4 text-muted-fg">{new Date(invitation.expires_at).toLocaleDateString("es-CO")}</td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${status === "Pendiente de uso" ? "bg-blue-50 text-blue-700" : status === "Utilizada" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
+                          <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${status === "Pendiente de uso" ? "bg-blue-50 text-decom-blue-text" : status === "Utilizada" ? "bg-emerald-50 text-emerald-700" : "bg-surface-muted text-muted-fg"}`}>
                             {status}
                           </span>
                         </td>
@@ -476,7 +476,7 @@ export default function InvitationsPage() {
                             <button type="button" onClick={() => void revokeInvitation(invitation)} className="text-xs font-semibold text-red-600 hover:underline">
                               Revocar
                             </button>
-                          ) : <span className="text-xs text-slate-400">—</span>}
+                          ) : <span className="text-xs text-muted-fg">—</span>}
                         </td>
                       </tr>
                     );
@@ -487,11 +487,11 @@ export default function InvitationsPage() {
           )}
         </section>
 
-        <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <section className="mt-8 rounded-2xl border border-line bg-surface p-6 shadow-sm sm:p-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-bold">Solicitudes de ingreso</h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-muted-fg">
                 Revisa los datos enviados y aprueba o rechaza las solicitudes de tu ámbito.
               </p>
             </div>
@@ -500,7 +500,7 @@ export default function InvitationsPage() {
               onChange={(event) =>
                 setRequestFilter(event.target.value as "pending" | "approved" | "rejected" | "all")
               }
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm"
+              className="rounded-xl border border-line bg-surface px-4 py-2.5 text-sm"
               aria-label="Filtrar solicitudes"
             >
               <option value="pending">Pendientes</option>
@@ -522,7 +522,7 @@ export default function InvitationsPage() {
           ) : null}
 
           {requests.length === 0 ? (
-            <p className="mt-6 rounded-xl border border-dashed border-slate-200 px-5 py-10 text-center text-sm text-slate-500">
+            <p className="mt-6 rounded-xl border border-dashed border-line px-5 py-10 text-center text-sm text-muted-fg">
               {requestFilter === "pending"
                 ? "No hay solicitudes pendientes de revisión."
                 : "No hay solicitudes para este filtro."}
@@ -530,12 +530,12 @@ export default function InvitationsPage() {
           ) : (
             <div className="mt-6 space-y-4">
               {requests.map((request) => (
-                <article key={request.request_id} className="rounded-xl border border-slate-200 p-5">
+                <article key={request.request_id} className="rounded-xl border border-line p-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <h3 className="font-bold">{request.full_name}</h3>
-                      <p className="mt-1 text-sm text-slate-600">{request.email}</p>
-                      <p className="text-sm text-slate-600">WhatsApp: {request.phone || "No registrado"}</p>
+                      <p className="mt-1 text-sm text-muted-fg">{request.email}</p>
+                      <p className="text-sm text-muted-fg">WhatsApp: {request.phone || "No registrado"}</p>
                     </div>
                     <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
                       request.request_status === "pending"
@@ -554,39 +554,39 @@ export default function InvitationsPage() {
 
                   <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
                     <div>
-                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Distrito</dt>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-muted-fg">Distrito</dt>
                       <dd className="mt-1">{request.district_name || "No especificado"}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Congregación</dt>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-muted-fg">Congregación</dt>
                       <dd className="mt-1">{request.congregation_name || "No especificada"}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Tipo</dt>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-muted-fg">Tipo</dt>
                       <dd className="mt-1">{request.invitation_type === "decom_member" ? "Miembro DECOM" : "Invitado"}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Rol solicitado</dt>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-muted-fg">Rol solicitado</dt>
                       <dd className="mt-1">{request.requested_role_name || "Integrante"}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Fecha de nacimiento</dt>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-muted-fg">Fecha de nacimiento</dt>
                       <dd className="mt-1">{request.date_of_birth || "No registrada"}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Solicitud recibida</dt>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-muted-fg">Solicitud recibida</dt>
                       <dd className="mt-1">{new Date(request.requested_at).toLocaleString("es-CO", { timeZone: "America/Bogota" })}</dd>
                     </div>
                   </dl>
 
                   {request.decision_note ? (
-                    <p className="mt-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
+                    <p className="mt-4 rounded-lg bg-surface-muted p-3 text-sm text-muted-fg">
                       Observación registrada: {request.decision_note}
                     </p>
                   ) : null}
 
                   {request.request_status === "pending" ? (
-                    <div className="mt-5 border-t border-slate-100 pt-4">
+                    <div className="mt-5 border-t border-line-soft pt-4">
                       <label className="block text-sm font-semibold">
                         Observación (opcional; se incluirá en el correo de decisión)
                         <textarea
@@ -599,7 +599,7 @@ export default function InvitationsPage() {
                           }
                           maxLength={1000}
                           rows={2}
-                          className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal outline-none focus:border-[#087DB5]"
+                          className="mt-2 w-full rounded-xl border border-line px-4 py-3 text-sm font-normal outline-none focus:border-decom-blue"
                           placeholder="Escribe una observación si es necesaria."
                         />
                       </label>
@@ -616,7 +616,7 @@ export default function InvitationsPage() {
                           type="button"
                           onClick={() => void reviewRequest(request, "approved")}
                           disabled={reviewingRequestId !== null}
-                          className="rounded-xl bg-[#087DB5] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#066a9b] disabled:opacity-50"
+                          className="rounded-xl bg-decom-blue px-4 py-2.5 text-sm font-semibold text-white hover:bg-decom-blue-hover disabled:opacity-50"
                         >
                           {reviewingRequestId === request.request_id ? "Procesando..." : "Aprobar"}
                         </button>
@@ -629,7 +629,7 @@ export default function InvitationsPage() {
           )}
         </section>
 
-        <p className="mt-6 text-xs leading-5 text-slate-500">
+        <p className="mt-6 text-xs leading-5 text-muted-fg">
           Los enlaces nuevos se generan para el distrito seleccionado. La congregación la elige la persona durante su solicitud y cualquier rol institucional queda sujeto a aprobación.
         </p>
       </div>

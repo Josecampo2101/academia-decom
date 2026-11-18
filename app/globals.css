@@ -12,7 +12,7 @@
   --surface: #ffffff;
   --surface-raised: #ffffff;
   --surface-muted: #edf3f8;
-  --muted: #60748a;
+  --muted: #56697f;
   --border: #dce5ef;
   --brand: #0756a0;
   --brand-strong: #0b3970;
@@ -23,6 +23,15 @@
   --focus: #168bc2;
   --radius-card: 16px;
   --shadow-soft: 0 18px 50px -28px rgb(11 57 112 / 28%);
+  --line-soft: #eaf0f6;
+  --decom-blue: #087db5;
+  --decom-blue-hover: #066a9b;
+  --decom-blue-text: #096ba0;
+  --decom-blue-soft: #e5f2f8;
+  --decom-teal: #19a7a0;
+  --decom-teal-text: #0e7a75;
+  --decom-teal-light: #55d1c4;
+  --decom-navy: #102d4d;
 }
 
 :root.dark,
@@ -43,11 +52,34 @@
   --gold: #ffd166;
   --focus: #65c8e9;
   --shadow-soft: 0 22px 55px -30px rgb(0 0 0 / 65%);
+  --line-soft: #22364d;
+  --decom-blue: #087db5;
+  --decom-blue-hover: #066a9b;
+  --decom-blue-text: #55b8e8;
+  --decom-blue-soft: rgb(8 125 181 / 22%);
+  --decom-teal: #19a7a0;
+  --decom-teal-text: #2bc4bc;
+  --decom-teal-light: #55d1c4;
+  --decom-navy: #102d4d;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --shadow-sm: 0 1px 2px 0 rgb(16 45 77 / 4%), 0 1px 3px 0 rgb(16 45 77 / 3%);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-line: var(--border);
+  --color-line-soft: var(--line-soft);
+  --color-muted-fg: var(--muted);
+  --color-decom-blue: var(--decom-blue);
+  --color-decom-blue-hover: var(--decom-blue-hover);
+  --color-decom-blue-text: var(--decom-blue-text);
+  --color-decom-blue-soft: var(--decom-blue-soft);
+  --color-decom-teal: var(--decom-teal);
+  --color-decom-teal-text: var(--decom-teal-text);
+  --color-decom-teal-light: var(--decom-teal-light);
+  --color-decom-navy: var(--decom-navy);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
 }
@@ -65,8 +97,7 @@ html {
 body {
   min-height: 100vh;
   background:
-    radial-gradient(ellipse at top left, rgb(57 169 220 / 8%), transparent 38%),
-    var(--background);
+    radial-gradient(ellipse at top left, rgb(57 169 220 / 8%), transparent 38%), var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), Inter, Arial, Helvetica, sans-serif;
   text-rendering: optimizeLegibility;
@@ -85,8 +116,7 @@ body {
 
 .dark body {
   background:
-    radial-gradient(ellipse at top left, rgb(57 169 220 / 10%), transparent 42%),
-    var(--background);
+    radial-gradient(ellipse at top left, rgb(57 169 220 / 10%), transparent 42%), var(--background);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -100,7 +130,6 @@ body {
   }
 }
 
-
 /* Shared interaction and form-control baseline for every module. */
 :where(button, a, input, select, textarea) {
   -webkit-tap-highlight-color: transparent;
@@ -109,10 +138,17 @@ body {
 :where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {
   color: var(--foreground);
   accent-color: var(--brand);
-  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
 }
 
-:where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea)::placeholder {
+:where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  select,
+  textarea
+)::placeholder {
   color: var(--muted);
   opacity: 0.82;
 }
@@ -135,7 +171,6 @@ body {
     max-width: 100%;
   }
 }
-
 
 /* Accesibilidad adicional para navegación por teclado y modos de alto contraste. */
 :where([id]) {
@@ -166,5 +201,106 @@ body {
 
   :where(button, a[href], input, select, textarea) {
     text-decoration-thickness: 2px;
+  }
+}
+
+/*
+ * Paleta de estado en modo oscuro.
+ * Fondos claros (50-100) y bordes (200) pasan a tintes translúcidos; textos oscuros (700-900) pasan a
+ * tonos claros, de modo que cada par fondo/texto/borde conserva su contraste sin tocar las páginas.
+ * No se redefinen 300-600 (acentos y rellenos) ni el azul de Tailwind (se usa el azul de marca).
+ */
+:root.dark {
+  --color-amber-50: rgb(245 158 11 / 12%);
+  --color-emerald-50: rgb(16 185 129 / 12%);
+  --color-red-50: rgb(239 68 68 / 12%);
+  --color-rose-50: rgb(244 63 94 / 12%);
+  --color-sky-50: rgb(14 165 233 / 12%);
+  --color-teal-50: rgb(20 184 166 / 12%);
+  --color-orange-50: rgb(249 115 22 / 12%);
+  --color-green-50: rgb(34 197 94 / 12%);
+  --color-amber-100: rgb(245 158 11 / 18%);
+  --color-emerald-100: rgb(16 185 129 / 18%);
+  --color-red-100: rgb(239 68 68 / 18%);
+  --color-sky-100: rgb(14 165 233 / 18%);
+  --color-teal-100: rgb(20 184 166 / 18%);
+  --color-green-100: rgb(34 197 94 / 18%);
+  --color-amber-200: rgb(245 158 11 / 35%);
+  --color-emerald-200: rgb(16 185 129 / 35%);
+  --color-red-200: rgb(239 68 68 / 35%);
+  --color-green-200: rgb(34 197 94 / 35%);
+  --color-rose-200: rgb(244 63 94 / 35%);
+  --color-teal-200: rgb(20 184 166 / 35%);
+  --color-amber-700: #fcd34d;
+  --color-amber-800: #fcd34d;
+  --color-red-700: #fca5a5;
+  --color-red-800: #fca5a5;
+  --color-rose-700: #fda4af;
+  --color-rose-800: #fda4af;
+  --color-teal-700: #5eead4;
+  --color-teal-800: #5eead4;
+  --color-green-700: #86efac;
+  --color-green-800: #86efac;
+  --color-sky-700: #7dd3fc;
+  --color-sky-800: #7dd3fc;
+  --color-emerald-700: #6ee7b7;
+  --color-emerald-800: #6ee7b7;
+  --color-orange-700: #fdba74;
+  --color-orange-800: #fdba74;
+  --color-amber-900: #fde68a;
+  --color-emerald-900: #a7f3d0;
+  --color-green-900: #bbf7d0;
+  --color-red-900: #fecaca;
+  --color-sky-900: #bae6fd;
+  --color-teal-900: #99f6e4;
+}
+
+/* Enlace para saltar la navegación: invisible hasta recibir foco con el teclado. */
+.skip-link {
+  position: absolute;
+  top: -4rem;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  border-radius: 0.75rem;
+  background: var(--decom-navy);
+  color: #fff;
+  font-weight: 600;
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* Refinamientos tipográficos globales (sin tocar el marcado de las páginas). */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Barras de desplazamiento discretas, acordes con el tema. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+}
+
+/*
+ * Áreas táctiles cómodas (mínimo 40 px de alto) en móviles y pantallas táctiles.
+ * No altera el escritorio con ratón. Se excluyen los controles de tamaño fijo pequeño
+ * (interruptores e iconos de h-5 a h-9) para no deformarlos.
+ */
+@media (pointer: coarse), (max-width: 767px) {
+  button:not([role="switch"]):not([class*="h-5"]):not([class*="h-6"]):not([class*="h-7"]):not(
+      [class*="h-8"]
+    ):not([class*="h-9"]) {
+    min-height: 40px;
   }
 }
