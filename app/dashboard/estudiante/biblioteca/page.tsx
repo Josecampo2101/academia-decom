@@ -1,111 +1,76 @@
 "use client";
 
-import { StatusScreen } from "@/components/ui/StatusScreen";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  BookOpen,
+  CirclePlay,
+  ExternalLink,
+  FileText,
+  Headphones,
+  Image as ImageIcon,
+  Inbox,
+  LayoutTemplate,
+  Link2,
+  LoaderCircle,
+  Search,
+  type LucideIcon,
+} from "lucide-react";
+import { StatusScreen } from "@/components/ui/StatusScreen";
+import { createLibraryFileUrl, loadPublishedLibrary } from "@/lib/library/data";
+import type { LibraryResource, PublishedLibrary } from "@/lib/library/data";
+import {
+  RESOURCE_TYPES,
+  filterResources,
+  formatFileSize,
+  resourceOpenMode,
+  safeExternalUrl,
+  typeLabel,
+} from "@/lib/library/resources.mjs";
 import { createClient } from "@/lib/supabase/client";
 
 type AccessState = "checking" | "allowed" | "denied" | "error";
-type Resource = {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  type: "Guía" | "Plantilla" | "Video" | "Lectura";
-  duration: string;
-  level: string;
-  featured?: boolean;
+type LibraryState =
+  { status: "loading" } | { status: "ready"; library: PublishedLibrary } | { status: "error" };
+
+const TYPE_ICONS: Record<string, LucideIcon> = {
+  document: FileText,
+  guide: BookOpen,
+  template: LayoutTemplate,
+  video: CirclePlay,
+  audio: Headphones,
+  link: Link2,
+  reading: BookOpen,
+  infographic: ImageIcon,
 };
 
-const resources: Resource[] = [
-  {
-    id: "r1",
-    title: "Manual de identidad corporativa DECOM",
-    description:
-      "Principios institucionales, uso de marca, colores y criterios básicos de aplicación.",
-    category: "Identidad institucional",
-    type: "Guía",
-    duration: "12 min de lectura",
-    level: "Fundamental",
-    featured: true,
-  },
-  {
-    id: "r2",
-    title: "Lista de verificación para piezas gráficas",
-    description: "Puntos de control para revisar coherencia visual antes de publicar una pieza.",
-    category: "Diseño y comunicación",
-    type: "Plantilla",
-    duration: "5 min",
-    level: "Práctico",
-  },
-  {
-    id: "r3",
-    title: "Comunicación con propósito",
-    description:
-      "Lectura introductoria sobre mensaje, audiencia, intención y responsabilidad comunicativa.",
-    category: "Fundamentos",
-    type: "Lectura",
-    duration: "8 min de lectura",
-    level: "Fundamental",
-  },
-  {
-    id: "r4",
-    title: "Preparación para una cobertura audiovisual",
-    description: "Secuencia de preparación, registro y organización del material de una actividad.",
-    category: "Medios audiovisuales",
-    type: "Guía",
-    duration: "10 min de lectura",
-    level: "Intermedio",
-  },
-  {
-    id: "r5",
-    title: "Fundamentos de fotografía",
-    description:
-      "Conceptos introductorios de encuadre, luz y composición para registros institucionales.",
-    category: "Fotografía",
-    type: "Video",
-    duration: "14 min",
-    level: "Fundamental",
-  },
-  {
-    id: "r6",
-    title: "Estructura de una nota informativa",
-    description: "Modelo para organizar datos, contexto y redacción de una noticia institucional.",
-    category: "Medios escritos",
-    type: "Plantilla",
-    duration: "6 min",
-    level: "Práctico",
-  },
-];
+const ACTION_LABELS = { link: "Abrir enlace", file: "Abrir archivo", text: "Leer" } as const;
 
-const categories = [
-  "Todos",
-  "Identidad institucional",
-  "Fundamentos",
-  "Diseño y comunicación",
-  "Medios audiovisuales",
-  "Fotografía",
-  "Medios escritos",
-];
-const typeStyles: Record<Resource["type"], string> = {
-  Guía: "bg-sky-50 text-sky-700",
-  Plantilla: "bg-teal-50 text-teal-700",
-  Video: "bg-violet-50 text-violet-700",
-  Lectura: "bg-amber-50 text-amber-700",
-};
+function formatDate(value: string | null) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat("es-CO", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
+}
 
 export default function StudentLibraryPage() {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const [access, setAccess] = useState<AccessState>("checking");
+  const [libraryState, setLibraryState] = useState<LibraryState>({ status: "loading" });
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("Todos");
-  const [type, setType] = useState("Todos");
-  const [selected, setSelected] = useState<Resource | null>(null);
+  const [categoryId, setCategoryId] = useState("all");
+  const [type, setType] = useState("all");
+  const [reading, setReading] = useState<LibraryResource | null>(null);
+  const [openingId, setOpeningId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState("");
 
   useEffect(() => {
     let active = true;
-    async function verifyAccess() {
+
+    async function verifyAccessAndLoad() {
       try {
         const {
           data: { user },
@@ -134,35 +99,81 @@ export default function StudentLibraryPage() {
         if (rolesError) throw rolesError;
         if (!active) return;
         const keys = (roles ?? []).map((role) => role.role_key);
-        setAccess(
-          keys.includes("member") || keys.includes("national_admin") ? "allowed" : "denied",
-        );
+        if (!(keys.includes("member") || keys.includes("national_admin"))) {
+          setAccess("denied");
+          return;
+        }
+        setAccess("allowed");
+
+        // La biblioteca se lee aparte: si falla, el acceso sigue siendo válido y se avisa en pantalla.
+        try {
+          const library = await loadPublishedLibrary(supabase);
+          if (active) setLibraryState({ status: "ready", library });
+        } catch (error) {
+          console.error("No fue posible cargar la biblioteca:", error);
+          if (active) setLibraryState({ status: "error" });
+        }
       } catch (error) {
         console.error("No fue posible validar el acceso a la biblioteca:", error);
         if (active) setAccess("error");
       }
     }
-    void Promise.resolve().then(verifyAccess);
+
+    void Promise.resolve().then(verifyAccessAndLoad);
     return () => {
       active = false;
     };
   }, [router, supabase]);
 
-  const filtered = useMemo(() => {
-    const normalized = query.trim().toLocaleLowerCase("es");
-    return resources.filter((item) => {
-      const matchesQuery =
-        !normalized ||
-        [item.title, item.description, item.category].some((value) =>
-          value.toLocaleLowerCase("es").includes(normalized),
-        );
-      return (
-        matchesQuery &&
-        (category === "Todos" || item.category === category) &&
-        (type === "Todos" || item.type === type)
-      );
-    });
-  }, [query, category, type]);
+  const library = libraryState.status === "ready" ? libraryState.library : null;
+  const resources = useMemo(() => library?.resources ?? [], [library]);
+  const visible = useMemo(
+    () => filterResources(resources, { query, categoryId, type }),
+    [resources, query, categoryId, type],
+  );
+  const categoryNames = useMemo(
+    () => new Map((library?.categories ?? []).map((category) => [category.id, category.name])),
+    [library],
+  );
+  // Solo se ofrecen categorías y tipos que realmente tienen recursos publicados.
+  const usedCategories = (library?.categories ?? []).filter((category) =>
+    resources.some((resource) => resource.category_id === category.id),
+  );
+  const usedTypes = [...new Set(resources.map((resource) => resource.resource_type))];
+  const hasFilters = query.trim() !== "" || categoryId !== "all" || type !== "all";
+
+  async function handleOpen(resource: LibraryResource) {
+    setActionError("");
+    const mode = resourceOpenMode(resource);
+    if (mode === "text") {
+      setReading(resource);
+      return;
+    }
+    if (mode === "link") {
+      window.open(safeExternalUrl(resource.external_url), "_blank", "noopener,noreferrer");
+      return;
+    }
+    if (mode === "file" && resource.storage_path) {
+      setOpeningId(resource.id);
+      // La pestaña se abre al instante (con el clic) para que el navegador no la bloquee.
+      const tab = window.open("", "_blank");
+      try {
+        const url = await createLibraryFileUrl(supabase, resource.storage_path);
+        if (tab) {
+          tab.opener = null;
+          tab.location.href = url;
+        } else {
+          window.location.assign(url);
+        }
+      } catch (error) {
+        console.error("No fue posible abrir el archivo de la biblioteca:", error);
+        tab?.close();
+        setActionError("No pudimos abrir el archivo. Inténtalo de nuevo o avisa a tu tutor.");
+      } finally {
+        setOpeningId(null);
+      }
+    }
+  }
 
   if (access === "checking")
     return (
@@ -188,7 +199,7 @@ export default function StudentLibraryPage() {
             <p className="text-xs font-extrabold tracking-[0.14em] text-decom-blue-text">
               ACADEMIA DECOM
             </p>
-            <p className="mt-1 text-xs text-muted-fg">Biblioteca de aprendizaje</p>
+            <p className="mt-1 text-xs text-muted-fg">Biblioteca de recursos</p>
           </div>
           <button
             type="button"
@@ -199,199 +210,228 @@ export default function StudentLibraryPage() {
           </button>
         </div>
       </header>
-      <div className="mx-auto max-w-6xl space-y-7 px-5 py-7 md:px-8 md:py-9">
-        <section className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-decom-teal-text">
-              Recursos para crecer
-            </p>
-            <h1 className="mt-2 text-2xl font-extrabold md:text-3xl">Biblioteca DECOM</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-fg">
-              Consulta materiales de apoyo para fortalecer tus conocimientos y llevarlos a la
-              práctica.
-            </p>
-          </div>
-          <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800">
-            Catálogo de demostración
-          </span>
-        </section>
-        <section className="rounded-3xl bg-gradient-to-br from-decom-navy to-decom-blue p-6 text-white md:p-8">
-          <p className="text-xs font-bold uppercase tracking-wider text-white/70">
-            Recurso destacado
+
+      <div className="mx-auto max-w-6xl space-y-6 px-5 py-7 pb-12 md:px-8 md:py-9">
+        <section>
+          <p className="text-xs font-bold tracking-[0.16em] text-decom-teal-text uppercase">
+            Material de estudio
           </p>
-          <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
-            <div className="max-w-2xl">
-              <h2 className="text-xl font-extrabold">Manual de identidad corporativa DECOM</h2>
-              <p className="mt-2 text-sm leading-6 text-white/75">
-                Conoce los fundamentos visuales e institucionales que orientan la comunicación de
-                DECOM.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setSelected(resources[0])}
-              className="rounded-xl bg-surface px-4 py-3 text-xs font-bold text-foreground"
-            >
-              Explorar recurso →
-            </button>
-          </div>
+          <h1 className="mt-2 text-2xl font-extrabold md:text-3xl">Biblioteca</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-fg">
+            Guías, plantillas, lecturas y recursos publicados por la coordinación académica para
+            apoyar tu formación.
+          </p>
         </section>
-        <section className="space-y-4">
-          <div className="grid gap-3 md:grid-cols-[1fr_220px_180px]">
-            <label className="relative">
-              <span className="sr-only">Buscar recursos</span>
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Buscar por título, tema o descripción..."
-                className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none focus:border-decom-blue"
-              />
-            </label>
-            <label>
-              <span className="sr-only">Filtrar por categoría</span>
-              <select
-                value={category}
-                onChange={(event) => setCategory(event.target.value)}
-                className="w-full rounded-xl border border-line bg-surface px-3 py-3 text-sm text-muted-fg outline-none focus:border-decom-blue"
-              >
-                {categories.map((item) => (
-                  <option key={item}>{item}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span className="sr-only">Filtrar por tipo</span>
-              <select
-                value={type}
-                onChange={(event) => setType(event.target.value)}
-                className="w-full rounded-xl border border-line bg-surface px-3 py-3 text-sm text-muted-fg outline-none focus:border-decom-blue"
-              >
-                {["Todos", "Guía", "Plantilla", "Video", "Lectura"].map((item) => (
-                  <option key={item}>{item}</option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold">Todos los recursos</h2>
-            <span className="text-xs text-muted-fg">{filtered.length} resultados</span>
-          </div>
-          {filtered.length ? (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {filtered.map((item) => (
-                <article
-                  key={item.id}
-                  className="flex flex-col rounded-2xl border border-line bg-surface p-5 shadow-sm"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${typeStyles[item.type]}`}
-                    >
-                      {item.type}
-                    </span>
-                    <span className="text-[10px] font-semibold text-muted-fg">{item.level}</span>
-                  </div>
-                  <h3 className="mt-4 text-sm font-bold">{item.title}</h3>
-                  <p className="mt-2 flex-1 text-xs leading-5 text-muted-fg">{item.description}</p>
-                  <div className="mt-4 flex items-center justify-between border-t border-line-soft pt-3">
-                    <span className="text-[10px] text-muted-fg">
-                      {item.category} · {item.duration}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setSelected(item)}
-                      className="shrink-0 text-xs font-bold text-decom-blue-text hover:underline"
-                    >
-                      Ver detalle →
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed border-line bg-surface p-10 text-center">
-              <h3 className="text-sm font-bold">No encontramos recursos</h3>
-              <p className="mt-2 text-xs text-muted-fg">
-                Prueba con otra búsqueda o cambia los filtros.
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setQuery("");
-                  setCategory("Todos");
-                  setType("Todos");
-                }}
-                className="mt-4 text-xs font-bold text-decom-blue-text"
-              >
-                Limpiar filtros
-              </button>
-            </div>
-          )}
-        </section>
-        <p className="text-[11px] leading-5 text-muted-fg">
-          Los recursos son ejemplos de catálogo. La descarga, reproducción, favoritos y permisos por
-          curso se conectarán cuando se apruebe el módulo documental y su almacenamiento.
-        </p>
-      </div>
-      {selected && (
-        <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-950/40 p-4 sm:items-center">
-          <section
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="resource-title"
-            className="w-full max-w-lg rounded-3xl bg-surface p-6 shadow-2xl"
+
+        {libraryState.status === "error" ? (
+          <p
+            role="alert"
+            className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-800"
           >
-            <div className="flex items-center justify-between">
-              <span
-                className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${typeStyles[selected.type]}`}
-              >
-                {selected.type}
-              </span>
-              <button
-                type="button"
-                aria-label="Cerrar detalle"
-                onClick={() => setSelected(null)}
-                className="rounded-lg px-3 py-1 text-lg text-muted-fg hover:bg-surface-muted"
-              >
-                ×
-              </button>
-            </div>
-            <h2 id="resource-title" className="mt-4 text-lg font-bold">
-              {selected.title}
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-muted-fg">{selected.description}</p>
-            <dl className="mt-5 grid grid-cols-2 gap-3 rounded-xl bg-surface-muted p-4 text-xs">
-              <div>
-                <dt className="text-muted-fg">Categoría</dt>
-                <dd className="mt-1 font-semibold">{selected.category}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-fg">Nivel</dt>
-                <dd className="mt-1 font-semibold">{selected.level}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-fg">Duración</dt>
-                <dd className="mt-1 font-semibold">{selected.duration}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-fg">Tipo</dt>
-                <dd className="mt-1 font-semibold">{selected.type}</dd>
-              </div>
-            </dl>
-            <p className="mt-4 text-xs leading-5 text-amber-700">
-              Este elemento es una ficha de demostración; todavía no existe un archivo o contenido
-              multimedia conectado.
+            No pudimos cargar la biblioteca en este momento. Recarga la página; si el problema
+            continúa, avisa a tu tutor.
+          </p>
+        ) : null}
+        {actionError ? (
+          <p
+            role="alert"
+            className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-800"
+          >
+            {actionError}
+          </p>
+        ) : null}
+
+        {libraryState.status === "loading" ? (
+          <div role="status" className="flex items-center gap-3 py-10 text-sm text-muted-fg">
+            <LoaderCircle className="h-5 w-5 animate-spin" aria-hidden="true" />
+            Cargando recursos...
+          </div>
+        ) : null}
+
+        {library && resources.length === 0 ? (
+          <section className="rounded-3xl border border-dashed border-line bg-surface-muted p-10 text-center">
+            <Inbox className="mx-auto h-8 w-8 text-muted-fg" aria-hidden="true" />
+            <h2 className="mt-3 text-base font-bold">Aún no hay recursos publicados</h2>
+            <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-muted-fg">
+              Cuando la coordinación académica publique material para tu distrito, lo encontrarás
+              aquí.
             </p>
-            <button
-              type="button"
-              onClick={() => setSelected(null)}
-              className="mt-5 w-full rounded-xl bg-decom-blue px-4 py-3 text-sm font-semibold text-white"
-            >
-              Cerrar
-            </button>
           </section>
-        </div>
-      )}
+        ) : null}
+
+        {library && resources.length > 0 ? (
+          <>
+            <section className="space-y-4">
+              <div className="flex flex-col gap-3 md:flex-row">
+                <label className="relative flex-1">
+                  <span className="sr-only">Buscar recursos</span>
+                  <Search
+                    className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-fg"
+                    aria-hidden="true"
+                  />
+                  <input
+                    type="search"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="Buscar por título o descripción"
+                    className="w-full rounded-xl border border-line bg-surface py-3 pr-4 pl-10 text-sm"
+                  />
+                </label>
+                <label className="md:w-56">
+                  <span className="sr-only">Filtrar por tipo</span>
+                  <select
+                    value={type}
+                    onChange={(event) => setType(event.target.value)}
+                    className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm"
+                  >
+                    <option value="all">Todos los tipos</option>
+                    {usedTypes.map((item) => (
+                      <option key={item} value={item}>
+                        {RESOURCE_TYPES[item] ?? typeLabel(item)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              {usedCategories.length > 1 ? (
+                <div
+                  role="group"
+                  aria-label="Filtrar por categoría"
+                  className="flex flex-wrap gap-2"
+                >
+                  {[{ id: "all", name: "Todas" }, ...usedCategories].map((category) => (
+                    <button
+                      key={category.id}
+                      type="button"
+                      aria-pressed={categoryId === category.id}
+                      onClick={() => setCategoryId(category.id)}
+                      className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                        categoryId === category.id
+                          ? "border-decom-blue bg-decom-blue-soft text-decom-blue-text"
+                          : "border-line bg-surface text-muted-fg hover:bg-surface-muted"
+                      }`}
+                    >
+                      {category.name}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
+              <p role="status" className="text-xs text-muted-fg">
+                Mostrando {visible.length} de {resources.length}{" "}
+                {resources.length === 1 ? "recurso" : "recursos"}
+              </p>
+            </section>
+
+            {visible.length === 0 ? (
+              <section className="rounded-3xl border border-dashed border-line bg-surface-muted p-10 text-center">
+                <h2 className="text-base font-bold">No encontramos recursos con ese criterio</h2>
+                {hasFilters ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuery("");
+                      setCategoryId("all");
+                      setType("all");
+                    }}
+                    className="mt-4 rounded-xl border border-line bg-surface px-4 py-2.5 text-xs font-semibold text-foreground hover:bg-surface-muted"
+                  >
+                    Limpiar filtros
+                  </button>
+                ) : null}
+              </section>
+            ) : (
+              <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {visible.map((resource) => {
+                  const Icon = TYPE_ICONS[resource.resource_type] ?? FileText;
+                  const mode = resourceOpenMode(resource);
+                  const size = formatFileSize(resource.size_bytes);
+                  const course = resource.course_id ? library.courseTitles[resource.course_id] : "";
+                  const meta = [
+                    categoryNames.get(resource.category_id),
+                    course,
+                    `v${resource.version_label}`,
+                    size,
+                    formatDate(resource.published_at),
+                  ].filter(Boolean);
+                  return (
+                    <li
+                      key={resource.id}
+                      className="flex flex-col rounded-2xl border border-line bg-surface p-5 shadow-sm"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-decom-blue-soft text-decom-blue-text">
+                          <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
+                        </span>
+                        <span className="rounded-full bg-surface-muted px-2.5 py-1 text-[10px] font-bold text-muted-fg">
+                          {typeLabel(resource.resource_type)}
+                        </span>
+                      </div>
+                      <h2 className="mt-4 text-sm font-bold">{resource.title}</h2>
+                      <p className="mt-1.5 line-clamp-3 flex-1 text-xs leading-5 text-muted-fg">
+                        {resource.description}
+                      </p>
+                      <p className="mt-3 text-[11px] leading-5 text-muted-fg">{meta.join(" · ")}</p>
+                      <div className="mt-4 border-t border-line-soft pt-4">
+                        {mode === "none" ? (
+                          <p className="text-xs text-muted-fg">Contenido no disponible.</p>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => void handleOpen(resource)}
+                            disabled={openingId === resource.id}
+                            className="inline-flex items-center gap-2 rounded-xl bg-decom-blue px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-decom-blue-hover disabled:opacity-60"
+                          >
+                            {openingId === resource.id ? (
+                              <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />
+                            ) : mode === "link" ? (
+                              <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                            ) : null}
+                            {ACTION_LABELS[mode]}
+                            <span className="sr-only"> {resource.title}</span>
+                          </button>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </>
+        ) : null}
+      </div>
+
+      {reading ? (
+        <dialog
+          ref={(element) => {
+            if (element && !element.open) element.showModal();
+          }}
+          onClose={() => setReading(null)}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) event.currentTarget.close();
+          }}
+          aria-labelledby="reading-title"
+          className="m-auto w-[calc(100%-2rem)] max-w-2xl rounded-3xl border border-line bg-surface p-6 text-foreground shadow-2xl backdrop:bg-black/50"
+        >
+          <p className="text-xs font-semibold text-muted-fg">
+            {typeLabel(reading.resource_type)} · v{reading.version_label}
+          </p>
+          <h2 id="reading-title" className="mt-1 text-lg font-bold">
+            {reading.title}
+          </h2>
+          <div className="mt-4 max-h-[60vh] overflow-y-auto text-sm leading-7 whitespace-pre-wrap text-foreground">
+            {reading.content}
+          </div>
+          <button
+            type="button"
+            onClick={(event) => event.currentTarget.closest("dialog")?.close()}
+            className="mt-6 w-full rounded-xl bg-decom-blue px-4 py-3 text-sm font-semibold text-white hover:bg-decom-blue-hover"
+          >
+            Cerrar
+          </button>
+        </dialog>
+      ) : null}
     </main>
   );
 }

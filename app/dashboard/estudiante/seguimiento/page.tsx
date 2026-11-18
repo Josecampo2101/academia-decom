@@ -1,74 +1,56 @@
 "use client";
 
-import { StatusScreen } from "@/components/ui/StatusScreen";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Inbox, LoaderCircle } from "lucide-react";
+import { ProgressBar } from "@/components/ui/ProgressBar";
+import { StatusScreen } from "@/components/ui/StatusScreen";
+import { loadStudentTracking } from "@/lib/tracking/data";
+import type { EventStatus, RouteState, Tracking } from "@/lib/tracking/engine.mjs";
 import { createClient } from "@/lib/supabase/client";
 
 type AccessState = "checking" | "allowed" | "denied" | "error";
+type TrackingState =
+  { status: "loading" } | { status: "ready"; tracking: Tracking } | { status: "error" };
 
-const courses = [
-  {
-    name: "Identidad corporativa DECOM",
-    progress: 68,
-    done: 7,
-    total: 10,
-    state: "En curso",
-    next: "Aplicación de identidad visual",
-  },
-  {
-    name: "Medios escritos",
-    progress: 0,
-    done: 0,
-    total: 8,
-    state: "Bloqueado",
-    next: "Se habilitará al completar el curso anterior",
-  },
-  {
-    name: "Medios digitales",
-    progress: 0,
-    done: 0,
-    total: 9,
-    state: "Bloqueado",
-    next: "Se habilitará según la ruta académica",
-  },
-];
+const ROUTE_LABELS: Record<RouteState, { label: string; className: string }> = {
+  completed: { label: "Completado", className: "bg-teal-50 text-teal-700" },
+  in_progress: { label: "En curso", className: "bg-decom-blue-soft text-decom-blue-text" },
+  not_started: { label: "Sin iniciar", className: "bg-surface-muted text-muted-fg" },
+};
 
-const milestones = [
-  {
-    date: "11 nov 2026",
-    title: "Actividad de aplicación de identidad visual",
-    description: "Pendiente de entrega en este prototipo.",
-    status: "Pendiente",
-  },
-  {
-    date: "10 nov 2026",
-    title: "Lección: elementos de identidad",
-    description: "Contenido marcado como completado.",
-    status: "Completado",
-  },
-  {
-    date: "8 nov 2026",
-    title: "Cuestionario de fundamentos",
-    description: "Práctica disponible; resultado no registrado.",
-    status: "Disponible",
-  },
-  {
-    date: "5 nov 2026",
-    title: "Inicio de la ruta formativa",
-    description: "Comenzaste el curso de identidad corporativa.",
-    status: "Completado",
-  },
-];
+const EVENT_LABELS: Record<EventStatus, { label: string; dot: string }> = {
+  completed: { label: "Completada", dot: "bg-teal-500" },
+  graded: { label: "Calificada", dot: "bg-teal-500" },
+  passed: { label: "Aprobada", dot: "bg-teal-500" },
+  submitted: { label: "Entregada", dot: "bg-decom-blue" },
+  in_review: { label: "En revisión", dot: "bg-decom-blue" },
+  changes_requested: { label: "Con ajustes", dot: "bg-amber-400" },
+  not_passed: { label: "No aprobada", dot: "bg-amber-400" },
+};
 
-export default function StudentProgressPage() {
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("es-CO", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
+function lessonsText(count: number) {
+  return `${count} ${count === 1 ? "lección" : "lecciones"}`;
+}
+
+export default function StudentTrackingPage() {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const [access, setAccess] = useState<AccessState>("checking");
+  const [state, setState] = useState<TrackingState>({ status: "loading" });
 
   useEffect(() => {
     let active = true;
-    async function verifyAccess() {
+
+    async function verifyAccessAndLoad() {
       try {
         const {
           data: { user },
@@ -85,27 +67,39 @@ export default function StudentProgressPage() {
           .eq("user_id", user.id);
         if (assignmentError) throw assignmentError;
         if (!active) return;
-        const ids = [...new Set((assignments ?? []).map((item) => item.role_id))];
-        if (!ids.length) {
+        const roleIds = [...new Set((assignments ?? []).map((item) => item.role_id))];
+        if (!roleIds.length) {
           setAccess("denied");
           return;
         }
         const { data: roles, error: rolesError } = await supabase
           .from("roles")
           .select("role_key")
-          .in("id", ids);
+          .in("id", roleIds);
         if (rolesError) throw rolesError;
         if (!active) return;
         const keys = (roles ?? []).map((role) => role.role_key);
-        setAccess(
-          keys.includes("member") || keys.includes("national_admin") ? "allowed" : "denied",
-        );
+        if (!(keys.includes("member") || keys.includes("national_admin"))) {
+          setAccess("denied");
+          return;
+        }
+        setAccess("allowed");
+
+        // El seguimiento se lee aparte: si falla, el acceso sigue siendo válido y se avisa en pantalla.
+        try {
+          const tracking = await loadStudentTracking(supabase, user.id);
+          if (active) setState({ status: "ready", tracking });
+        } catch (error) {
+          console.error("No fue posible cargar el seguimiento:", error);
+          if (active) setState({ status: "error" });
+        }
       } catch (error) {
         console.error("No fue posible validar el acceso al seguimiento:", error);
         if (active) setAccess("error");
       }
     }
-    void Promise.resolve().then(verifyAccess);
+
+    void Promise.resolve().then(verifyAccessAndLoad);
     return () => {
       active = false;
     };
@@ -121,11 +115,13 @@ export default function StudentProgressPage() {
     return (
       <StatusScreen
         title={access === "error" ? "No pudimos validar tu acceso" : "Acceso restringido"}
-        message="Esta sección está habilitada para estudiantes autorizados."
+        message="El seguimiento está habilitado para estudiantes con una asignación vigente."
         actionLabel="Volver al panel"
         onAction={() => router.push("/dashboard/estudiante")}
       />
     );
+
+  const tracking = state.status === "ready" ? state.tracking : null;
 
   return (
     <main id="contenido" className="min-h-screen bg-background text-foreground">
@@ -146,142 +142,177 @@ export default function StudentProgressPage() {
           </button>
         </div>
       </header>
-      <div className="mx-auto max-w-6xl space-y-7 px-5 py-7 md:px-8 md:py-9">
-        <section className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-decom-teal-text">
-              Tu evolución
-            </p>
-            <h1 className="mt-2 text-2xl font-extrabold md:text-3xl">Mi seguimiento</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-fg">
-              Consulta el estado de tu ruta, los hitos de aprendizaje y las próximas acciones.
-            </p>
-          </div>
-          <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800">
-            Datos de demostración
-          </span>
-        </section>
-        <section className="grid gap-4 sm:grid-cols-3">
-          <article className="rounded-2xl border border-line bg-surface p-5">
-            <p className="text-xs font-semibold text-muted-fg">Avance del curso actual</p>
-            <p className="mt-2 text-3xl font-extrabold">68%</p>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-muted">
-              <div className="h-full w-[68%] rounded-full bg-decom-teal" />
-            </div>
-          </article>
-          <article className="rounded-2xl border border-line bg-surface p-5">
-            <p className="text-xs font-semibold text-muted-fg">Lecciones completadas</p>
-            <p className="mt-2 text-3xl font-extrabold">
-              7 <span className="text-base font-semibold text-muted-fg">/ 10</span>
-            </p>
-          </article>
-          <article className="rounded-2xl border border-line bg-surface p-5">
-            <p className="text-xs font-semibold text-muted-fg">Actividades por entregar</p>
-            <p className="mt-2 text-3xl font-extrabold">1</p>
-          </article>
-        </section>
-        <section className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-6">
-          <h2 className="text-lg font-bold">Ruta de formación</h2>
-          <p className="mt-1 text-xs text-muted-fg">
-            La secuencia definitiva se administrará desde el catálogo académico.
+
+      <div className="mx-auto max-w-6xl space-y-7 px-5 py-7 pb-12 md:px-8 md:py-9">
+        <section>
+          <p className="text-xs font-bold tracking-[0.16em] text-decom-teal-text uppercase">
+            Tu evolución
           </p>
-          <div className="mt-5 space-y-5">
-            {courses.map((course, index) => (
-              <article key={course.name} className="flex gap-4">
-                <div
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-bold ${index === 0 ? "bg-decom-blue-soft text-decom-blue-text" : "bg-surface-muted text-muted-fg"}`}
-                >
-                  {index + 1}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h3 className="text-sm font-bold">{course.name}</h3>
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${index === 0 ? "bg-teal-50 text-teal-700" : "bg-surface-muted text-muted-fg"}`}
-                    >
-                      {course.state}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-xs text-muted-fg">
-                    {course.done} de {course.total} lecciones · {course.next}
+          <h1 className="mt-2 text-2xl font-extrabold md:text-3xl">Mi seguimiento</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-fg">
+            Consulta el estado de tu ruta, tu actividad reciente y las próximas acciones.
+          </p>
+        </section>
+
+        {state.status === "error" ? (
+          <p
+            role="alert"
+            className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-800"
+          >
+            No pudimos cargar tu seguimiento en este momento. Recarga la página; si el problema
+            continúa, avisa a tu tutor.
+          </p>
+        ) : null}
+
+        {state.status === "loading" ? (
+          <div role="status" className="flex items-center gap-3 py-10 text-sm text-muted-fg">
+            <LoaderCircle className="h-5 w-5 animate-spin" aria-hidden="true" />
+            Cargando tu seguimiento...
+          </div>
+        ) : null}
+
+        {tracking && tracking.routes.length === 0 ? (
+          <section className="rounded-3xl border border-dashed border-line bg-surface-muted p-10 text-center">
+            <Inbox className="mx-auto h-8 w-8 text-muted-fg" aria-hidden="true" />
+            <h2 className="mt-3 text-base font-bold">Aún no tienes cursos asignados</h2>
+            <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-muted-fg">
+              Cuando la coordinación te matricule en un curso, aquí verás tu avance, tus pendientes
+              y tu actividad reciente.
+            </p>
+          </section>
+        ) : null}
+
+        {tracking && tracking.routes.length > 0 ? (
+          <>
+            <section className="grid gap-4 sm:grid-cols-3">
+              <article className="rounded-2xl border border-line bg-surface p-5">
+                <p className="text-xs font-semibold text-muted-fg">Avance general</p>
+                <p className="mt-2 text-3xl font-extrabold">{tracking.overall.percent}%</p>
+                <ProgressBar
+                  percent={tracking.overall.percent}
+                  label="Avance general"
+                  tone="teal"
+                  className="mt-3 h-2"
+                />
+              </article>
+              <article className="rounded-2xl border border-line bg-surface p-5">
+                <p className="text-xs font-semibold text-muted-fg">Lecciones completadas</p>
+                <p className="mt-2 text-3xl font-extrabold">
+                  {tracking.overall.done}{" "}
+                  <span className="text-base font-semibold text-muted-fg">
+                    / {tracking.overall.total}
+                  </span>
+                </p>
+              </article>
+              <article className="rounded-2xl border border-line bg-surface p-5">
+                <p className="text-xs font-semibold text-muted-fg">Actividades por entregar</p>
+                <p className="mt-2 text-3xl font-extrabold">{tracking.pending.length}</p>
+              </article>
+            </section>
+
+            <section className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-6">
+              <h2 className="text-lg font-bold">Ruta de formación</h2>
+              <p className="mt-1 text-xs text-muted-fg">Tus cursos y el avance en cada uno.</p>
+              <ol className="mt-5 space-y-5">
+                {tracking.routes.map((route, index) => {
+                  const chip = ROUTE_LABELS[route.state];
+                  const detail =
+                    route.state === "completed"
+                      ? "Curso finalizado"
+                      : route.nextLessonTitle
+                        ? `Siguiente: ${route.nextLessonTitle}`
+                        : "Aún no hay lecciones publicadas";
+                  return (
+                    <li key={route.enrollmentId} className="flex gap-4">
+                      <div
+                        aria-hidden="true"
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-bold ${
+                          route.state === "not_started"
+                            ? "bg-surface-muted text-muted-fg"
+                            : "bg-decom-blue-soft text-decom-blue-text"
+                        }`}
+                      >
+                        {index + 1}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <h3 className="text-sm font-bold">{route.title}</h3>
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${chip.className}`}
+                          >
+                            {chip.label}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-muted-fg">
+                          {route.done} de {lessonsText(route.total)} · {detail}
+                        </p>
+                        <ProgressBar
+                          percent={route.percent}
+                          label={`Avance en ${route.title}`}
+                          tone="teal"
+                          className="mt-3 h-2"
+                        />
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
+
+            <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+              <article className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-6">
+                <h2 className="text-lg font-bold">Actividad reciente</h2>
+                {tracking.recent.length === 0 ? (
+                  <p className="mt-4 text-xs leading-5 text-muted-fg">
+                    Todavía no hay actividad registrada. Completa una lección o entrega una
+                    actividad y aparecerá aquí.
                   </p>
-                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-muted">
-                    <div
-                      className="h-full rounded-full bg-decom-teal"
-                      style={{ width: course.progress + "%" }}
-                    />
-                  </div>
+                ) : (
+                  <ul className="mt-4 divide-y divide-line-soft">
+                    {tracking.recent.map((item) => (
+                      <li key={item.id} className="flex gap-3 py-4">
+                        <span
+                          aria-hidden="true"
+                          className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${EVENT_LABELS[item.status].dot}`}
+                        />
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-xs font-bold">{item.title}</h3>
+                            <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-semibold text-muted-fg">
+                              {EVENT_LABELS[item.status].label}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-xs leading-5 text-muted-fg">{item.description}</p>
+                          <p className="mt-1 text-[11px] text-muted-fg">{formatDate(item.date)}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </article>
+
+              <article className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-6">
+                <h2 className="text-lg font-bold">Próximos pasos</h2>
+                <p className="mt-1 text-xs text-muted-fg">
+                  Acciones sugeridas según lo que tienes pendiente.
+                </p>
+                <div className="mt-5 space-y-3">
+                  {tracking.nextSteps.map((step) => (
+                    <button
+                      key={step.kind}
+                      type="button"
+                      onClick={() => router.push(step.href)}
+                      className="w-full rounded-xl border border-line p-4 text-left transition hover:border-decom-blue"
+                    >
+                      <span className="text-xs font-bold">{step.title}</span>
+                      <span className="mt-1 block text-[11px] text-muted-fg">{step.detail}</span>
+                    </button>
+                  ))}
                 </div>
               </article>
-            ))}
-          </div>
-        </section>
-        <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-          <article className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-6">
-            <h2 className="text-lg font-bold">Actividad reciente</h2>
-            <div className="mt-4 divide-y divide-line-soft">
-              {milestones.map((item) => (
-                <div key={item.title} className="flex gap-3 py-4">
-                  <span
-                    className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${item.status === "Completado" ? "bg-teal-500" : "bg-amber-400"}`}
-                  />
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-xs font-bold">{item.title}</h3>
-                      <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[9px] font-semibold text-muted-fg">
-                        {item.status}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs leading-5 text-muted-fg">{item.description}</p>
-                    <p className="mt-1 text-[10px] text-muted-fg">{item.date}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </article>
-          <article className="rounded-3xl border border-line bg-surface p-5 shadow-sm md:p-6">
-            <h2 className="text-lg font-bold">Próximos pasos</h2>
-            <p className="mt-1 text-xs text-muted-fg">
-              Acciones sugeridas para continuar tu aprendizaje.
-            </p>
-            <div className="mt-5 space-y-3">
-              <button
-                type="button"
-                onClick={() => router.push("/dashboard/estudiante/actividades")}
-                className="w-full rounded-xl border border-line p-4 text-left transition hover:border-decom-blue"
-              >
-                <span className="text-xs font-bold">Entregar actividad pendiente</span>
-                <span className="mt-1 block text-[11px] text-muted-fg">
-                  Aplicación de identidad visual
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push("/dashboard/estudiante/formacion")}
-                className="w-full rounded-xl border border-line p-4 text-left transition hover:border-decom-blue"
-              >
-                <span className="text-xs font-bold">Continuar formación</span>
-                <span className="mt-1 block text-[11px] text-muted-fg">
-                  Retoma el curso de identidad corporativa
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push("/dashboard/estudiante/evaluaciones")}
-                className="w-full rounded-xl border border-line p-4 text-left transition hover:border-decom-blue"
-              >
-                <span className="text-xs font-bold">Practicar conocimientos</span>
-                <span className="mt-1 block text-[11px] text-muted-fg">
-                  Cuestionario de fundamentos
-                </span>
-              </button>
-            </div>
-          </article>
-        </section>
-        <p className="text-[11px] leading-5 text-muted-fg">
-          Las cifras, fechas y estados de esta vista son ficticios. No representan registros
-          académicos reales ni generan decisiones oficiales.
-        </p>
+            </section>
+          </>
+        ) : null}
       </div>
     </main>
   );
