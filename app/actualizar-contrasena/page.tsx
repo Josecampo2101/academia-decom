@@ -4,8 +4,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
-const inputClassName =
-  "mt-2 w-full rounded-xl border border-line bg-background px-4 py-3";
+const inputClassName = "mt-2 w-full rounded-xl border border-line bg-background px-4 py-3";
 const buttonClassName =
   "w-full rounded-xl bg-decom-blue px-5 py-3 font-semibold text-white disabled:opacity-60";
 const feedbackClassName = "rounded-xl border border-line bg-surface-muted p-4 text-sm";
