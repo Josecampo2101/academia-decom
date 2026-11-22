@@ -75,6 +75,8 @@ No aparecen configuradas en Vercel las siguientes credenciales necesarias para c
 
 El hostname esperado de Turnstile quedó configurado por separado para Preview y Production, pero eso no sustituye las claves reales. La protección de contraseñas filtradas de Supabase Auth continúa deshabilitada y debe activarse antes de abrir el registro al distrito.
 
+Tampoco hay un programador configurado para invocar `/api/cron/invitation-notifications`: no existe `vercel.json` con Cron ni un programador externo documentado como activo. El worker no enviará automáticamente la cola hasta configurar el programador. En Vercel Hobby la cadencia mínima admitida es cada 15 minutos; se debe habilitar después de configurar y probar las claves de servidor y Resend. El formulario público también necesita un rate limiter persistente por IP/token antes de una difusión amplia.
+
 ### Validación de código
 
 En el commit `79436f8a18bdac9d42cf3ea5b49a52a8ce5514de`:
