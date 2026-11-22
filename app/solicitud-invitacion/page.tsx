@@ -14,7 +14,10 @@ export default function InvitationApplicationPage(props: InvitationPageProps) {
   return (
     <Suspense
       fallback={
-        <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] p-6 text-sm text-slate-500">
+        <main
+          id="contenido"
+          className="flex min-h-screen items-center justify-center bg-background p-6 text-sm text-muted-fg"
+        >
           Preparando el formulario de invitación...
         </main>
       }

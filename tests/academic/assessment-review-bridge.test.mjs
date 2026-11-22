@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createAssessmentAttempt, gradeAssessment } from "../../lib/academic/assessment-attempts.ts";
+import {
+  createAssessmentAttempt,
+  gradeAssessment,
+} from "../../lib/academic/assessment-attempts.ts";
 import {
   getStudentAssessmentReviews,
   readAssessmentReviewQueue,
@@ -16,7 +19,10 @@ globalThis.window = {
     getItem: (key) => storage.get(key) ?? null,
     setItem: (key, value) => storage.set(key, value),
   },
-  dispatchEvent: () => { dispatchCount += 1; return true; },
+  dispatchEvent: () => {
+    dispatchCount += 1;
+    return true;
+  },
 };
 const question = { id: "short", type: "Respuesta corta", prompt: "Explica", options: [] };
 const attempt = createAssessmentAttempt(
@@ -43,7 +49,11 @@ test("upsertAssessmentReviewQueueItem guarda y recupera un intento válido", () 
 });
 
 test("upsertAssessmentReviewQueueItem actualiza el intento sin duplicarlo", () => {
-  const updated = { ...item, studentLabel: "Nombre actualizado", updatedAt: "2026-11-11T19:00:00.000Z" };
+  const updated = {
+    ...item,
+    studentLabel: "Nombre actualizado",
+    updatedAt: "2026-11-11T19:00:00.000Z",
+  };
   assert.equal(upsertAssessmentReviewQueueItem(updated), true);
   assert.equal(readAssessmentReviewQueue().length, 1);
   assert.equal(readAssessmentReviewQueue()[0].studentLabel, "Nombre actualizado");
@@ -80,12 +90,15 @@ test("upsertAssessmentReviewQueueItem rechaza cambios de identidad o envío orig
 });
 
 test("readAssessmentReviewQueue descarta registros corruptos y claves inconsistentes", () => {
-  storage.set("academia-decom:assessment-review-queue:v1", JSON.stringify([
-    item,
-    { ...item, id: "id-incorrecto" },
-    { ...item, attempt: { ...attempt, result: { ...attempt.result, pendingManual: 5 } } },
-    null,
-  ]));
+  storage.set(
+    "academia-decom:assessment-review-queue:v1",
+    JSON.stringify([
+      item,
+      { ...item, id: "id-incorrecto" },
+      { ...item, attempt: { ...attempt, result: { ...attempt.result, pendingManual: 5 } } },
+      null,
+    ]),
+  );
   assert.deepEqual(readAssessmentReviewQueue(), [item]);
 });
 
@@ -102,7 +115,6 @@ test("writeAssessmentReviewQueue rechaza elementos inválidos y duplicados", () 
   assert.equal(dispatchCount, dispatchesBefore);
   assert.equal(storage.get("academia-decom:assessment-review-queue:v1"), storedBefore);
 });
-
 
 test("writeAssessmentReviewQueue rechaza resultados con IDs de pregunta duplicados", () => {
   const duplicatedAttempt = {
@@ -126,21 +138,25 @@ test("writeAssessmentReviewQueue rechaza revisiones con feedback solo de espacio
       manualPossible: 1,
       questions: [{ questionId: "short", status: "revisada", earnedPoints: 0, possiblePoints: 1 }],
     },
-    manualReviews: [{
-      questionId: "short",
-      reviewerId: "tutor-1",
-      feedback: "   ",
-      earnedPoints: 0,
-      possiblePoints: 1,
-      reviewedAt: "2026-11-11T19:00:00.000Z",
-    }],
+    manualReviews: [
+      {
+        questionId: "short",
+        reviewerId: "tutor-1",
+        feedback: "   ",
+        earnedPoints: 0,
+        possiblePoints: 1,
+        reviewedAt: "2026-11-11T19:00:00.000Z",
+      },
+    ],
   };
   assert.equal(writeAssessmentReviewQueue([{ ...item, attempt: reviewedAttempt }]), false);
 });
 
 test("writeAssessmentReviewQueue devuelve false si localStorage falla", () => {
   const originalSetItem = globalThis.window.localStorage.setItem;
-  globalThis.window.localStorage.setItem = () => { throw new Error("quota"); };
+  globalThis.window.localStorage.setItem = () => {
+    throw new Error("quota");
+  };
   assert.equal(writeAssessmentReviewQueue([item]), false);
   globalThis.window.localStorage.setItem = originalSetItem;
 });

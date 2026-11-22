@@ -25,7 +25,7 @@ declare global {
           "expired-callback"?: () => void;
           "error-callback"?: () => void;
           theme?: "light" | "dark" | "auto";
-        }
+        },
       ) => string;
       reset: (widgetId?: string) => void;
       remove?: (widgetId: string) => void;
@@ -123,12 +123,7 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
         captchaToken,
       });
 
-      if (
-        result.valid &&
-        result.invitationType &&
-        result.districtName &&
-        result.congregations
-      ) {
+      if (result.valid && result.invitationType && result.districtName && result.congregations) {
         setInvitation({
           valid: true,
           invitationType: result.invitationType,
@@ -139,13 +134,11 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
         setMessage(
           result.congregations.length
             ? "Enlace válido. Completa tus datos para enviar la solicitud."
-            : "El enlace es válido, pero el distrito todavía no tiene congregaciones activas."
+            : "El enlace es válido, pero el distrito todavía no tiene congregaciones activas.",
         );
       }
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "No fue posible validar el enlace."
-      );
+      setMessage(error instanceof Error ? error.message : "No fue posible validar el enlace.");
     } finally {
       setLoading(false);
       resetCaptcha();
@@ -169,21 +162,15 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
         phone,
         dateOfBirth,
         congregationId,
-        requestedRoleId:
-          invitation.invitationType === "decom_member" ? requestedRoleId : null,
+        requestedRoleId: invitation.invitationType === "decom_member" ? requestedRoleId : null,
       });
 
       if (result.success) {
         setSuccess(true);
-        setMessage(
-          result.message ??
-            "Tu solicitud fue recibida y está pendiente de aprobación."
-        );
+        setMessage(result.message ?? "Tu solicitud fue recibida y está pendiente de aprobación.");
       }
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "No fue posible enviar la solicitud."
-      );
+      setMessage(error instanceof Error ? error.message : "No fue posible enviar la solicitud.");
     } finally {
       setLoading(false);
       resetCaptcha();
@@ -194,17 +181,17 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
   const canSubmit =
     Boolean(
       captchaToken &&
-        fullName.trim() &&
-        email.trim() &&
-        phone.trim() &&
-        dateOfBirth &&
-        congregationId &&
-        !loading
+      fullName.trim() &&
+      email.trim() &&
+      phone.trim() &&
+      dateOfBirth &&
+      congregationId &&
+      !loading,
     ) &&
     (invitation?.invitationType !== "decom_member" || Boolean(requestedRoleId));
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] px-4 py-8 text-[#102D4D] sm:px-6">
+    <main id="contenido" className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6">
       {siteKey ? (
         <Script
           src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
@@ -215,33 +202,30 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
 
       <div className="mx-auto max-w-3xl">
         <header className="mb-8 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#087DB5] text-xl font-bold text-white">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-decom-blue text-xl font-bold text-white">
             D
           </div>
           <div>
             <p className="text-sm font-extrabold tracking-[0.14em]">ACADEMIA DECOM</p>
-            <p className="text-xs text-slate-500">Solicitud de vinculación</p>
+            <p className="text-xs text-muted-fg">Solicitud de vinculación</p>
           </div>
         </header>
 
-        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          <div className="bg-[#102D4D] px-6 py-8 text-white sm:px-9">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#55D1C4]">
+        <section className="overflow-hidden rounded-3xl border border-line bg-surface shadow-sm">
+          <div className="bg-decom-navy px-6 py-8 text-white sm:px-9">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-decom-teal-light">
               Formación para comunicar con propósito
             </p>
-            <h1 className="mt-3 text-2xl font-bold sm:text-3xl">
-              Solicitud de ingreso
-            </h1>
+            <h1 className="mt-3 text-2xl font-bold sm:text-3xl">Solicitud de ingreso</h1>
             <p className="mt-3 max-w-xl text-sm leading-6 text-blue-100">
-              Completa tus datos para solicitar tu vinculación. Toda solicitud
-              debe ser revisada y aprobada por la administración antes de activar
-              el acceso a la plataforma.
+              Completa tus datos para solicitar tu vinculación. Toda solicitud debe ser revisada y
+              aprobada por la administración antes de activar el acceso a la plataforma.
             </p>
           </div>
 
           <div className="space-y-6 p-6 sm:p-9">
             {token && siteKey && !success ? (
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="rounded-xl border border-line bg-surface-muted p-4">
                 <p className="text-sm font-bold">Verificación de seguridad</p>
                 <div ref={captchaContainer} className="mt-3 min-h-[66px]" />
               </div>
@@ -249,16 +233,16 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
 
             {!token ? (
               <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">
-                Falta el enlace de invitación. Abre la dirección completa que
-                recibiste para continuar con el registro.
+                Falta el enlace de invitación. Abre la dirección completa que recibiste para
+                continuar con el registro.
               </div>
             ) : null}
 
             {!siteKey ? (
               <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">
-                El formulario está preparado, pero todavía no se ha configurado
-                la verificación de seguridad. El envío permanecerá bloqueado
-                hasta configurar Turnstile en el entorno de despliegue.
+                El formulario está preparado, pero todavía no se ha configurado la verificación de
+                seguridad. El envío permanecerá bloqueado hasta configurar Turnstile en el entorno
+                de despliegue.
               </div>
             ) : null}
 
@@ -266,7 +250,7 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
               <div className="space-y-4">
                 <div>
                   <h2 className="font-bold">Verifica tu invitación</h2>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-muted-fg">
                     Confirma que eres una persona y valida que el enlace siga vigente.
                   </p>
                 </div>
@@ -274,7 +258,7 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
                   type="button"
                   disabled={!canValidate}
                   onClick={() => void validateInvitation()}
-                  className="w-full rounded-xl bg-[#087DB5] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#066a9b] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full rounded-xl bg-decom-blue px-5 py-3 text-sm font-bold text-white transition hover:bg-decom-blue-hover disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loading ? "Validando..." : "Validar invitación"}
                 </button>
@@ -283,17 +267,15 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
 
             {invitation && !success ? (
               <form onSubmit={submitApplication} className="space-y-5">
-                <div className="rounded-xl bg-[#087DB5]/5 p-4 text-sm">
-                  <p className="font-bold text-[#087DB5]">Invitación validada</p>
-                  <p className="mt-1 text-slate-600">
+                <div className="rounded-xl bg-decom-blue/5 p-4 text-sm">
+                  <p className="font-bold text-decom-blue-text">Invitación validada</p>
+                  <p className="mt-1 text-muted-fg">
                     Distrito: <strong>{invitation.districtName}</strong>
                   </p>
-                  <p className="mt-1 text-slate-600">
+                  <p className="mt-1 text-muted-fg">
                     Tipo:{" "}
                     <strong>
-                      {invitation.invitationType === "guest"
-                        ? "Invitado"
-                        : "Integrante de DECOM"}
+                      {invitation.invitationType === "guest" ? "Invitado" : "Integrante de DECOM"}
                     </strong>
                   </p>
                 </div>
@@ -307,7 +289,7 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
                       autoComplete="name"
                       value={fullName}
                       onChange={(event) => setFullName(event.target.value)}
-                      className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-normal outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10"
+                      className="mt-2 w-full rounded-xl border border-line px-4 py-3 font-normal outline-none focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/10"
                       placeholder="Escribe tus nombres y apellidos"
                     />
                   </label>
@@ -320,7 +302,7 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
                       autoComplete="email"
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
-                      className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-normal outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10"
+                      className="mt-2 w-full rounded-xl border border-line px-4 py-3 font-normal outline-none focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/10"
                       placeholder="nombre@correo.com"
                     />
                   </label>
@@ -333,7 +315,7 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
                       autoComplete="tel"
                       value={phone}
                       onChange={(event) => setPhone(event.target.value)}
-                      className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-normal outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10"
+                      className="mt-2 w-full rounded-xl border border-line px-4 py-3 font-normal outline-none focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/10"
                       placeholder="+57 300 000 0000"
                     />
                   </label>
@@ -345,7 +327,7 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
                       max={new Date().toISOString().slice(0, 10)}
                       value={dateOfBirth}
                       onChange={(event) => setDateOfBirth(event.target.value)}
-                      className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-normal outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10"
+                      className="mt-2 w-full rounded-xl border border-line px-4 py-3 font-normal outline-none focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/10"
                     />
                   </label>
                   <label className="text-sm font-semibold">
@@ -354,7 +336,7 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
                       required
                       value={congregationId}
                       onChange={(event) => setCongregationId(event.target.value)}
-                      className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 font-normal outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10"
+                      className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 font-normal outline-none focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/10"
                     >
                       <option value="">Selecciona tu congregación</option>
                       {invitation.congregations.map((congregation) => (
@@ -371,7 +353,7 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
                         required
                         value={requestedRoleId}
                         onChange={(event) => setRequestedRoleId(event.target.value)}
-                        className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 font-normal outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10"
+                        className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 font-normal outline-none focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/10"
                       >
                         <option value="">Selecciona el rol que deseas solicitar</option>
                         {invitation.roles.map((role) => (
@@ -380,9 +362,9 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
                           </option>
                         ))}
                       </select>
-                      <span className="mt-2 block text-xs font-normal text-slate-500">
-                        La selección no concede el rol automáticamente. Requiere
-                        aprobación administrativa.
+                      <span className="mt-2 block text-xs font-normal text-muted-fg">
+                        La selección no concede el rol automáticamente. Requiere aprobación
+                        administrativa.
                       </span>
                     </label>
                   ) : null}
@@ -391,13 +373,13 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
                 <button
                   type="submit"
                   disabled={!canSubmit || !invitation.congregations.length}
-                  className="w-full rounded-xl bg-[#087DB5] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#066a9b] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full rounded-xl bg-decom-blue px-5 py-3.5 text-sm font-bold text-white transition hover:bg-decom-blue-hover disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loading ? "Enviando solicitud..." : "Enviar solicitud"}
                 </button>
-                <p className="text-center text-xs leading-5 text-slate-500">
-                  Al enviar, confirmas que los datos suministrados son correctos.
-                  Tu cuenta no se activa hasta que la solicitud sea aprobada.
+                <p className="text-center text-xs leading-5 text-muted-fg">
+                  Al enviar, confirmas que los datos suministrados son correctos. Tu cuenta no se
+                  activa hasta que la solicitud sea aprobada.
                 </p>
               </form>
             ) : null}
@@ -407,26 +389,24 @@ export default function InvitationApplicationForm({ token }: { token: string }) 
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-100 text-xl font-bold text-emerald-700">
                   ✓
                 </div>
-                <h2 className="mt-4 text-xl font-bold text-emerald-900">
-                  Solicitud recibida
-                </h2>
+                <h2 className="mt-4 text-xl font-bold text-emerald-900">Solicitud recibida</h2>
                 <p className="mt-2 text-sm leading-6 text-emerald-800">{message}</p>
                 <p className="mt-2 text-sm leading-6 text-emerald-800">
-                  Recibirás un correo de confirmación. Espera la decisión de la
-                  administración antes de intentar activar tu cuenta.
+                  Recibirás un correo de confirmación. Espera la decisión de la administración antes
+                  de intentar activar tu cuenta.
                 </p>
               </div>
             ) : null}
 
             {message && !success ? (
-              <p role="status" className="rounded-xl bg-slate-100 p-4 text-sm text-slate-700">
+              <p role="status" className="rounded-xl bg-surface-muted p-4 text-sm text-foreground">
                 {message}
               </p>
             ) : null}
           </div>
         </section>
 
-        <footer className="py-7 text-center text-xs text-slate-400">
+        <footer className="py-7 text-center text-xs text-muted-fg">
           Academia DECOM · Acceso mediante invitación
         </footer>
       </div>

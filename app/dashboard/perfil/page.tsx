@@ -62,7 +62,9 @@ export default function ProfilePage() {
       if (!active) return;
 
       if (error || !data) {
-        setMessage("No fue posible consultar tu perfil. Intenta nuevamente o contacta al administrador.");
+        setMessage(
+          "No fue posible consultar tu perfil. Intenta nuevamente o contacta al administrador.",
+        );
         setMessageType("error");
         setLoading(false);
         return;
@@ -154,11 +156,12 @@ export default function ProfilePage() {
       }
 
       if (selectedFile) {
-        const extension = selectedFile.type === "image/png"
-          ? "png"
-          : selectedFile.type === "image/webp"
-            ? "webp"
-            : "jpg";
+        const extension =
+          selectedFile.type === "image/png"
+            ? "png"
+            : selectedFile.type === "image/webp"
+              ? "webp"
+              : "jpg";
         uploadedPath = `${authData.user.id}/${crypto.randomUUID()}.${extension}`;
 
         const { error: uploadError } = await supabase.storage
@@ -192,7 +195,8 @@ export default function ProfilePage() {
         const { error: removeError } = await supabase.storage
           .from(AVATAR_BUCKET)
           .remove([avatarPath]);
-        if (removeError) console.warn("No se pudo retirar la fotografía anterior:", removeError.message);
+        if (removeError)
+          console.warn("No se pudo retirar la fotografía anterior:", removeError.message);
       }
 
       setAvatarPath(uploadedPath ?? avatarPath);
@@ -217,68 +221,99 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f4f7fb] px-4 text-[#102d4d] dark:bg-[#0b1422] dark:text-white">
+      <main
+        id="contenido"
+        className="flex min-h-screen items-center justify-center bg-background px-4 text-foreground dark:bg-[#0b1422]"
+      >
         <div className="text-center">
-          <LoaderCircle className="mx-auto h-9 w-9 animate-spin text-[#087db5]" />
-          <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">Cargando tu perfil...</p>
+          <LoaderCircle className="mx-auto h-9 w-9 animate-spin text-decom-blue-text" />
+          <p className="mt-3 text-sm text-muted-fg">Cargando tu perfil...</p>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#f4f7fb] px-4 py-8 text-[#102d4d] dark:bg-[#0b1422] dark:text-white sm:py-12">
+    <main
+      id="contenido"
+      className="min-h-screen bg-background px-4 py-8 text-foreground dark:bg-[#0b1422] sm:py-12"
+    >
       <div className="mx-auto max-w-2xl">
         <button
           type="button"
           onClick={() => router.push("/dashboard")}
-          className="mb-6 inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-[#087db5] transition hover:bg-[#087db5]/10"
+          className="mb-6 inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-decom-blue-text transition hover:bg-decom-blue/10"
         >
           <ArrowLeft className="h-4 w-4" />
           Volver al inicio
         </button>
 
-        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-900/5 dark:border-slate-700 dark:bg-[#142235]">
-          <div className="bg-[#102d4d] px-6 py-8 text-white sm:px-9">
+        <section className="overflow-hidden rounded-3xl border border-line bg-surface shadow-xl shadow-slate-900/5 dark:bg-[#142235]">
+          <div className="bg-decom-navy px-6 py-8 text-white sm:px-9">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
                 <UserRound className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#9bdcf5]">Escuela de Comunicaciones D34</p>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#9bdcf5]">
+                  Escuela de Comunicaciones D34
+                </p>
                 <h1 className="mt-1 text-2xl font-bold">Tu perfil institucional</h1>
               </div>
             </div>
             <p className="mt-5 max-w-lg text-sm leading-6 text-blue-100">
-              Completa tus datos para ingresar a tu espacio académico. Puedes agregar una fotografía ahora o hacerlo más adelante.
+              Completa tus datos para ingresar a tu espacio académico. Puedes agregar una fotografía
+              ahora o hacerlo más adelante.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6 px-6 py-8 sm:px-9">
             <div className="flex flex-col items-center gap-4 sm:flex-row">
-              <div className="relative flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-[#087db5]/15 bg-[#087db5]/10 text-[#087db5]">
+              <div className="relative flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-decom-blue/15 bg-decom-blue/10 text-decom-blue-text">
                 {visibleAvatar ? (
-                  <Image src={visibleAvatar} alt="Vista previa de tu fotografía de perfil" width={112} height={112} unoptimized className="h-full w-full object-cover" />
+                  <Image
+                    src={visibleAvatar}
+                    alt="Vista previa de tu fotografía de perfil"
+                    width={112}
+                    height={112}
+                    unoptimized
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <UserRound className="h-12 w-12" />
                 )}
-                <span className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#087db5] text-white dark:border-[#142235]">
+                <span className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-decom-blue text-white dark:border-[#142235]">
                   <Camera className="h-4 w-4" />
                 </span>
               </div>
               <div className="text-center sm:text-left">
                 <h2 className="font-bold">Fotografía de perfil</h2>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">JPG, PNG o WebP · Máximo 5 MB</p>
-                <label htmlFor="profile-avatar" className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-[#087db5]/30 px-4 py-2.5 text-sm font-semibold text-[#087db5] transition hover:bg-[#087db5]/10">
+                <p className="mt-1 text-sm text-muted-fg">JPG, PNG o WebP · Máximo 5 MB</p>
+                <label
+                  htmlFor="profile-avatar"
+                  className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-decom-blue/30 px-4 py-2.5 text-sm font-semibold text-decom-blue-text transition hover:bg-decom-blue/10"
+                >
                   <ImagePlus className="h-4 w-4" />
-                  {selectedFile ? "Cambiar fotografía" : avatarPath ? "Actualizar fotografía" : "Subir fotografía"}
+                  {selectedFile
+                    ? "Cambiar fotografía"
+                    : avatarPath
+                      ? "Actualizar fotografía"
+                      : "Subir fotografía"}
                 </label>
-                <input id="profile-avatar" type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileChange} className="sr-only" />
+                <input
+                  id="profile-avatar"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleFileChange}
+                  className="sr-only"
+                />
               </div>
             </div>
 
             <div>
-              <label htmlFor="full-name" className="mb-2 block text-sm font-semibold">Nombre completo <span className="text-red-500">*</span></label>
+              <label htmlFor="full-name" className="mb-2 block text-sm font-semibold">
+                Nombre completo <span className="text-red-500">*</span>
+              </label>
               <input
                 id="full-name"
                 type="text"
@@ -289,12 +324,14 @@ export default function ProfilePage() {
                 value={fullName}
                 onChange={(event) => setFullName(event.target.value)}
                 placeholder="Escribe tu nombre y apellidos"
-                className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#087db5] focus:ring-4 focus:ring-[#087db5]/10 dark:border-slate-600 dark:bg-[#0b1422] dark:text-white"
+                className="h-12 w-full rounded-xl border border-line bg-surface px-4 text-sm text-foreground outline-none transition placeholder:text-muted-fg focus:border-decom-blue focus:ring-4 focus:ring-decom-blue/10 dark:bg-[#0b1422]"
               />
             </div>
 
             <div>
-              <label htmlFor="phone" className="mb-2 block text-sm font-semibold">Número de WhatsApp <span className="text-red-500">*</span></label>
+              <label htmlFor="phone" className="mb-2 block text-sm font-semibold">
+                Número de WhatsApp <span className="text-red-500">*</span>
+              </label>
               <input
                 id="phone"
                 type="tel"
@@ -305,23 +342,28 @@ export default function ProfilePage() {
                 value={phone}
                 onChange={(event) => setPhone(event.target.value)}
                 placeholder="Tu número de contacto"
-                className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#087db5] focus:ring-4 focus:ring-[#087db5]/10 dark:border-slate-600 dark:bg-[#0b1422] dark:text-white"
+                className="h-12 w-full rounded-xl border border-line bg-surface px-4 text-sm text-foreground outline-none transition placeholder:text-muted-fg focus:border-decom-blue focus:ring-4 focus:ring-decom-blue/10 dark:bg-[#0b1422]"
               />
             </div>
 
             {message && (
-              <div role="status" className={`flex items-start gap-2 rounded-xl border p-3 text-sm leading-5 ${messageType === "error" ? "border-red-200 bg-red-50 text-red-700" : messageType === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-blue-200 bg-blue-50 text-blue-700"}`}>
-                {messageType === "success" ? <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" /> : null}
+              <div
+                role="status"
+                className={`flex items-start gap-2 rounded-xl border p-3 text-sm leading-5 ${messageType === "error" ? "border-red-200 bg-red-50 text-red-700" : messageType === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-blue-200 bg-blue-50 text-decom-blue-text"}`}
+              >
+                {messageType === "success" ? (
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+                ) : null}
                 <span>{message}</span>
               </div>
             )}
 
-            <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 dark:border-slate-700 sm:flex-row sm:justify-end">
+            <div className="flex flex-col-reverse gap-3 border-t border-line pt-6 sm:flex-row sm:justify-end">
               {profileComplete && (
                 <button
                   type="button"
                   onClick={() => router.push("/dashboard")}
-                  className="h-12 rounded-xl border border-slate-300 px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+                  className="h-12 rounded-xl border border-line px-5 text-sm font-semibold text-muted-fg transition hover:bg-surface-muted "
                 >
                   Cancelar
                 </button>
@@ -329,9 +371,13 @@ export default function ProfilePage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#087db5] px-6 text-sm font-bold text-white shadow-lg shadow-[#087db5]/20 transition hover:bg-[#06689a] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-decom-blue px-6 text-sm font-bold text-white shadow-lg shadow-[#087db5]/20 transition hover:bg-[#06689a] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {saving ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                {saving ? (
+                  <LoaderCircle className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
                 {saving ? "Guardando..." : "Guardar y continuar"}
               </button>
             </div>

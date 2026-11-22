@@ -57,11 +57,7 @@ function escapeHtml(value: string) {
   });
 }
 
-function buildEmail(
-  notification: ClaimedNotification,
-  request: RequestRecord,
-  appUrl: string
-) {
+function buildEmail(notification: ClaimedNotification, request: RequestRecord, appUrl: string) {
   const name = escapeHtml(request.full_name || "integrante");
   const brand = "Academia DECOM";
 
@@ -138,7 +134,7 @@ async function processNotifications(request: NextRequest) {
   if (!apiKey || !from || !appUrl) {
     return response(
       { error: "Falta configurar RESEND_API_KEY, RESEND_FROM_EMAIL o APP_URL." },
-      503
+      503,
     );
   }
 
@@ -153,10 +149,9 @@ async function processNotifications(request: NextRequest) {
   }
 
   const supabase = createAdminClient();
-  const { data, error } = await supabase.rpc(
-    "claim_invitation_notifications",
-    { p_batch_size: 10 }
-  );
+  const { data, error } = await supabase.rpc("claim_invitation_notifications", {
+    p_batch_size: 10,
+  });
 
   if (error) {
     return response({ error: "No fue posible reclamar las notificaciones pendientes." }, 503);
@@ -178,12 +173,7 @@ async function processNotifications(request: NextRequest) {
       }
 
       const record = requestRecord as RequestRecord;
-      if (
-        !isNotificationStateCompatible(
-          notification.notification_type,
-          record.status
-        )
-      ) {
+      if (!isNotificationStateCompatible(notification.notification_type, record.status)) {
         throw new Error("El estado de la solicitud no coincide con la notificación.");
       }
 
@@ -217,7 +207,7 @@ async function processNotifications(request: NextRequest) {
 
       if (!resendResponse.ok || !resendBody.id) {
         throw new Error(
-          `Resend rechazó el envío (${resendResponse.status}): ${resendBody.message ?? resendBody.name ?? "error del proveedor"}`
+          `Resend rechazó el envío (${resendResponse.status}): ${resendBody.message ?? resendBody.name ?? "error del proveedor"}`,
         );
       }
 
@@ -242,12 +232,8 @@ async function processNotifications(request: NextRequest) {
 
       results.push({ id: notification.notification_id, status: "sent" });
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message.slice(0, 900) : "Error desconocido";
-      const delayMinutes = Math.min(
-        60 * 24,
-        5 * 2 ** Math.max(0, notification.attempt_number - 1)
-      );
+      const message = error instanceof Error ? error.message.slice(0, 900) : "Error desconocido";
+      const delayMinutes = Math.min(60 * 24, 5 * 2 ** Math.max(0, notification.attempt_number - 1));
 
       await supabase
         .from("invitation_notifications")

@@ -34,25 +34,21 @@ export function DashboardModuleCard({
         <Icon className="h-6 w-6" aria-hidden="true" />
       </div>
 
-      <h4 className="mt-5 font-bold">{title}</h4>
-      <p className={`mt-2 min-h-10 text-sm leading-6 ${mutedTextClass}`}>
-        {description}
-      </p>
+      <h3 className="mt-5 font-bold">{title}</h3>
+      <p className={`mt-2 min-h-10 text-sm leading-6 ${mutedTextClass}`}>{description}</p>
 
       <div className="mt-5 flex min-h-11 items-center">
         {enabled ? (
           <button
             type="button"
             onClick={onOpen}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#087DB5] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#066895] focus-visible:outline-offset-4"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-decom-blue px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-decom-blue-hover focus-visible:outline-offset-4"
           >
             Abrir módulo
             <span aria-hidden="true">→</span>
           </button>
         ) : (
-          <p className={`text-xs font-medium ${mutedTextClass}`}>
-            No habilitado para tu perfil
-          </p>
+          <p className={`text-xs font-medium ${mutedTextClass}`}>No habilitado para tu perfil</p>
         )}
       </div>
     </article>

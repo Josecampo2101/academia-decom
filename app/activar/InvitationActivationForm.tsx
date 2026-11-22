@@ -9,11 +9,7 @@ type Mode = "signup" | "signin";
 const requestIdPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-export default function InvitationActivationForm({
-  requestId,
-}: {
-  requestId: string;
-}) {
+export default function InvitationActivationForm({ requestId }: { requestId: string }) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const activationStarted = useRef(false);
@@ -34,10 +30,9 @@ export default function InvitationActivationForm({
     setMessage("Verificando tu cuenta y la aprobación...");
 
     try {
-      const { data, error } = await supabase.rpc(
-        "activate_approved_invitation",
-        { p_request_id: requestId }
-      );
+      const { data, error } = await supabase.rpc("activate_approved_invitation", {
+        p_request_id: requestId,
+      });
 
       if (
         error ||
@@ -50,7 +45,7 @@ export default function InvitationActivationForm({
         activationStarted.current = false;
         setMessage(
           error?.message ??
-            "No fue posible activar la cuenta. Verifica que la solicitud esté aprobada y que uses el correo correspondiente."
+            "No fue posible activar la cuenta. Verifica que la solicitud esté aprobada y que uses el correo correspondiente.",
         );
         return;
       }
@@ -111,7 +106,7 @@ export default function InvitationActivationForm({
 
         if (error) {
           setMessage(
-            "No fue posible crear la cuenta. Si ya tienes una cuenta con este correo, cambia a «Iniciar sesión»."
+            "No fue posible crear la cuenta. Si ya tienes una cuenta con este correo, cambia a «Iniciar sesión».",
           );
           return;
         }
@@ -122,7 +117,7 @@ export default function InvitationActivationForm({
         }
 
         setMessage(
-          "Te enviamos un correo para confirmar tu dirección. Abre ese mensaje y vuelve a esta página desde el enlace de confirmación para terminar la activación."
+          "Te enviamos un correo para confirmar tu dirección. Abre ese mensaje y vuelve a esta página desde el enlace de confirmación para terminar la activación.",
         );
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -147,26 +142,25 @@ export default function InvitationActivationForm({
   const validRequest = requestIdPattern.test(requestId);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-4 py-8 text-[#102D4D]">
-      <section className="w-full max-w-xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <header className="bg-[#102D4D] px-7 py-8 text-white sm:px-9">
-          <p className="text-xs font-bold tracking-[0.2em] text-[#55D1C4]">
-            ACADEMIA DECOM
-          </p>
-          <h1 className="mt-3 text-2xl font-bold sm:text-3xl">
-            Activación de cuenta
-          </h1>
+    <main
+      id="contenido"
+      className="flex min-h-screen items-center justify-center bg-background px-4 py-8 text-foreground"
+    >
+      <section className="w-full max-w-xl overflow-hidden rounded-3xl border border-line bg-surface shadow-sm">
+        <header className="bg-decom-navy px-7 py-8 text-white sm:px-9">
+          <p className="text-xs font-bold tracking-[0.2em] text-decom-teal-light">ACADEMIA DECOM</p>
+          <h1 className="mt-3 text-2xl font-bold sm:text-3xl">Activación de cuenta</h1>
           <p className="mt-3 text-sm leading-6 text-blue-100">
-            Tu solicitud fue aprobada. Crea una contraseña o inicia sesión con
-            el correo que utilizaste en el registro para activar tu acceso.
+            Tu solicitud fue aprobada. Crea una contraseña o inicia sesión con el correo que
+            utilizaste en el registro para activar tu acceso.
           </p>
         </header>
 
         <div className="p-7 sm:p-9">
           {!validRequest ? (
             <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-              El enlace de activación no es válido. Utiliza el enlace completo
-              que recibiste en el correo de aprobación.
+              El enlace de activación no es válido. Utiliza el enlace completo que recibiste en el
+              correo de aprobación.
             </div>
           ) : activated ? (
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
@@ -174,7 +168,7 @@ export default function InvitationActivationForm({
             </div>
           ) : (
             <>
-              <div className="mb-6 flex rounded-xl bg-slate-100 p-1">
+              <div className="mb-6 flex rounded-xl bg-surface-muted p-1">
                 <button
                   type="button"
                   onClick={() => {
@@ -183,8 +177,8 @@ export default function InvitationActivationForm({
                   }}
                   className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
                     mode === "signup"
-                      ? "bg-white text-[#087DB5] shadow-sm"
-                      : "text-slate-500 hover:text-slate-700"
+                      ? "bg-surface text-decom-blue-text shadow-sm"
+                      : "text-muted-fg hover:text-foreground"
                   }`}
                 >
                   Crear cuenta
@@ -197,8 +191,8 @@ export default function InvitationActivationForm({
                   }}
                   className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
                     mode === "signin"
-                      ? "bg-white text-[#087DB5] shadow-sm"
-                      : "text-slate-500 hover:text-slate-700"
+                      ? "bg-surface text-decom-blue-text shadow-sm"
+                      : "text-muted-fg hover:text-foreground"
                   }`}
                 >
                   Iniciar sesión
@@ -215,7 +209,7 @@ export default function InvitationActivationForm({
                       autoComplete="name"
                       value={fullName}
                       onChange={(event) => setFullName(event.target.value)}
-                      className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-normal outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10"
+                      className="mt-2 w-full rounded-xl border border-line px-4 py-3 font-normal outline-none focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/10"
                       placeholder="Tus nombres y apellidos"
                     />
                   </label>
@@ -229,7 +223,7 @@ export default function InvitationActivationForm({
                     autoComplete="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-normal outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10"
+                    className="mt-2 w-full rounded-xl border border-line px-4 py-3 font-normal outline-none focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/10"
                     placeholder="El mismo correo de tu solicitud"
                   />
                 </label>
@@ -243,7 +237,7 @@ export default function InvitationActivationForm({
                     autoComplete={mode === "signup" ? "new-password" : "current-password"}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-normal outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10"
+                    className="mt-2 w-full rounded-xl border border-line px-4 py-3 font-normal outline-none focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/10"
                     placeholder={mode === "signup" ? "Mínimo 8 caracteres" : "Tu contraseña"}
                   />
                 </label>
@@ -258,7 +252,7 @@ export default function InvitationActivationForm({
                       autoComplete="new-password"
                       value={confirmPassword}
                       onChange={(event) => setConfirmPassword(event.target.value)}
-                      className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-normal outline-none focus:border-[#087DB5] focus:ring-2 focus:ring-[#087DB5]/10"
+                      className="mt-2 w-full rounded-xl border border-line px-4 py-3 font-normal outline-none focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/10"
                       placeholder="Repite tu contraseña"
                     />
                   </label>
@@ -267,7 +261,7 @@ export default function InvitationActivationForm({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full rounded-xl bg-[#087DB5] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#066a9b] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full rounded-xl bg-decom-blue px-5 py-3.5 text-sm font-bold text-white transition hover:bg-decom-blue-hover disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loading
                     ? "Procesando..."
@@ -278,14 +272,17 @@ export default function InvitationActivationForm({
               </form>
 
               {message ? (
-                <p role="status" className="mt-5 rounded-xl bg-slate-100 p-4 text-sm leading-6 text-slate-700">
+                <p
+                  role="status"
+                  className="mt-5 rounded-xl bg-surface-muted p-4 text-sm leading-6 text-foreground"
+                >
                   {message}
                 </p>
               ) : null}
 
-              <p className="mt-6 text-xs leading-5 text-slate-500">
-                La activación solo se completa si la solicitud está aprobada,
-                el correo está confirmado y coincide con el registrado.
+              <p className="mt-6 text-xs leading-5 text-muted-fg">
+                La activación solo se completa si la solicitud está aprobada, el correo está
+                confirmado y coincide con el registrado.
               </p>
             </>
           )}
