@@ -37,6 +37,9 @@ jobs:
       - name: Revisar estilo y errores estáticos
         run: npm run lint
 
+      - name: Mostrar formato esperado de la ruta de recuperación (temporal)
+        run: npx prettier app/actualizar-contrasena/page.tsx
+
       - name: Verificar formato (Prettier)
         run: npm run format:check
 
