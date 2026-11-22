@@ -91,7 +91,9 @@ export default function ActualizarContrasenaPage() {
       id="contenido"
       className="flex min-h-screen items-center justify-center bg-background px-4 py-8 text-foreground"
     >
-      <section className="w-full max-w-xl overflow-hidden rounded-3xl border border-line bg-surface shadow-sm">
+      <section
+        className="w-full max-w-xl overflow-hidden rounded-3xl border border-line bg-surface shadow-sm"
+      >
         <header className="bg-decom-navy px-7 py-8 text-white sm:px-9">
           <p className="text-xs font-bold tracking-[0.2em] text-decom-teal-light">
             ACADEMIA DECOM
