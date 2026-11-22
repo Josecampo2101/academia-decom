@@ -64,6 +64,8 @@ Consulta de solo lectura, sin exponer datos personales:
 
 Además, existen 2 solicitudes de invitación en estado `approved` y 0 filas en la cola `invitation_notifications`. Este snapshot no demuestra que el nuevo flujo esté roto —las solicitudes pueden ser históricas—, pero obliga a probar una solicitud nueva, su aprobación/rechazo y el encolado de notificaciones en Staging antes del uso real.
 
+Las asignaciones de rol actuales son 1 `national_admin` global y 1 `member` en el Distrito 7. No hay asignaciones de director distrital, comité, tutor, editor académico ni miembro para el Distrito 34. Esto impide probar el alcance real de sus roles y es un bloqueo operativo independiente del código.
+
 Los nombres actuales de los distritos están almacenados como `34` y `7`, no como `Distrito 34` y `Distrito 7`. No se modificaron datos para normalizarlos.
 
 ### Staging y Vercel — 22 de noviembre
