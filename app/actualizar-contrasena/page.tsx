@@ -4,6 +4,12 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
+const inputClassName =
+  "mt-2 w-full rounded-xl border border-line bg-background px-4 py-3";
+const buttonClassName =
+  "w-full rounded-xl bg-decom-blue px-5 py-3 font-semibold text-white disabled:opacity-60";
+const feedbackClassName = "rounded-xl border border-line bg-surface-muted p-4 text-sm";
+
 export default function ActualizarContrasenaPage() {
   const supabase = useMemo(() => createClient(), []);
   const [ready, setReady] = useState(false);
@@ -27,17 +33,12 @@ export default function ActualizarContrasenaPage() {
       setReady(true);
     });
 
-    void supabase.auth
-      .getUser()
-      .then(({ data, error }) => {
-        if (!active) return;
-        setHasSession(Boolean(data.user) && !error);
-        setEmail(data.user?.email ?? "");
-        setReady(true);
-      })
-      .catch(() => {
-        if (active) setReady(true);
-      });
+    void supabase.auth.getUser().then(({ data, error }) => {
+      if (!active) return;
+      setHasSession(Boolean(data.user) && !error);
+      setEmail(data.user?.email ?? "");
+      setReady(true);
+    });
 
     return () => {
       active = false;
@@ -50,9 +51,7 @@ export default function ActualizarContrasenaPage() {
     setMessage("");
 
     if (!hasSession) {
-      setMessage(
-        "El enlace de recuperación no es válido o ha vencido. Solicita uno nuevo desde el inicio de sesión.",
-      );
+      setMessage("El enlace no es válido o venció. Solicita otro desde el inicio de sesión.");
       return;
     }
 
@@ -72,20 +71,16 @@ export default function ActualizarContrasenaPage() {
       const { error } = await supabase.auth.updateUser({ password });
 
       if (error) {
-        setMessage(
-          "No fue posible actualizar la contraseña. Solicita un nuevo enlace e inténtalo otra vez.",
-        );
+        setMessage("No se pudo actualizar la contraseña. Solicita un nuevo enlace.");
         return;
       }
 
       setUpdated(true);
       setPassword("");
       setConfirmPassword("");
-      setMessage(
-        "Tu contraseña se actualizó correctamente. Ya puedes continuar a Academia DECOM.",
-      );
+      setMessage("Contraseña actualizada. Ya puedes continuar a Academia DECOM.");
     } catch {
-      setMessage("Ocurrió un error de conexión. Inténtalo nuevamente.");
+      setMessage("Error de conexión. Inténtalo nuevamente.");
     } finally {
       setLoading(false);
     }
@@ -96,9 +91,7 @@ export default function ActualizarContrasenaPage() {
       id="contenido"
       className="flex min-h-screen items-center justify-center bg-background px-4 py-8 text-foreground"
     >
-      <section
-        className="w-full max-w-xl overflow-hidden rounded-3xl border border-line bg-surface shadow-sm"
-      >
+      <section className="w-full max-w-xl overflow-hidden rounded-3xl border border-line bg-surface shadow-sm">
         <header className="bg-decom-navy px-7 py-8 text-white sm:px-9">
           <p className="text-xs font-bold tracking-[0.2em] text-decom-teal-light">
             ACADEMIA DECOM
@@ -109,49 +102,31 @@ export default function ActualizarContrasenaPage() {
           </p>
         </header>
 
-        <div className="p-7 sm:p-9">
-          {!ready ? (
+        <div className="space-y-5 p-7 sm:p-9">
+          {!ready && (
             <p role="status" className="text-sm text-muted-fg">
               Verificando el enlace de recuperación...
             </p>
-          ) : updated ? (
+          )}
+
+          {ready && !hasSession && (
             <div className="space-y-5">
-              <p
-                role="status"
-                className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"
-              >
-                {message}
+              <p role="alert" className={feedbackClassName}>
+                {message || "No se encontró una sesión válida. Solicita un nuevo enlace."}
               </p>
-              <Link
-                href="/dashboard"
-                className="inline-flex w-full items-center justify-center rounded-xl bg-decom-blue px-5 py-3 font-semibold text-white transition hover:bg-decom-blue-hover"
-              >
-                Continuar a Academia DECOM
-              </Link>
-            </div>
-          ) : !hasSession ? (
-            <div className="space-y-5">
-              <p
-                role="alert"
-                className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
-              >
-                {message ||
-                  "No encontramos una sesión de recuperación válida. Solicita un nuevo enlace desde el inicio de sesión."}
-              </p>
-              <Link
-                href="/"
-                className="inline-flex w-full items-center justify-center rounded-xl bg-decom-blue px-5 py-3 font-semibold text-white transition hover:bg-decom-blue-hover"
-              >
+              <Link href="/" className={buttonClassName}>
                 Volver al inicio de sesión
               </Link>
             </div>
-          ) : (
+          )}
+
+          {ready && hasSession && !updated && (
             <form onSubmit={handleSubmit} className="space-y-5">
-              {email ? (
+              {email && (
                 <p className="rounded-xl bg-surface-muted px-4 py-3 text-sm text-muted-fg">
                   Cuenta: <span className="font-semibold text-foreground">{email}</span>
                 </p>
-              ) : null}
+              )}
 
               <label className="block text-sm font-semibold">
                 Nueva contraseña
@@ -163,7 +138,7 @@ export default function ActualizarContrasenaPage() {
                   autoComplete="new-password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/10"
+                  className={inputClassName}
                   placeholder="Mínimo 8 caracteres"
                 />
               </label>
@@ -178,28 +153,32 @@ export default function ActualizarContrasenaPage() {
                   autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(event) => setConfirmPassword(event.target.value)}
-                  className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-decom-blue focus:ring-2 focus:ring-decom-blue/10"
+                  className={inputClassName}
                   placeholder="Escribe nuevamente la contraseña"
                 />
               </label>
 
-              {message ? (
-                <p
-                  role="alert"
-                  className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
-                >
+              {message && (
+                <p role="alert" className={feedbackClassName}>
                   {message}
                 </p>
-              ) : null}
+              )}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-xl bg-decom-blue px-5 py-3 font-semibold text-white transition hover:bg-decom-blue-hover disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {loading ? "Actualizando contraseña..." : "Guardar nueva contraseña"}
+              <button type="submit" disabled={loading} className={buttonClassName}>
+                {loading ? "Actualizando..." : "Guardar nueva contraseña"}
               </button>
             </form>
+          )}
+
+          {updated && (
+            <div className="space-y-5">
+              <p role="status" className={feedbackClassName}>
+                {message}
+              </p>
+              <Link href="/dashboard" className={buttonClassName}>
+                Continuar a Academia DECOM
+              </Link>
+            </div>
           )}
         </div>
       </section>
