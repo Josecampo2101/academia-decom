@@ -53,6 +53,19 @@ Inventario de `SECURITY DEFINER`:
 
 No deben contarse las funciones ejecutables por `authenticated` como vulnerabilidades automáticamente. Hay que revisar la autorización de cada función y sus helpers. Las funciones públicas inspeccionadas delegan varias comprobaciones a helpers de rol y ámbito; los helpers privados deben mantenerse fuera de los esquemas expuestos por la API y sus permisos deben seguir siendo intencionales. No se modificaron grants ni funciones.
 
+### Datos operativos de producción — 22 de noviembre
+
+Consulta de solo lectura, sin exponer datos personales:
+
+| Distrito | Estado | Congregaciones activas | Membresías activas |
+|---|---|---:|---:|
+| `34` (código `34`) | Activo | 138 | 0 |
+| `7` (código `07`) | Activo | 1 | 1 |
+
+Además, existen 2 solicitudes de invitación en estado `approved` y 0 filas en la cola `invitation_notifications`. Este snapshot no demuestra que el nuevo flujo esté roto —las solicitudes pueden ser históricas—, pero obliga a probar una solicitud nueva, su aprobación/rechazo y el encolado de notificaciones en Staging antes del uso real.
+
+Los nombres actuales de los distritos están almacenados como `34` y `7`, no como `Distrito 34` y `Distrito 7`. No se modificaron datos para normalizarlos.
+
 ### Staging y Vercel — 22 de noviembre
 
 - El proyecto Supabase `Academia DECOM Staging` fue restaurado.
