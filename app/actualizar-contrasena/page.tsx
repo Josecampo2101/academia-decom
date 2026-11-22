@@ -50,7 +50,9 @@ export default function ActualizarContrasenaPage() {
     setMessage("");
 
     if (!hasSession) {
-      setMessage("El enlace de recuperación no es válido o ha vencido. Solicita uno nuevo desde el inicio de sesión.");
+      setMessage(
+        "El enlace de recuperación no es válido o ha vencido. Solicita uno nuevo desde el inicio de sesión.",
+      );
       return;
     }
 
@@ -70,14 +72,18 @@ export default function ActualizarContrasenaPage() {
       const { error } = await supabase.auth.updateUser({ password });
 
       if (error) {
-        setMessage("No fue posible actualizar la contraseña. Solicita un nuevo enlace e inténtalo otra vez.");
+        setMessage(
+          "No fue posible actualizar la contraseña. Solicita un nuevo enlace e inténtalo otra vez.",
+        );
         return;
       }
 
       setUpdated(true);
       setPassword("");
       setConfirmPassword("");
-      setMessage("Tu contraseña se actualizó correctamente. Ya puedes continuar a Academia DECOM.");
+      setMessage(
+        "Tu contraseña se actualizó correctamente. Ya puedes continuar a Academia DECOM.",
+      );
     } catch {
       setMessage("Ocurrió un error de conexión. Inténtalo nuevamente.");
     } finally {
@@ -92,7 +98,9 @@ export default function ActualizarContrasenaPage() {
     >
       <section className="w-full max-w-xl overflow-hidden rounded-3xl border border-line bg-surface shadow-sm">
         <header className="bg-decom-navy px-7 py-8 text-white sm:px-9">
-          <p className="text-xs font-bold tracking-[0.2em] text-decom-teal-light">ACADEMIA DECOM</p>
+          <p className="text-xs font-bold tracking-[0.2em] text-decom-teal-light">
+            ACADEMIA DECOM
+          </p>
           <h1 className="mt-3 text-2xl font-bold sm:text-3xl">Restablecer contraseña</h1>
           <p className="mt-3 text-sm leading-6 text-blue-100">
             Define una nueva contraseña para recuperar el acceso seguro a tu cuenta.
@@ -101,10 +109,15 @@ export default function ActualizarContrasenaPage() {
 
         <div className="p-7 sm:p-9">
           {!ready ? (
-            <p role="status" className="text-sm text-muted-fg">Verificando el enlace de recuperación...</p>
+            <p role="status" className="text-sm text-muted-fg">
+              Verificando el enlace de recuperación...
+            </p>
           ) : updated ? (
             <div className="space-y-5">
-              <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+              <p
+                role="status"
+                className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"
+              >
                 {message}
               </p>
               <Link
@@ -116,8 +129,12 @@ export default function ActualizarContrasenaPage() {
             </div>
           ) : !hasSession ? (
             <div className="space-y-5">
-              <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                {message || "No encontramos una sesión de recuperación válida. Solicita un nuevo enlace desde el inicio de sesión."}
+              <p
+                role="alert"
+                className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
+              >
+                {message ||
+                  "No encontramos una sesión de recuperación válida. Solicita un nuevo enlace desde el inicio de sesión."}
               </p>
               <Link
                 href="/"
@@ -165,7 +182,10 @@ export default function ActualizarContrasenaPage() {
               </label>
 
               {message ? (
-                <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                <p
+                  role="alert"
+                  className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
+                >
                   {message}
                 </p>
               ) : null}
