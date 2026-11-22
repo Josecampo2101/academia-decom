@@ -1,3 +1,102 @@
+## Revisión actualizada — 22 de noviembre de 2026
+
+Esta sección reemplaza como referencia operativa las cifras preliminares del inventario del 11 de noviembre. La sección histórica se conserva debajo para trazabilidad.
+
+### Estado del proyecto y migraciones
+
+- Proyecto de producción inspeccionado en modo de solo lectura.
+- Producción registra **66 migraciones**; la rama de trabajo conserva **54 archivos SQL**.
+- Hay **12 versiones registradas en producción que no tienen archivo correspondiente en el repositorio**:
+  - `20261114024357_revoke_anon_execution_on_private_helpers`
+  - `20261114024429_revoke_public_execution_on_private_helpers`
+  - `20261114024510_remove_duplicate_role_policy_and_invitation_index`
+  - `20261114114354_20261114040000_enforce_assessment_attempt_timing_and_validation`
+  - `20261114114554_20261114041500_validate_assessment_options_and_answer_keys`
+  - `20261114115504_persist_expired_assessment_attempts`
+  - `20261114115614_handle_expired_assessment_attempt_limit`
+  - `20261114122257_prevent_course_unlock_after_withdrawal`
+  - `20261114141624_add_scoped_tutor_student_academic_detail`
+  - `20261114141654_fix_scoped_tutor_student_detail_queries`
+  - `20261114142250_create_scoped_tutor_student_notes`
+  - `20261114144501_scope_tutor_notes_to_eligible_enrollments`
+- La migración de avatares tiene una discrepancia de versión: producción registra `20261116020237_create_private_profile_avatars`; el repositorio contiene `20261115193000_create_private_profile_avatars`. No deben marcarse versiones como aplicadas ni renombrarse sin reconciliar su contenido.
+
+**Conclusión:** no ejecutar las 54 migraciones directamente sobre una base vacía. Varias presuponen tablas, funciones y permisos que no forman parte de una baseline versionada. Hace falta una extracción DDL completa y una baseline probada antes de reconstruir Staging.
+
+### Inventario de producción verificado
+
+| Elemento | Estado actual |
+|---|---:|
+| Tablas en `public` | 37 |
+| Tablas públicas con RLS | 37 |
+| Tablas públicas con RLS y sin políticas directas | 5 |
+| Políticas RLS en `public` | 98 |
+| Políticas en `storage` | 14 |
+| Buckets privados | 4 |
+
+Las cinco tablas públicas con RLS y sin políticas directas son `academic_tutor_student_notes`, `invitation_notifications`, `invitation_requests`, `membership_transfer_area_reviews` y `membership_transfers`. También existe `private.academic_assessment_answer_keys` con RLS y sin políticas directas. Esto no prueba una exposición: el acceso debe evaluarse junto con grants y RPC/funciones servidor. `invitation_requests` tiene un grant SELECT para `authenticated`, pero sin política RLS no permite leer filas directamente.
+
+Los cuatro buckets existen y son privados:
+- `academic-activity-submissions` — 50 MiB.
+- `academic-lesson-materials` — 50 MiB.
+- `academic-library-resources` — 50 MiB.
+- `decom-profile-avatars` — 5 MiB.
+
+El bucket de avatares sí existe en producción. La consulta actual confirma políticas de lectura, inserción y eliminación propias limitadas a la carpeta del usuario autenticado. La afirmación histórica de que no existía el bucket quedó obsoleta.
+
+### Funciones privilegiadas y permisos
+
+Inventario de `SECURITY DEFINER`:
+- `public`: 34 funciones; 0 ejecutables por `anon`, 29 ejecutables por `authenticated`.
+- `private`: 44 funciones; 0 ejecutables por `anon`, 30 ejecutables por `authenticated`.
+- Las 78 funciones observadas tienen `search_path` explícito.
+
+No deben contarse las funciones ejecutables por `authenticated` como vulnerabilidades automáticamente. Hay que revisar la autorización de cada función y sus helpers. Las funciones públicas inspeccionadas delegan varias comprobaciones a helpers de rol y ámbito; los helpers privados deben mantenerse fuera de los esquemas expuestos por la API y sus permisos deben seguir siendo intencionales. No se modificaron grants ni funciones.
+
+### Staging y Vercel — 22 de noviembre
+
+- El proyecto Supabase `Academia DECOM Staging` fue restaurado.
+- Staging está vacío: no tiene tablas ni migraciones. No se copiaron datos de producción.
+- El entorno Preview de Vercel quedó separado de Production/Development y apunta al proyecto Staging.
+- Se verificó el bundle del Preview: contiene la referencia de Staging y no la referencia de producción.
+- Se verificó el bundle del dominio de producción: contiene la referencia de producción y no la de Staging.
+- Preview está en estado READY. Las rutas públicas `/`, `/actualizar-contrasena` y `/solicitud-invitacion` respondieron HTTP 200.
+- No se ejecutaron pruebas autenticadas porque Staging aún no tiene esquema ni cuentas de prueba.
+- La rama Preview tiene un `CRON_SECRET` independiente y URLs propias. El dominio de producción conserva sus variables separadas.
+
+La creación de una rama de base de datos a partir de producción fue cotizada por Supabase en **USD 0,01344 por hora** y requiere confirmación explícita del coste. No se creó esa rama.
+
+### Bloqueos de configuración para el uso real
+
+No aparecen configuradas en Vercel las siguientes credenciales necesarias para completar los flujos:
+- `SUPABASE_SECRET_KEY` — operaciones privilegiadas del servidor.
+- `RESEND_API_KEY` y `RESEND_FROM_EMAIL` — notificaciones de invitación.
+- `NEXT_PUBLIC_TURNSTILE_SITE_KEY` y `TURNSTILE_SECRET_KEY` — protección del formulario público.
+
+El hostname esperado de Turnstile quedó configurado por separado para Preview y Production, pero eso no sustituye las claves reales. La protección de contraseñas filtradas de Supabase Auth continúa deshabilitada y debe activarse antes de abrir el registro al distrito.
+
+### Validación de código
+
+En el commit `79436f8a18bdac9d42cf3ea5b49a52a8ce5514de`:
+- GitHub Actions: `success`.
+- Prettier, ESLint, TypeScript, pruebas y build: correctos.
+- `npm audit --audit-level=moderate`: 0 vulnerabilidades, después de fijar `minimatch@11.0.9` para `@typescript-eslint/typescript-estree`.
+- Vercel Preview: `READY`.
+
+### Siguientes pasos seguros
+
+1. Obtener una línea base DDL completa de producción, sin datos ni secretos.
+2. Reconciliar las 12 migraciones ausentes y la versión de la migración de avatares.
+3. Crear y validar la baseline en Staging; aplicar después las migraciones incrementales.
+4. Configurar las claves reales de Supabase, Resend y Turnstile en los entornos correspondientes.
+5. Activar protección de contraseñas filtradas.
+6. Crear cuentas de prueba y recorrer los flujos de los siete roles, invitaciones, perfiles, formación, biblioteca, evaluaciones, seguimiento, reconocimientos y traslados.
+7. Resolver la cadena de PRs apiladas antes de integrar a `main`.
+
+**Regla de seguridad:** producción permanece intacta. No se debe promover a producción mientras Staging no sea reproducible y las pruebas autenticadas no hayan pasado.
+
+---
+
 # Auditoría inicial de línea base de Supabase
 
 > Estado: inventario preliminar de solo lectura. No es una migración baseline ni declara que el esquema sea reproducible todavía.
