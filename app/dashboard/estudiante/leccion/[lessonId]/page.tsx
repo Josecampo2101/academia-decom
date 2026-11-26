@@ -8,8 +8,11 @@ async function RouteContent({ params }: { params: Promise<{ lessonId: string }> 
 
 function RouteFallback() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-6">
-      <p className="text-sm text-slate-500">Cargando la lección...</p>
+    <main
+      id="contenido"
+      className="flex min-h-screen items-center justify-center bg-background px-6"
+    >
+      <p className="text-sm text-muted-fg">Cargando la lección...</p>
     </main>
   );
 }

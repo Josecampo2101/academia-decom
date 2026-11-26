@@ -6,8 +6,23 @@ async function RouteContent({ params }: { params: Promise<{ studentId: string }>
   return <TutorStudentDetailClient studentId={studentId} />;
 }
 
-export default function TutorStudentDetailPage({ params }: { params: Promise<{ studentId: string }> }) {
-  return <Suspense fallback={<main className="flex min-h-screen items-center justify-center bg-[#F4F7FA]"><p className="text-sm text-slate-500">Cargando ficha del estudiante...</p></main>}>
-    <RouteContent params={params} />
-  </Suspense>;
+export default function TutorStudentDetailPage({
+  params,
+}: {
+  params: Promise<{ studentId: string }>;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <main
+          id="contenido"
+          className="flex min-h-screen items-center justify-center bg-background"
+        >
+          <p className="text-sm text-muted-fg">Cargando ficha del estudiante...</p>
+        </main>
+      }
+    >
+      <RouteContent params={params} />
+    </Suspense>
+  );
 }

@@ -8,9 +8,7 @@ export function createAdminClient() {
   const secretKey = process.env.SUPABASE_SECRET_KEY;
 
   if (!supabaseUrl || !secretKey) {
-    throw new Error(
-      "Falta configurar NEXT_PUBLIC_SUPABASE_URL o SUPABASE_SECRET_KEY."
-    );
+    throw new Error("Falta configurar NEXT_PUBLIC_SUPABASE_URL o SUPABASE_SECRET_KEY.");
   }
 
   return createClient<Database>(supabaseUrl, secretKey, {

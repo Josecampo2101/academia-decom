@@ -1,4 +1,3 @@
-
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -7,7 +6,8 @@ export async function proxy(request: NextRequest) {
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)!,
     {
       cookies: {
         getAll() {
@@ -25,7 +25,7 @@ export async function proxy(request: NextRequest) {
           });
         },
       },
-    }
+    },
   );
 
   const {
@@ -35,9 +35,7 @@ export async function proxy(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
-  const isDashboard =
-    pathname === "/dashboard" ||
-    pathname.startsWith("/dashboard/");
+  const isDashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
 
   const isLoginPage = pathname === "/";
 
@@ -86,9 +84,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/",
-    "/dashboard/:path*",
-    "/acceso-denegado",
-  ],
+  matcher: ["/", "/dashboard/:path*", "/acceso-denegado"],
 };

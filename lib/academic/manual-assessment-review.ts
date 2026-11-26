@@ -1,7 +1,4 @@
-import type {
-  AssessmentAttempt,
-  ManualAssessmentReview,
-} from "./assessment-attempts.ts";
+import type { AssessmentAttempt, ManualAssessmentReview } from "./assessment-attempts.ts";
 
 export type ManualAssessmentReviewInput = {
   questionId: string;
@@ -37,7 +34,11 @@ export function reviewManualAnswer(
     return { ok: false, error: "question_not_pending" };
   }
   if (!input.reviewerId.trim()) return { ok: false, error: "invalid_reviewer" };
-  if (!Number.isInteger(input.earnedPoints) || input.earnedPoints < 0 || input.earnedPoints > question.possiblePoints) {
+  if (
+    !Number.isInteger(input.earnedPoints) ||
+    input.earnedPoints < 0 ||
+    input.earnedPoints > question.possiblePoints
+  ) {
     return { ok: false, error: "invalid_score" };
   }
   if (!input.feedback.trim() || input.feedback.length > 2000) {
@@ -57,8 +58,10 @@ export function reviewManualAnswer(
   };
 
   const previousReviews = attempt.manualReviews ?? [];
-  const manualEarned = previousReviews.reduce((total, item) => total + item.earnedPoints, 0) + review.earnedPoints;
-  const manualPossible = previousReviews.reduce((total, item) => total + item.possiblePoints, 0) + review.possiblePoints;
+  const manualEarned =
+    previousReviews.reduce((total, item) => total + item.earnedPoints, 0) + review.earnedPoints;
+  const manualPossible =
+    previousReviews.reduce((total, item) => total + item.possiblePoints, 0) + review.possiblePoints;
   const updatedAttempt: AssessmentAttempt = {
     ...attempt,
     result: {
@@ -66,9 +69,11 @@ export function reviewManualAnswer(
       manualEarned,
       manualPossible,
       pendingManual: Math.max(0, attempt.result.pendingManual - 1),
-      questions: attempt.result.questions.map((item) => item.questionId === question.questionId
-        ? { ...item, status: "revisada", earnedPoints: review.earnedPoints }
-        : item),
+      questions: attempt.result.questions.map((item) =>
+        item.questionId === question.questionId
+          ? { ...item, status: "revisada", earnedPoints: review.earnedPoints }
+          : item,
+      ),
     },
     manualReviews: [...previousReviews, review],
   };

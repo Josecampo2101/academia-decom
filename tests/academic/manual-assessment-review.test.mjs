@@ -7,13 +7,19 @@ import {
 } from "../../lib/academic/assessment-attempts.ts";
 import { reviewManualAnswer } from "../../lib/academic/manual-assessment-review.ts";
 
-const question = { id: "short", type: "Respuesta corta", prompt: "Explica el concepto", options: [] };
-const makeAttempt = () => createAssessmentAttempt(
-  "assessment-manual",
-  { short: "Una respuesta del estudiante" },
-  gradeAssessment([question], {}, { short: "Una respuesta del estudiante" }, { short: 5 }),
-  new Date("2026-11-11T16:00:00.000Z"),
-);
+const question = {
+  id: "short",
+  type: "Respuesta corta",
+  prompt: "Explica el concepto",
+  options: [],
+};
+const makeAttempt = () =>
+  createAssessmentAttempt(
+    "assessment-manual",
+    { short: "Una respuesta del estudiante" },
+    gradeAssessment([question], {}, { short: "Una respuesta del estudiante" }, { short: 5 }),
+    new Date("2026-11-11T16:00:00.000Z"),
+  );
 const validInput = {
   questionId: "short",
   reviewerId: "tutor-123",
@@ -47,29 +53,54 @@ test("reviewManualAnswer rechaza puntuaciones negativas, fraccionarias o superio
 });
 
 test("reviewManualAnswer exige tutor, retroalimentación y fecha válidos", () => {
-  assert.deepEqual(reviewManualAnswer(makeAttempt(), { ...validInput, reviewerId: " " }), { ok: false, error: "invalid_reviewer" });
-  assert.deepEqual(reviewManualAnswer(makeAttempt(), { ...validInput, feedback: "  " }), { ok: false, error: "invalid_feedback" });
-  assert.deepEqual(reviewManualAnswer(makeAttempt(), { ...validInput, feedback: "x".repeat(2001) }), { ok: false, error: "invalid_feedback" });
-  assert.deepEqual(reviewManualAnswer(makeAttempt(), { ...validInput, reviewedAt: "fecha" }), { ok: false, error: "invalid_review_date" });
+  assert.deepEqual(reviewManualAnswer(makeAttempt(), { ...validInput, reviewerId: " " }), {
+    ok: false,
+    error: "invalid_reviewer",
+  });
+  assert.deepEqual(reviewManualAnswer(makeAttempt(), { ...validInput, feedback: "  " }), {
+    ok: false,
+    error: "invalid_feedback",
+  });
+  assert.deepEqual(
+    reviewManualAnswer(makeAttempt(), { ...validInput, feedback: "x".repeat(2001) }),
+    { ok: false, error: "invalid_feedback" },
+  );
+  assert.deepEqual(reviewManualAnswer(makeAttempt(), { ...validInput, reviewedAt: "fecha" }), {
+    ok: false,
+    error: "invalid_review_date",
+  });
 });
 
 test("reviewManualAnswer no permite revisar dos veces la misma respuesta", () => {
   const first = reviewManualAnswer(makeAttempt(), validInput);
   assert.equal(first.ok, true);
   if (!first.ok) return;
-  assert.deepEqual(reviewManualAnswer(first.attempt, validInput), { ok: false, error: "question_already_reviewed" });
+  assert.deepEqual(reviewManualAnswer(first.attempt, validInput), {
+    ok: false,
+    error: "question_already_reviewed",
+  });
 });
 
 test("reviewManualAnswer distingue pregunta inexistente y pregunta que no requiere revisión", () => {
   const attempt = makeAttempt();
-  assert.deepEqual(reviewManualAnswer(attempt, { ...validInput, questionId: "missing" }), { ok: false, error: "question_not_found" });
+  assert.deepEqual(reviewManualAnswer(attempt, { ...validInput, questionId: "missing" }), {
+    ok: false,
+    error: "question_not_found",
+  });
 
   const objectiveAttempt = createAssessmentAttempt(
     "assessment-manual",
     { choice: "A" },
-    gradeAssessment([{ id: "choice", type: "Selección única", prompt: "Elige", options: ["A"] }], { choice: ["A"] }, { choice: "A" }),
+    gradeAssessment(
+      [{ id: "choice", type: "Selección única", prompt: "Elige", options: ["A"] }],
+      { choice: ["A"] },
+      { choice: "A" },
+    ),
   );
-  assert.deepEqual(reviewManualAnswer(objectiveAttempt, { ...validInput, questionId: "choice" }), { ok: false, error: "question_not_pending" });
+  assert.deepEqual(reviewManualAnswer(objectiveAttempt, { ...validInput, questionId: "choice" }), {
+    ok: false,
+    error: "question_not_pending",
+  });
 });
 
 test("parseAssessmentAttempts conserva revisiones manuales válidas", () => {

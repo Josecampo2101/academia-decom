@@ -1,11 +1,7 @@
 import { createHash } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import {
-  isValidDateOfBirth,
-  isValidEmail,
-  isValidUuid,
-} from "@/lib/invitations/validation.mjs";
+import { isValidDateOfBirth, isValidEmail, isValidUuid } from "@/lib/invitations/validation.mjs";
 
 type RequestBody = {
   action?: "validate" | "submit";
@@ -35,8 +31,7 @@ function hashInvitationToken(token: string) {
 
 const TURNSTILE_ACTION = "invitation_application";
 
-const TURNSTILE_TEST_SECRET_KEY =
-  "1x0000000000000000000000000000000AA";
+const TURNSTILE_TEST_SECRET_KEY = "1x0000000000000000000000000000000AA";
 
 async function verifyCaptcha(token: string) {
   const secret = process.env.TURNSTILE_SECRET_KEY;
@@ -55,16 +50,13 @@ async function verifyCaptcha(token: string) {
     response: token,
   });
   try {
-    const response = await fetch(
-      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: form,
-        cache: "no-store",
-        signal: AbortSignal.timeout(8000),
-      }
-    );
+    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form,
+      cache: "no-store",
+      signal: AbortSignal.timeout(8000),
+    });
 
     if (!response.ok) return { ok: false, unavailable: true };
 
@@ -78,15 +70,13 @@ async function verifyCaptcha(token: string) {
       ok:
         result.success === true &&
         (isExplicitLocalTest ||
-          (result.hostname === expectedHost &&
-            result.action === TURNSTILE_ACTION)),
+          (result.hostname === expectedHost && result.action === TURNSTILE_ACTION)),
       unavailable: false,
     };
   } catch {
     return { ok: false, unavailable: true };
   }
 }
-
 
 async function readBodyWithLimit(request: NextRequest, maxBytes: number) {
   const reader = request.body?.getReader();
@@ -157,8 +147,7 @@ export async function POST(request: NextRequest) {
 
   // JSON is untrusted at runtime: TypeScript types do not validate incoming values.
   const token = typeof body.token === "string" ? body.token.trim() : "";
-  const captchaToken =
-    typeof body.captchaToken === "string" ? body.captchaToken.trim() : "";
+  const captchaToken = typeof body.captchaToken === "string" ? body.captchaToken.trim() : "";
 
   if (token.length < 32 || token.length > 512) {
     return json({ error: "El enlace de invitación no es válido." }, 400);
@@ -173,13 +162,13 @@ export async function POST(request: NextRequest) {
   if (captcha.unavailable) {
     return json(
       { error: "La verificación de seguridad no está disponible. Inténtalo más tarde." },
-      503
+      503,
     );
   }
   if (!captcha.ok) {
     return json(
       { error: "No se pudo validar la verificación de seguridad. Inténtalo de nuevo." },
-      400
+      400,
     );
   }
 
@@ -205,10 +194,7 @@ export async function POST(request: NextRequest) {
   if (new Date(invitation.expires_at).getTime() <= Date.now()) {
     return json({ error: "Esta invitación ha vencido." }, 410);
   }
-  if (
-    invitation.invitation_type !== "guest" &&
-    invitation.invitation_type !== "decom_member"
-  ) {
+  if (invitation.invitation_type !== "guest" && invitation.invitation_type !== "decom_member") {
     return json({ error: "Este enlace no admite solicitudes públicas." }, 403);
   }
 
@@ -284,9 +270,7 @@ export async function POST(request: NextRequest) {
   const dateOfBirth = body.dateOfBirth!.trim();
   const congregationId = body.congregationId!.trim();
   const requestedRoleId =
-    typeof body.requestedRoleId === "string"
-      ? body.requestedRoleId.trim() || null
-      : null;
+    typeof body.requestedRoleId === "string" ? body.requestedRoleId.trim() || null : null;
 
   if (fullName.length < 3 || fullName.length > 140) {
     return json({ error: "Ingresa tu nombre completo." }, 400);
@@ -304,10 +288,7 @@ export async function POST(request: NextRequest) {
   if (!isValidUuid(congregationId)) {
     return json({ error: "Selecciona una congregación válida." }, 400);
   }
-  if (
-    invitation.invitation_type === "guest" &&
-    requestedRoleId
-  ) {
+  if (invitation.invitation_type === "guest" && requestedRoleId) {
     return json({ error: "Los invitados no pueden solicitar un rol institucional." }, 400);
   }
   if (
@@ -339,7 +320,10 @@ export async function POST(request: NextRequest) {
     if (/ya existe una solicitud/i.test(message)) {
       return json({ error: "Ya existe una solicitud con este correo para esta invitación." }, 409);
     }
-    return json({ error: "No fue posible registrar la solicitud. Verifica los datos e inténtalo de nuevo." }, 400);
+    return json(
+      { error: "No fue posible registrar la solicitud. Verifica los datos e inténtalo de nuevo." },
+      400,
+    );
   }
 
   return json({

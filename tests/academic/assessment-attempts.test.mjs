@@ -8,8 +8,18 @@ import {
 
 const questions = [
   { id: "single", type: "Selección única", prompt: "Pregunta única", options: ["A", "B"] },
-  { id: "multiple", type: "Selección múltiple", prompt: "Pregunta múltiple", options: ["A", "B", "C"] },
-  { id: "boolean", type: "Verdadero o falso", prompt: "Pregunta V/F", options: ["Verdadero", "Falso"] },
+  {
+    id: "multiple",
+    type: "Selección múltiple",
+    prompt: "Pregunta múltiple",
+    options: ["A", "B", "C"],
+  },
+  {
+    id: "boolean",
+    type: "Verdadero o falso",
+    prompt: "Pregunta V/F",
+    options: ["Verdadero", "Falso"],
+  },
   { id: "short", type: "Respuesta corta", prompt: "Explica", options: [] },
 ];
 
@@ -24,12 +34,10 @@ test("gradeAssessment calcula preguntas objetivas y deja respuesta corta para re
   assert.equal(result.objectiveEarned, 5);
   assert.equal(result.objectivePossible, 6);
   assert.equal(result.pendingManual, 1);
-  assert.deepEqual(result.questions.map(({ status }) => status), [
-    "correcta",
-    "correcta",
-    "incorrecta",
-    "revision_manual",
-  ]);
+  assert.deepEqual(
+    result.questions.map(({ status }) => status),
+    ["correcta", "correcta", "incorrecta", "revision_manual"],
+  );
   assert.equal(result.questions[3].earnedPoints, null);
   assert.equal(result.questions[3].possiblePoints, 4);
 });
@@ -47,12 +55,7 @@ test("gradeAssessment exige coincidencia exacta en selección múltiple", () => 
 });
 
 test("gradeAssessment usa un punto cuando el puntaje configurado no es válido", () => {
-  const result = gradeAssessment(
-    [questions[0]],
-    { single: ["A"] },
-    { single: "A" },
-    { single: 0 },
-  );
+  const result = gradeAssessment([questions[0]], { single: ["A"] }, { single: "A" }, { single: 0 });
 
   assert.equal(result.questions[0].possiblePoints, 1);
   assert.equal(result.objectiveEarned, 1);
@@ -73,7 +76,10 @@ test("createAssessmentAttempt conserva respuestas y genera metadatos de envío",
 
 test("parseAssessmentAttempts filtra JSON inválido, intentos de otra evaluación y registros corruptos", () => {
   assert.deepEqual(parseAssessmentAttempts("no-json", "assessment-1"), []);
-  assert.deepEqual(parseAssessmentAttempts(JSON.stringify({ id: "not-an-array" }), "assessment-1"), []);
+  assert.deepEqual(
+    parseAssessmentAttempts(JSON.stringify({ id: "not-an-array" }), "assessment-1"),
+    [],
+  );
 
   const valid = createAssessmentAttempt(
     "assessment-1",
@@ -82,10 +88,18 @@ test("parseAssessmentAttempts filtra JSON inválido, intentos de otra evaluació
     new Date("2026-11-11T15:00:00.000Z"),
   );
   const otherAssessment = { ...valid, id: "other", assessmentId: "assessment-2" };
-  const corrupt = { ...valid, id: "corrupt", submittedAt: "yesterday", result: { ...valid.result, pendingManual: 99 } };
+  const corrupt = {
+    ...valid,
+    id: "corrupt",
+    submittedAt: "yesterday",
+    result: { ...valid.result, pendingManual: 99 },
+  };
 
   assert.deepEqual(
-    parseAssessmentAttempts(JSON.stringify([valid, otherAssessment, corrupt, null, "invalid"]), "assessment-1"),
+    parseAssessmentAttempts(
+      JSON.stringify([valid, otherAssessment, corrupt, null, "invalid"]),
+      "assessment-1",
+    ),
     [valid],
   );
 });

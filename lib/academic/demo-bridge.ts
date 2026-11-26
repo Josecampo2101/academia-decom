@@ -29,7 +29,7 @@ export function readDemoBridge(): DemoBridgeSubmission[] {
   if (typeof window === "undefined") return [];
   try {
     const value: unknown = JSON.parse(window.localStorage.getItem(DEMO_BRIDGE_STORAGE_KEY) ?? "[]");
-    return Array.isArray(value) ? value as DemoBridgeSubmission[] : [];
+    return Array.isArray(value) ? (value as DemoBridgeSubmission[]) : [];
   } catch {
     return [];
   }

@@ -1,11 +1,11 @@
 name: Verificación de calidad
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - "main"
-      - "fix/**"
-      - "feature/**"
+      - "feat/escuela-comunicaciones-d34-frontend"
   pull_request:
 
 permissions:
@@ -36,6 +36,15 @@ jobs:
 
       - name: Revisar estilo y errores estáticos
         run: npm run lint
+
+      - name: Verificar formato (Prettier)
+        run: npm run format:check
+
+      - name: Ejecutar pruebas automatizadas
+        run: npm test
+
+      - name: Auditar vulnerabilidades de dependencias
+        run: npm audit --audit-level=high
 
       - name: Verificar tipos TypeScript
         run: npm run typecheck
